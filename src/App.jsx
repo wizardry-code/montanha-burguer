@@ -3,14 +3,13 @@ import { Castelo } from './components/Castelo'
 import './App.css'
 
 function App() {
-
   return (
     <div className="divPai">
       <div className="divConteudo">
         <h1>Montanha Burguer</h1>
       </div>
       <div className="div3d">
-      <Castelo/>
+        <Castelo />
       </div>
     </div>
   )

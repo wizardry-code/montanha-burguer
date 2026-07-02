@@ -4,8 +4,8 @@
   color: white;
   position: relative;
 }
-.divConteudo{
-  z-index: 1;
+.divConteudo h1{
+  z-index: 9;
 }
 .div3d{
   position: absolute;

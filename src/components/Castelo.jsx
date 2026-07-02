@@ -1,6 +1,7 @@
 import {useGLTF,Environment,OrbitControls} from "@react-three/drei"
-import {Canvas} from "@react-three/fiber"
+import {Canvas,useFrame} from "@react-three/fiber"
 import React from 'react'
+
 
 const Modelo = () => {
     const modelo = useGLTF("/modelos/wrath_of_the_dragon-compressed.glb")
@@ -12,12 +13,26 @@ const Modelo = () => {
 
 export const Castelo = () => {
   return (
-    <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+
+    <Canvas camera={{ position: [0,0,5], fov: 90 }}>
         <Environment preset = 'sunset'></Environment>
         <Modelo/>
         <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
+        <MonitordeCamera />
     </Canvas>
     )
 }
+
+// Componente auxiliar para monitorar a câmera
+const MonitordeCamera = () => {
+  useFrame((state) => {
+    const { x, y, z } = state.camera.position
+    // Exibe as coordenadas arredondadas para não poluir o console com números gigantes
+    console.log(`Câmera Posição -> X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}, Z: ${z.toFixed(2)}`)
+  })
+
+  return null // Este componente não renderiza nada visualmente
+}
+
 
 export default Castelo
