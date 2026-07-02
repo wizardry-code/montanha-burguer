@@ -1,5 +1,5 @@
 import { useState } from 'react'
-
+import { Castelo } from './components/Castelo'
 import './App.css'
 
 function App() {
@@ -9,8 +9,9 @@ function App() {
       <div className="divConteudo">
         <h1>Montanha Burguer</h1>
       </div>
-    <div className="div3d">
-    </div>
+      <div className="div3d">
+      <Castelo/>
+      </div>
     </div>
   )
 }
