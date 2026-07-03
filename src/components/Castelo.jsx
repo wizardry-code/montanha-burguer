@@ -4,7 +4,7 @@ import React from 'react'
 import { EffectComposer } from "@react-three/postprocessing"
 import { Fluid } from "@whatisjery/react-fluid-distortion" 
 const Modelo = () => {
-    const modelo = useGLTF("/modelos/wrath_of_the_dragon-compressed.glb")
+    const modelo = useGLTF("modelos/wrath_of_the_dragon-compressed.glb")
   return (
     <primitive object={modelo.scene} />
   )
