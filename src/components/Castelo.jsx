@@ -1,6 +1,6 @@
 import {useGLTF,Environment,OrbitControls} from "@react-three/drei"
 import {Canvas,useFrame} from "@react-three/fiber"
-import React from 'react'
+import React,{ Suspense } from 'react'
 import { EffectComposer } from "@react-three/postprocessing"
 import { Fluid } from "@whatisjery/react-fluid-distortion" 
 const Modelo = () => {
@@ -16,7 +16,7 @@ export const Castelo = () => {
 
     <Canvas camera={{ position: [0,0,5], fov: 90 }}>
         <Environment preset = 'sunset'></Environment>
-        <Modelo/>
+        <Suspense><Modelo/></Suspense>
         <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
         <MonitordeCamera />
         <EffectComposer>
