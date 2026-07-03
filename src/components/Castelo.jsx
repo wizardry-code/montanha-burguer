@@ -1,8 +1,8 @@
 import {useGLTF,Environment,OrbitControls} from "@react-three/drei"
 import {Canvas,useFrame} from "@react-three/fiber"
 import React from 'react'
-
-
+import { EffectComposer } from "@react-three/postprocessing"
+import { Fluid } from "@whatisjery/react-fluid-distortion" 
 const Modelo = () => {
     const modelo = useGLTF("/modelos/wrath_of_the_dragon-compressed.glb")
   return (
@@ -19,6 +19,9 @@ export const Castelo = () => {
         <Modelo/>
         <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
         <MonitordeCamera />
+        <EffectComposer>
+          <Fluid backgroundColor="#000000" fluidColor="#f8f8f8"  radius={0.01}  curl={1} blend={1}/>
+        </EffectComposer>
     </Canvas>
     )
 }
