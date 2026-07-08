@@ -14,14 +14,11 @@ const Modelo = () => {
 export const Castelo = () => {
   return (
 
-    <Canvas camera={{ position: [0,0,5], fov: 90 }}>
+    <Canvas camera={{ position: [0,0,5], fov: 90 }} gl={{ alpha: true }}>
         <Environment preset = 'sunset'></Environment>
         <Suspense><Modelo/></Suspense>
         <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} />
         <MonitordeCamera />
-        <EffectComposer>
-          <Fluid backgroundColor="#000000" fluidColor="#f8f8f8"  radius={0.01}  curl={1} blend={1}/>
-        </EffectComposer>
     </Canvas>
     )
 }

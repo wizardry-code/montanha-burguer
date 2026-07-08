@@ -10,4 +10,6 @@
 .div3d{
   position: absolute;
   inset: 0;
+  background-image: url(assets/blue-sky-with-clouds.jpg);
+  object-fit: fill;
 }
