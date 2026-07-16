@@ -1,0 +1,22 @@
+.preLoaderContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 100dvh;
+    /*background-img*/
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /*centralziação do filho*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+.logoLoader {
+    width: 100vw;  /* Defina o tamanho aqui */
+    height: auto; /* Defina o tamanho aqui */
+    object-fit: contain;
+    z-index: 3;
+}
