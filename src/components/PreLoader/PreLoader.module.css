@@ -4,19 +4,29 @@
     left: 0;
     width: 100dvw;
     height: 100dvh;
-    /*background-img*/
+    background-color: black;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /*centralziação do filho*/
+    
+    /* Centralização e alinhamento vertical */
     display: flex;
+    flex-direction: column; /* Garante que o texto fique abaixo da logo */
     justify-content: center;
     align-items: center;
+    gap: 20px; /* Cria um espaço maneiro entre a logo e o texto */
     z-index: 2;
 }
+
 .logoLoader {
-    width: 100vw;  /* Defina o tamanho aqui */
-    height: auto; /* Defina o tamanho aqui */
-    object-fit: contain;
+    width: 20%;  /* 100vw é o tamanho da tela inteira, use algo menor para a logo */
+    height: auto; 
     z-index: 3;
+}
+
+.textLoader {
+    font-family: 'MedievalSharp', sans-serif;
+    font-size: 2.5rem;
+    color: #ffffff;
+    margin: 0;
 }
