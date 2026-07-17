@@ -17,9 +17,15 @@
     gap: 20px; /* Cria um espaço maneiro entre a logo e o texto */
     z-index: 2;
 }
-
+.preLoaderContent {
+    display: flex;
+    flex-direction: column; /* Garante que o texto fique abaixo da logo */
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Cria um espaço maneiro entre a logo e o texto */
+}
 .logoLoader {
-    width: 20%;  /* 100vw é o tamanho da tela inteira, use algo menor para a logo */
+    width: 100%;  /* 100vw é o tamanho da tela inteira, use algo menor para a logo */
     height: auto; 
     z-index: 3;
 }

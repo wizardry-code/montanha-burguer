@@ -1,73 +1,81 @@
-/* Container principal ajustado para flexibilidade responsiva */
+/* Container principal - Cuida APENAS do comportamento na tela */
 .headerContainer {
-    position: fixed;
+    position: fixed; /* Mantém fixo no topo (Excelente para UX) */
     top: 0;
     left: 0;
     width: 100%;
-    
-    /* Altura definida em rem (1rem = 16px padrão). Altura ideal estável */
-    height: 4.5rem; /* Equivalente a 72px */
+    height: 4.5rem; /* ~72px */
     z-index: 100;
     
-    /* Fundo opaco fosco que se funde com os tons escuros da Taverna */
-    background-color: rgba(102, 102, 102, 0.65); 
-    
-    /* Desfoca o modelo 3D ao fundo, criando uma fusão orgânica sem pesar a renderização */
+    /* Estética da Taverna */
+    background-color: #141414c7; 
     backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px); /* Suporte para Safari */
-    
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(255, 4, 4, 0.03);
+    
+    /* Centraliza o miolo (headerContent) no meio da tela */
     display: flex;
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s ease;
 }
 
-/* Miolo do Header limitando largura máxima de leitura */
+/* Miolo do Header - Cuida APENAS do alinhamento dos elementos */
 .headerContent {
     width: 100%;
-    max-width: 80rem; /* ~1280px baseado na escala padrão */
-    padding: 0 2rem; /* Afastamento lateral elástico */
+    padding: 0 3rem;  /* Reduzido para aproximar os elementos ao máximo das pontas */
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-between; /* Mantido como fallback seguro */
 }
 
+/* Esquerda: Ganha peso 1 e joga o conteúdo para o início */
 .logoWrapper {
     display: flex;
     align-items: center;
+    flex: 1; 
+    justify-content: flex-start; 
 }
 
 .logo {
-    /* Altura relativa ao tamanho do header */
-    height: 10rem; 
+    height: 4rem; 
     width: auto;
     object-fit: contain;
 }
 
-/* Links do Menu usando distâncias elásticas */
+/* Centro: Não encolhe e fica espremido no centro matemático */
 .navMenu {
     display: flex;
-    gap: 2.5rem; 
+    gap: 2.5rem;
+    flex-shrink: 0; 
 }
 
 .navLink {
-    font-family: 'Inter', sans-serif;
+    font-family: 'MedievalSharp';
     font-size: 0.95rem;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.85); /* Tom quase branco para evitar contraste agressivo */
+    color: rgba(255, 255, 255, 0.85);
     text-decoration: none;
     letter-spacing: 0.03em;
     transition: color 0.2s ease;
 }
 
 .navLink:hover {
-    color: #4ade80; /* Destaque verde sutil */
+    color: #4ade80;
 }
 
-/* Call to Action limpo e adaptável */
+/* Direita: Ganha peso 1 (igual à logo) e joga o conteúdo para o fim */
+.rightWrapper {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end; 
+    gap: 2rem;
+}
+
+/* Call to Action */
 .ctaButton {
-    font-family: 'Inter', sans-serif;
+    font-family: 'MedievalSharp', sans-serif;
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -75,27 +83,48 @@
     color: #0f0f0f;
     background-color: #4ade80;
     padding: 0.5rem 1.2rem;
-    border-radius: 0.25rem; /* Raio de borda relativo */
+    border-radius: 0.25rem;
     text-decoration: none;
     transition: all 0.2s ease;
 }
 
 .ctaButton:hover {
     background-color: #22c55e;
-    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2); /* Brilho neon sutil */
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2);
 }
 
-/* QUEBRA DE RESPONSIVIDADE: Ajuste dinâmico de escala para dispositivos móveis */
+.menuIcon {
+    width: 2rem;
+    height: auto;
+    cursor: pointer;
+}
+
+.menuIcon path {
+    fill: rgba(255, 255, 255, 0.85);
+    transition: fill 0.2s ease; 
+}
+
+.menuIcon:hover path {
+    fill: #4ade80;
+}
+
+/* QUEBRA DE RESPONSIVIDADE */
 @media (max-width: 48rem) { /* ~768px */
     .headerContainer {
-        height: 3.75rem; /* Header fica ligeiramente menor em telas pequenas (~60px) */
+        height: 3.75rem; /* ~60px */
     }
     
     .navMenu {
-        display: none; /* Oculta os links em telas menores para posterior menu sanduíche */
+        display: none; 
     }
     
+    /* Garante que o ícone do menu mobile também use o alinhamento da direita */
+    .ctaWrapper {
+        display: none; /* Oculta o botão de texto no mobile se quiser priorizar o hambúrguer */
+    }
+    
+    
     .logo {
-        height: 8rem; /* Logo reduz proporcionalmente */
+        height: 2.5rem; 
     }
 }
