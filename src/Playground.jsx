@@ -10,7 +10,8 @@ import Hero from './components/Hero/Hero'
 function Playground () {
 return (
     <div>
-        <PreLoader />
+        <Header />
+        <Hero />
     </div>
 );
 }
