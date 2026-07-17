@@ -1,0 +1,101 @@
+/* Container principal ajustado para flexibilidade responsiva */
+.headerContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    
+    /* Altura definida em rem (1rem = 16px padrão). Altura ideal estável */
+    height: 4.5rem; /* Equivalente a 72px */
+    z-index: 100;
+    
+    /* Fundo opaco fosco que se funde com os tons escuros da Taverna */
+    background-color: rgba(102, 102, 102, 0.65); 
+    
+    /* Desfoca o modelo 3D ao fundo, criando uma fusão orgânica sem pesar a renderização */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px); /* Suporte para Safari */
+    
+    border-bottom: 1px solid rgba(255, 4, 4, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+/* Miolo do Header limitando largura máxima de leitura */
+.headerContent {
+    width: 100%;
+    max-width: 80rem; /* ~1280px baseado na escala padrão */
+    padding: 0 2rem; /* Afastamento lateral elástico */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logoWrapper {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    /* Altura relativa ao tamanho do header */
+    height: 10rem; 
+    width: auto;
+    object-fit: contain;
+}
+
+/* Links do Menu usando distâncias elásticas */
+.navMenu {
+    display: flex;
+    gap: 2.5rem; 
+}
+
+.navLink {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85); /* Tom quase branco para evitar contraste agressivo */
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: color 0.2s ease;
+}
+
+.navLink:hover {
+    color: #4ade80; /* Destaque verde sutil */
+}
+
+/* Call to Action limpo e adaptável */
+.ctaButton {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #0f0f0f;
+    background-color: #4ade80;
+    padding: 0.5rem 1.2rem;
+    border-radius: 0.25rem; /* Raio de borda relativo */
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.ctaButton:hover {
+    background-color: #22c55e;
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2); /* Brilho neon sutil */
+}
+
+/* QUEBRA DE RESPONSIVIDADE: Ajuste dinâmico de escala para dispositivos móveis */
+@media (max-width: 48rem) { /* ~768px */
+    .headerContainer {
+        height: 3.75rem; /* Header fica ligeiramente menor em telas pequenas (~60px) */
+    }
+    
+    .navMenu {
+        display: none; /* Oculta os links em telas menores para posterior menu sanduíche */
+    }
+    
+    .logo {
+        height: 8rem; /* Logo reduz proporcionalmente */
+    }
+}
