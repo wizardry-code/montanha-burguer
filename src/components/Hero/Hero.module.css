@@ -17,12 +17,6 @@
   width: 100%;
   overflow: hidden;
   z-index: 1;
-
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url(https://static.vecteezy.com/ti/vetor-gratis/p1/44229324-estrelado-noite-ceu-espaco-desatado-padronizar-galaxia-brilhante-estrelas-fundo-tecido-desatado-impressao-ou-textil-fundo-involucro-papel-espaco-padronizar-ou-papel-de-parede-com-cometa-brilhando-constelacoes-vetor.jpg);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
 }
 
 .canvasContainer canvas {
@@ -54,6 +48,9 @@
   opacity: 0; /* estado inicial — GSAP assume o controle no useEffect */
     margin: 0;
   font-weight: 400;
+}
+.cuidado{
+  color: red;
 }
 .sceneText strong {
   color: #c9a227 ; /* dourado clássico — ajuste o tom conforme a paleta da marca */

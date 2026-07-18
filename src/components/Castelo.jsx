@@ -1,29 +1,27 @@
 import { useGLTF } from "@react-three/drei"
 import React from "react"
 
-
 export const Castelo = () => {
-    //exporta apenas o modelo puro
-    const modelo = useGLTF("modelos/wrath_of_the_dragon-compressed.glb")
-    return <primitive object={modelo.scene} />
+const modelo = useGLTF("modelos/wrath_of_the_dragon-compressed.glb");
 
-    //O monitoramento das cordenadas da camera
-    const MonitordeCamera = () => {
-    useFrame((state) => {
-        const { x, y, z } = state.camera.position
+  // Percorre o modelo e força todas as malhas a projetarem e receberem sombra
+React.useMemo(() => {
+    modelo.scene.traverse((child) => {
+    if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
         
-        // Mantendo o cálculo do vetor de foco baseado na rotação da câmera
-        const targetX = x - Math.sin(state.camera.rotation.y);
-        const targetY = y + Math.sin(state.camera.rotation.x);
-        const targetZ = z - Math.cos(state.camera.rotation.y);
-        
-        console.log(
-            `DRONE -> Posição [X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}, Z: ${z.toFixed(2)}] ` +
-            `| Olhando Para [X: ${targetX.toFixed(2)}, Y: ${targetY.toFixed(2)}, Z: ${targetZ.toFixed(2)}]`
-        )
-    })
-    return null
-}}
+        // Se o modelo original usar materiais muito brilhantes, 
+        // você pode calibrar a rugosidade aqui para tirar o aspeto de plástico:
+        if (child.material) {
+        child.material.roughness = 0.8; 
+        }
+    }
+    });
+}, [modelo]);
+
+return <primitive object={modelo.scene} />;
+};
 
 export default Castelo
 useGLTF.preload("modelos/wrath_of_the_dragon-compressed.glb")

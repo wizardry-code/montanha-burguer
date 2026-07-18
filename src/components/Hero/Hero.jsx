@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { DrawSVGPlugin } from 'gsap/all';
 import { Castelo } from '../Castelo.jsx';
 import styles from './Hero.module.css';
+import { Stars } from '@react-three/drei';
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
@@ -248,9 +249,41 @@ export default function Hero() {
     <section className={styles.hero} ref={sectionHeroRef}>
       <div className={styles.heroBelt} ref={heroBeltRef}>
         <div className={styles.canvasContainer} ref={canvasContainerRef}>
-          <Canvas camera={{ position: [WAYPOINTS[0].x, WAYPOINTS[0].y, WAYPOINTS[0].z], fov: 90 }}>
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[5, 10, 5]} intensity={1} />
+          <Canvas shadows
+            camera={{ position: [WAYPOINTS[0].x, WAYPOINTS[0].y, WAYPOINTS[0].z], fov: 90 }}>
+            <ambientLight intensity={0.2} />
+            <directionalLight 
+            castShadow
+              position={[25, 40, 20]} // Ajuste para bater no ângulo do pôr do sol da foto 1
+              intensity={1.5}
+              shadow-mapSize-width={2048} // Resolução da sombra
+              shadow-mapSize-height={2048}
+              shadow-camera-far={200}
+              shadow-camera-left={-60}
+              shadow-camera-right={60}
+              shadow-camera-top={60}
+              shadow-camera-bottom={-60}
+              shadow-bias={-0.0005} // Evita artefatos estranhos na geometria (shadow acne)
+            />
+            {/* Um tom de azul meia-noite muito escuro para dar contraste */}
+            <color attach="background" args={['#050811']} /> 
+
+            {/* 2. NÉVOA (Obrigatório ter a MESMA cor do background acima!) */}
+            <fog attach="fog" args={['#050811', 40, 180]} />
+
+            {/* 3. CAMPO ESTELAR 3D */}
+            <Stars 
+              radius={100}      // Distância das estrelas a partir do centro
+              depth={50}        // Volume/profundidade do campo estelar
+              count={5000}      // Quantidade de estrelas
+              factor={4}        // Tamanho do brilho das estrelas
+              saturation={0}    // 0 = estrelas brancas, 1 = estrelas coloridas
+              fade              // Faz as estrelas distantes terem fade out
+              speed={1}         // Velocidade da cintilação (piscar)
+            />
+
+            {/* Luzes, Castelo, CameraRig, EffectComposer continuam aqui para baixo... */}
+            <ambientLight intensity={0.2} />
             <Castelo />
             <CameraRig cameraTarget={cameraTarget} onUpdateLiveCoords={setLiveCoords} />
           </Canvas>
@@ -290,7 +323,7 @@ export default function Hero() {
               className={`${styles.sceneText} ${styles.dragaoText}`}
               ref={(el) => (textRefs.current.dragao = el)}
             >
-              Cuidado: Criaturas lendárias cobiçam nossas{' '}
+              <span className={styles.cuidado}>Cuidado!</span> Criaturas lendárias cobiçam nossas{' '}
               <strong>receitas secretas</strong>. Mas aqui, até o{' '}
               <strong>fogo do dragão</strong> trabalha para grelhar o burger perfeito.
             </h2>
@@ -299,7 +332,7 @@ export default function Hero() {
               className={`${styles.sceneText} ${styles.guildaText}`}
               ref={(el) => (textRefs.current.guilda = el)}
             >
-              <strong>REÚNA SUA GALERA!</strong> As campanhas mais gloriosas são
+              <strong>REÚNA SUA GALERA.</strong> As campanhas mais gloriosas são
               feitas ao lado dos aliados mais próximos. E depois do combate, a{' '}
               <strong>taverna</strong> aguarda para a festa.
             </h2>

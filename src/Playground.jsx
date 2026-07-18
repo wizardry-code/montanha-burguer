@@ -14,6 +14,7 @@ return (
     <div>
         <Header />
         <Hero />
+        <Section2/>
     </div>
 );
 }
