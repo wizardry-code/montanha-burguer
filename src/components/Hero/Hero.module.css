@@ -2,7 +2,6 @@
   position: relative;
   width: 100%;
   z-index: 1;
-  isolation: isolate; /* cria contexto de empilhamento próprio, evita fuga de z-index do Canvas */
 }
 
 .heroBelt {
@@ -39,22 +38,60 @@
   pointer-events: none;
 }
 
-.divTextosHero {
+.sceneText {
+  font-family: 'MedievalSharp';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 80%;
-  max-width: 600px;
+  max-width: 640px;
   text-align: center;
-  color: white;
+  color: rgb(255, 255, 255);
+  font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+  line-height: 1.4;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  opacity: 0; /* estado inicial — GSAP assume o controle no useEffect */
+    margin: 0;
+  font-weight: 400;
+}
+.sceneText strong {
+  color: #c9a227 ; /* dourado clássico — ajuste o tom conforme a paleta da marca */
+  font-weight: 700;
+}
+.ponteText {
+  /* fade simples, sem overrides extras */
 }
 
+.dragaoText {
+  will-change: transform, opacity;
+}
+
+.guildaText {
+  transform-origin: center center;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  letter-spacing: 0.02em;
+}
+
+.portaoWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4em;
+  max-width: 800px;
+}
+
+.portaoLeft,
+.portaoRight {
+  display: inline-block;
+  will-change: transform, opacity;
+}
 
 .divSVGTransS2 {
   position: absolute;
   inset: 0;
-  z-index: 5; /* acima do <canvas>, abaixo do textOverlayContainer se precisar */
+  z-index: 20;
   pointer-events: none;
 }
 

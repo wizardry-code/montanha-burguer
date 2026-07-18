@@ -44,6 +44,15 @@ const WAYPOINTS = [
   { x: -0.53, y: 19.40, z: -85.09, targetX: -0.49, targetY: 19.55, targetZ: -86.09 },
 ];
 
+// Índices de waypoint onde cada cena entra/sai.
+// AJUSTE AQUI depois de ver o resultado — é o "match" com o ritmo visual do voo.
+const SCENES = {
+  ponte:  { enter: 1,  exit: 4  },
+  dragao: { enter: 6,  exit: 11},
+  guilda: { enter: 18,  exit: 19 },
+  portao: { enter: 23, exit: 25 },
+};
+
 function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
   const lookAtVector = useRef(
     new THREE.Vector3(WAYPOINTS[0].targetX, WAYPOINTS[0].targetY, WAYPOINTS[0].targetZ)
@@ -89,35 +98,32 @@ export default function Hero() {
   const sectionHeroRef = useRef(null);
   const heroBeltRef = useRef(null);
   const canvasContainerRef = useRef(null);
-  const textRefs = useRef([]);
   const svgPathRef = useRef(null);
   const cameraTarget = useRef({ ...WAYPOINTS[0] });
+
+  // Refs de texto — um por cena, mais os dois "metades" da cena do portão
+  const textRefs = useRef({});
+  const portaoLeftRef = useRef(null);
+  const portaoRightRef = useRef(null);
 
   const [liveCoords, setLiveCoords] = useState({ x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 });
 
   useEffect(() => {
-    const validTexts = textRefs.current.filter(Boolean);
-
-    if (validTexts.length > 0) {
-      gsap.set(validTexts[0], { opacity: 1 });
-      if (validTexts.length > 1) {
-        gsap.set(validTexts.slice(1), { opacity: 0 });
-      }
-    }
+    // Estado inicial: todos os textos invisíveis
+    Object.values(textRefs.current).forEach((el) => {
+      if (el) gsap.set(el, { opacity: 0 });
+    });
 
     const svgContainer = svgPathRef.current?.closest(`.${styles.divSVGTransS2}`);
 
-    // Estado inicial: invisível e "não desenhado"
     if (svgPathRef.current && svgContainer) {
       gsap.set(svgContainer, { opacity: 0 });
       gsap.set(svgPathRef.current, {
-        drawSVG: "0% 0%" ,
-        attr:{"stroke-width":0}
+        drawSVG: "0% 0%",
+        attr: { "stroke-width": 0 }
       });
     }
 
-    // TIMELINE ÚNICA: voo do Drone + textos + PREENCHIMENTO final do SVG
-    // (a retração/reveal fica 100% a cargo da Seção 2 — sem 2º ScrollTrigger aqui)
     const tlDrone = gsap.timeline({
       scrollTrigger: {
         trigger: heroBeltRef.current,
@@ -130,6 +136,7 @@ export default function Hero() {
 
     const dragonTarget = SCENE_TARGETS.dragon;
 
+    // 1. Loop de câmera + cravação de labels de cena
     for (let i = 1; i < WAYPOINTS.length; i++) {
       const point = WAYPOINTS[i];
       const currentPointNumber = i + 1;
@@ -149,21 +156,86 @@ export default function Hero() {
         ease: 'sine.inOut',
       });
 
-      if (validTexts[i - 1]) tlDrone.to(validTexts[i - 1], { opacity: 0, duration: 0.3 }, '<');
-      if (validTexts[i]) tlDrone.to(validTexts[i], { opacity: 1, duration: 0.3 }, '<0.15');
+      Object.entries(SCENES).forEach(([key, { enter, exit }]) => {
+        if (i === enter) tlDrone.addLabel(`${key}Enter`, "<");
+        if (i === exit) tlDrone.addLabel(`${key}Exit`, "<");
+      });
     }
 
-    // ÚLTIMO PASSO da timeline: SÓ preenche a tela (handoff para a Seção 2)
+    // 2. Cena 1 — Ponte: fade simples
+    if (textRefs.current.ponte) {
+      tlDrone
+        .fromTo(textRefs.current.ponte,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.4, ease: "power1.inOut" },
+          "ponteEnter"
+        )
+        .to(textRefs.current.ponte,
+          { opacity: 0, duration: 0.4, ease: "power1.inOut" },
+          "ponteExit"
+        );
+    }
+
+    // 3. Cena 2 — Dragão: parallax lateral
+    if (textRefs.current.dragao) {
+      tlDrone
+        .fromTo(textRefs.current.dragao,
+          { opacity: 0, x: 60 },
+          { opacity: 1, x: 0, duration: 0.3, ease: "power1.out" },
+          "dragaoEnter"
+        )
+        .to(textRefs.current.dragao,
+          { x: -70, ease: "none", duration: 1 },
+          "dragaoEnter"
+        )
+        .to(textRefs.current.dragao,
+          { opacity: 0, duration: 0.3, ease: "power1.in" },
+          "dragaoExit"
+        );
+    }
+
+    // 4. Cena 3 — Guilda: zoom infinito
+    if (textRefs.current.guilda) {
+      tlDrone
+        .fromTo(textRefs.current.guilda,
+          { opacity: 0, scale: 0.85 },
+          { opacity: 1, scale: 1, duration: 0.25, ease: "power1.out" },
+          "guildaEnter"
+        )
+        .to(textRefs.current.guilda,
+          { scale: 9, opacity: 0, ease: "power2.in", duration: 0.75 },
+          "guildaEnter+=0.25"
+        );
+    }
+
+    // 5. Cena 4 — Portão: text split sincronizado com o gate 3D
+    if (textRefs.current.portao) {
+      tlDrone
+        .fromTo(textRefs.current.portao,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.3, ease: "power1.out" },
+          "portaoEnter"
+        )
+        .to(portaoLeftRef.current,
+          { x: -220, opacity: 0, ease: "power2.in", duration: 0.5 },
+          "portaoExit"
+        )
+        .to(portaoRightRef.current,
+          { x: 220, opacity: 0, ease: "power2.in", duration: 0.5 },
+          "portaoExit"
+        );
+    }
+
+    // 6. Handoff final: preenchimento do SVG (fica cobrindo a tela p/ Seção 2 assumir)
     if (svgPathRef.current && svgContainer) {
       tlDrone
         .to(svgContainer, { opacity: 1, duration: 0.1 })
         .to(svgPathRef.current, {
           drawSVG: "0% 100%",
-          attr:{"stroke-width":1200},
+          attr: { "stroke-width": 1200 },
           ease: "power1.in",
           duration: 1.5,
-        },"<");
-      // Fica parado em "tela 100% vermelha" — a Seção 2 assume daqui.
+        }, "<");
     }
 
     return () => {
@@ -182,32 +254,71 @@ export default function Hero() {
             <Castelo />
             <CameraRig cameraTarget={cameraTarget} onUpdateLiveCoords={setLiveCoords} />
           </Canvas>
+
           <div className={styles.divSVGTransS2}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100%"
-            height="100%"
-            viewBox="0 0 1316 664"
-            fill="none"
-            preserveAspectRatio="none"
-          >
-            <path
-              ref={svgPathRef}
-              d="M13.4746 291.27C13.4746 291.27 100.646 -18.6724 255.617 16.8418C410.588 52.356 61.0296 431.197 233.017 546.326C431.659 679.299 444.494 21.0125 652.73 100.784C860.967 180.556 468.663 430.709 617.216 546.326C765.769 661.944 819.097 48.2722 988.501 120.156C1174.21 198.957 809.424 543.841 988.501 636.726C1189.37 740.915 1301.67 149.213 1301.67 149.213"
-              stroke="#ff0000"
-              strokeWidth="13"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="100%"
+              height="100%"
+              viewBox="0 0 1316 664"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path
+                ref={svgPathRef}
+                d="M13.4746 291.27C13.4746 291.27 100.646 -18.6724 255.617 16.8418C410.588 52.356 61.0296 431.197 233.017 546.326C431.659 679.299 444.494 21.0125 652.73 100.784C860.967 180.556 468.663 430.709 617.216 546.326C765.769 661.944 819.097 48.2722 988.501 120.156C1174.21 198.957 809.424 543.841 988.501 636.726C1189.37 740.915 1301.67 149.213 1301.67 149.213"
+                stroke="#ff0000"
+                strokeWidth="13"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
-          </div>
-          <div className={styles.textOverlayContainer}>
-          {/* Suas divs de texto mapeadas permanecem aqui */}
-          </div>
+
+          {/* Textos com semântica de SEO: h1 único (Cena 1) + h2 (Cenas 2, 3, 4) */}
+          <section className={styles.textOverlayContainer} aria-label="Introdução Montanha Burguer">
+            <h1
+              className={`${styles.sceneText} ${styles.ponteText}`}
+              ref={(el) => (textRefs.current.ponte = el)}
+            >
+              Atravesse a ponte entre o comum e o <strong>extraordinário</strong>.
+              Bem-vindo ao reino onde grandes aventuras despertam{' '}
+              <strong>grandes fomes</strong>.
+            </h1>
+
+            <h2
+              className={`${styles.sceneText} ${styles.dragaoText}`}
+              ref={(el) => (textRefs.current.dragao = el)}
+            >
+              Cuidado: Criaturas lendárias cobiçam nossas{' '}
+              <strong>receitas secretas</strong>. Mas aqui, até o{' '}
+              <strong>fogo do dragão</strong> trabalha para grelhar o burger perfeito.
+            </h2>
+
+            <h2
+              className={`${styles.sceneText} ${styles.guildaText}`}
+              ref={(el) => (textRefs.current.guilda = el)}
+            >
+              <strong>REÚNA SUA GALERA!</strong> As campanhas mais gloriosas são
+              feitas ao lado dos aliados mais próximos. E depois do combate, a{' '}
+              <strong>taverna</strong> aguarda para a festa.
+            </h2>
+
+            <h2
+              className={`${styles.sceneText} ${styles.portaoWrapper}`}
+              ref={(el) => (textRefs.current.portao = el)}
+            >
+              <span className={styles.portaoLeft} ref={portaoLeftRef}>
+                O portal está aberto. Deixe o mundo virtual
+              </span>
+              <span className={styles.portaoRight} ref={portaoRightRef}>
+                e venha viver a <strong>experiência real</strong> na nossa
+                verdadeira <strong>fortaleza do sabor</strong>!
+              </span>
+            </h2>
+          </section>
+        </div>
       </div>
-
-
     </section>
   );
 }
