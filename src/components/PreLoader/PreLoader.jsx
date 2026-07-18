@@ -4,6 +4,7 @@ import { useGSAP } from '@gsap/react';
 
 import Logo from '../Logo/Logo';
 import { headerLogoRef } from '../../utils/logoRef';
+import { assetsReadyPromise } from '../../utils/assetsReady';
 import styles from './PreLoader.module.css';
 
 gsap.registerPlugin(useGSAP);
@@ -12,8 +13,7 @@ gsap.registerPlugin(useGSAP);
 const EXIT_DELAY = 0.18; // 180ms
 // Duração do voo até a posição do Header
 const FLIGHT_DURATION = 1;
-// A cortina de fundo começa a sumir um pouco depois do início do voo
-const BG_FADE_OFFSET = 0.15;
+// Duração do fade do fundo (cortina), que só começa depois que a logo chega
 const BG_FADE_DURATION = 0.9;
 
 const PreLoader = () => {
@@ -99,13 +99,7 @@ const PreLoader = () => {
 
             exitTl
                 .addLabel('voo')
-                // A) Fundo (cortina) some suavemente — SÓ o fundo, opacity, nunca backgroundColor
-                .to(
-                    bgRef.current,
-                    { opacity: 0, duration: BG_FADE_DURATION, ease: 'power2.out' },
-                    `voo+=${BG_FADE_OFFSET}`
-                )
-                // B) A logo do preloader voa até a posição/tamanho exatos da logo do Header
+                // A) A logo do preloader voa até a posição/tamanho exatos da logo do Header
                 .to(
                     flyingLogo,
                     {
@@ -118,7 +112,7 @@ const PreLoader = () => {
                     },
                     'voo'
                 )
-                // C) Troca de guarda: no EXATO frame em que a logo chega, a do Header
+                // B) Troca de guarda: no EXATO frame em que a logo chega, a do Header
                 // aparece e a do Loader some. Como as duas ocupam o mesmo lugar/tamanho
                 // nesse instante, o usuário nunca percebe a troca.
                 .call(
@@ -128,15 +122,38 @@ const PreLoader = () => {
                     },
                     null,
                     `voo+=${FLIGHT_DURATION}`
+                )
+                // C) SÓ AGORA, com a logo já no lugar, o fundo (cortina) some —
+                // nada de fade acontecendo durante o voo.
+                .to(
+                    bgRef.current,
+                    { opacity: 0, duration: BG_FADE_DURATION, ease: 'power2.out' },
+                    `voo+=${FLIGHT_DURATION}`
                 );
         };
 
         // Dispara o loop do brilho imediatamente
         playShimmerCycle();
 
-        // Verifica se a página já carregou ou aguarda o evento
+        // ==========================================
+        // GATILHO REAL DE "CARREGOU" — dois sinais, não um
+        // ==========================================
+        // 1) window 'load': HTML, CSS, JS, fontes, imagens do <img>/<link>
+        // 2) assetsReadyPromise: modelos 3D e afins, buscados via JS depois
+        //    do 'load' (o navegador não espera por eles sozinho)
+        // Só quando os DOIS estiverem prontos é que a flag realmente vira
+        // true — e o brilho, ao terminar a volta atual, libera a saída.
+        const readiness = { page: false, assets: false };
+
+        const tryMarkReady = () => {
+            if (readiness.page && readiness.assets) {
+                pageHasLoaded.current = true;
+            }
+        };
+
         const handlePageLoaded = () => {
-            pageHasLoaded.current = true;
+            readiness.page = true;
+            tryMarkReady();
         };
 
         if (document.readyState === 'complete') {
@@ -144,6 +161,11 @@ const PreLoader = () => {
         } else {
             window.addEventListener('load', handlePageLoaded);
         }
+
+        assetsReadyPromise.then(() => {
+            readiness.assets = true;
+            tryMarkReady();
+        });
 
         return () => window.removeEventListener('load', handlePageLoaded);
     }, { scope: container });
