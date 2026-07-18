@@ -6,6 +6,6 @@ import Playground from './Playground.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Playground />
+    <App />
   </StrictMode>,
 )

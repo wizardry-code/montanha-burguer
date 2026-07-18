@@ -1,38 +1,39 @@
+
 .preLoaderContainer {
     position: fixed;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100dvh;
-    background-color: black;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    
-    /* Centralização e alinhamento vertical */
-    display: flex;
-    flex-direction: column; /* Garante que o texto fique abaixo da logo */
-    justify-content: center;
-    align-items: center;
-    gap: 20px; /* Cria um espaço maneiro entre a logo e o texto */
-    z-index: 2;
-}
-.preLoaderContent {
-    display: flex;
-    flex-direction: column; /* Garante que o texto fique abaixo da logo */
-    justify-content: center;
-    align-items: center;
-    gap: 20px; /* Cria um espaço maneiro entre a logo e o texto */
-}
-.logoLoader {
-    width: 100%;  /* 100vw é o tamanho da tela inteira, use algo menor para a logo */
-    height: auto; 
-    z-index: 3;
+    z-index: 9999; /* Fica acima de tudo, inclusive do Header */
+    pointer-events: auto;
 }
 
-.textLoader {
-    font-family: 'MedievalSharp', sans-serif;
-    font-size: 2.5rem;
-    color: #ffffff;
-    margin: 0;
+/* Cortina de fundo: é a ÚNICA coisa que recebe o fade de opacidade.
+   Fica atrás do conteúdo (logo), então a logo pode continuar 100%
+   visível enquanto o fundo já está sumindo. */
+.preLoaderBg {
+    position: absolute;
+    inset: 0;
+    background-color: #0b0b0b;
+    z-index: 0;
+    will-change: opacity;
+}
+
+.preLoaderContent {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0 20px;
+}
+
+.logoLoader {
+    width: 100%;
+    max-width: 450px; /* Controla o tamanho do logo centralizado */
+    height: auto;
+    display: block;
+    will-change: transform;
 }
