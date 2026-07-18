@@ -1,0 +1,50 @@
+.section2 {
+  position: relative;
+  width: 100%;
+  z-index: 0;
+  isolation: isolate;
+}
+
+/* Controla a duração/"velocidade" do recolhimento do SVG.
+   Aumente para um reveal mais lento e suave. */
+.revealBelt {
+  position: relative;
+  width: 100%;
+  height: 250dvh;
+}
+
+.stickyStage {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.purpleBg {
+  position: absolute;
+  inset: 0;
+  background-color: blueviolet;
+  z-index: 1;
+}
+
+.svgOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.svgOverlay svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.content {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-color: blueviolet;
+  z-index: 0;
+}

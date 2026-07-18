@@ -6,6 +6,8 @@ import  PreLoader  from './components/PreLoader/PreLoader'
 import './App.css'
 import Header from './components/Header/Header'
 import Hero from './components/Hero/Hero'
+import { Section } from 'postprocessing'
+import Section2 from './components/Section2/Section2'
 
 function Playground () {
 return (
