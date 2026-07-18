@@ -1,4 +1,4 @@
-/* Container principal - Cuida APENAS do comportamento na tela */
+
 .headerContainer {
     position: fixed; /* Mantém fixo no topo (Excelente para UX) */
     top: 0;
@@ -41,6 +41,8 @@
     height: 4rem; 
     width: auto;
     object-fit: contain;
+    opacity: 0; /* some para o GSAP revelar no exato instante da troca com o PreLoader */
+    will-change: opacity;
 }
 
 /* Centro: Não encolhe e fica espremido no centro matemático */
