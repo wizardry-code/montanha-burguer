@@ -30,59 +30,76 @@
   inset: 0;
   z-index: 10;
   pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Centraliza perfeitamente em telas horizontais */
 }
 
+/* ============================================================
+   AJUSTE DE POSIÇÃO E SUAVIZAÇÃO DOS TEXTOS (DESKTOP)
+   ============================================================ */
 .sceneText {
-  font-family: 'MedievalSharp';
+  font-family: 'MedievalSharp', sans-serif;
   position: absolute;
+  
+  /* 🛑 AJUSTE DE POSIÇÃO VERTICAL (PC): 
+     Altere de 50% para valores maiores (ex: 60%) se quiser empurrar o texto para baixo 
+     ou menores (ex: 40%) para subir o texto na tela do computador. */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80%;
-  max-width: 640px;
+  
+  width: 85%;
+  max-width: 700px;
   text-align: center;
-  color: rgb(255, 255, 255);
-  font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+  color: #ffffff;
+  
+  /* 🛑 AJUSTE CINEMATOGRÁFICO DE TAMANHO DE FONTE (PC):
+     O valor do meio (2.2vw) controla a fluidez baseado na largura da tela */
+  font-size: clamp(1.2rem, 2.2vw, 2rem);
   line-height: 1.4;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
-  opacity: 0; /* estado inicial — GSAP assume o controle no useEffect */
-    margin: 0;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+  opacity: 0; /* Controlado nativamente pelo GSAP timeline */
+  margin: 0;
   font-weight: 400;
-}
-.cuidado{
-  color: red;
-}
-.sceneText strong {
-  color: #c9a227 ; /* dourado clássico — ajuste o tom conforme a paleta da marca */
-  font-weight: 700;
-}
-.ponteText {
-  /* fade simples, sem overrides extras */
+  perspective: 1000px; /* Cria o ambiente para a rotação 3D sutil do SplitText */
+
+  /* Solução definitiva contra texto embaçado (Força Renderização Subpixel) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-.dragaoText {
-  will-change: transform, opacity;
+/* Classes injetadas dinamicamente pelo SplitText oficial */
+:global(.split-line) {
+  overflow: hidden !important;
+  display: block;
+}
+
+.cuidado {
+  color: #ff3333;
+}
+
+.sceneText strong {
+  color: #e5b82e;
+  font-weight: 700;
 }
 
 .guildaText {
-  transform-origin: center center;
-  will-change: transform, opacity;
-  backface-visibility: hidden;
   letter-spacing: 0.02em;
 }
 
 .portaoWrapper {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.4em;
-  max-width: 800px;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  max-width: 850px;
 }
 
 .portaoLeft,
 .portaoRight {
   display: inline-block;
-  will-change: transform, opacity;
 }
 
 .divSVGTransS2 {
@@ -96,4 +113,37 @@
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* ============================================================
+   AJUSTE FINO PARA DISPOSITIVOS MÓVEIS (CELULARES)
+   ============================================================ */
+@media (max-width: 768px) {
+  .sceneText {
+    width: 90%;
+    max-width: none;
+    
+    /* 🛑 AJUSTE DE POSIÇÃO VERTICAL (MOBILE/CELL):
+       Mude aqui se o texto estiver sobrepondo elementos do modelo 3D em telas verticais. 
+       Exemplo: 65% empurra o texto mais perto do rodapé, deixando o centro livre pro dragão. */
+    top: 55%; 
+    
+    /* 🛑 AJUSTE DE FONTE (MOBILE/CELL):
+       Evita estouro lateral diminuindo inteligentemente a escala para telas menores */
+    font-size: clamp(1rem, 4.2vw, 1.3rem);
+    line-height: 1.5;
+  }
+
+  .portaoWrapper {
+    width: 90%;
+    gap: 0.5em;
+  }
+}
+
+@media (max-width: 440px) {
+  .sceneText {
+    /* 🛑 AJUSTE CRÍTICO PARA TELAS ULTRA ESTREITAS (IPHONES/SMALL ANDROIDS): */
+    top: 58%;
+    font-size: clamp(0.9rem, 5vw, 1.1rem);
+  }
 }
