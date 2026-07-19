@@ -13,8 +13,10 @@ gsap.registerPlugin(useGSAP);
 const EXIT_DELAY = 0.18; // 180ms
 // Duração do voo até a posição do Header
 const FLIGHT_DURATION = 1;
-// Duração do fade do fundo (cortina), que só começa depois que a logo chega
+// Duração do fade do fundo (cortina)
 const BG_FADE_DURATION = 0.9;
+// Tempo de interseção: o fundo começa a sumir 200ms antes da logo pousar
+const OVERLAP_TIME = 0.2; 
 
 const PreLoader = () => {
     const container = useRef(null); // wrapper fixo (nunca é animado, só escondido no final)
@@ -25,8 +27,7 @@ const PreLoader = () => {
     useGSAP(() => {
         const pageHasLoaded = { current: false };
 
-        // Header começa invisível para não haver flash antes da troca (reforçado
-        // também via CSS em Header.module.css, isso aqui é só uma garantia extra).
+        // Header começa invisível para não haver flash antes da troca
         if (headerLogoRef.current) {
             gsap.set(headerLogoRef.current, { opacity: 0 });
         }
@@ -34,10 +35,6 @@ const PreLoader = () => {
         // ==========================================
         // ESTADO: CARREGANDO — brilho diagonal em loop
         // ==========================================
-        // Em vez de usar repeat:-1 (que corta a animação no meio quando mandamos
-        // parar), cada ciclo é uma timeline própria que, ao terminar, decide se
-        // continua o loop ou libera a saída. Assim o brilho sempre termina uma
-        // volta completa antes de qualquer outra coisa acontecer.
         const playShimmerCycle = () => {
             return gsap.timeline({
                 onComplete: () => {
@@ -62,11 +59,7 @@ const PreLoader = () => {
         // BRILHO ESTABILIZADO → SVG NO ESTADO ORIGINAL
         // ==========================================
         const settleAndExit = () => {
-            // Garante que a logo está 100% no estado original: sem transform,
-            // sem scale, sem nada — só o brilho parado no fim do curso.
             gsap.set(loaderLogoRef.current, { clearProps: 'transform,x,y,scale' });
-
-            // Pequena pausa antes de iniciar o voo, como pedido (150~200ms)
             gsap.delayedCall(EXIT_DELAY, runExitFlight);
         };
 
@@ -84,22 +77,19 @@ const PreLoader = () => {
             const startRect = flyingLogo.getBoundingClientRect();
             const endRect = finalLogo.getBoundingClientRect();
 
-            const deltaX =
-                endRect.left + endRect.width / 2 - (startRect.left + startRect.width / 2);
-            const deltaY =
-                endRect.top + endRect.height / 2 - (startRect.top + startRect.height / 2);
+            const deltaX = endRect.left + endRect.width / 2 - (startRect.left + startRect.width / 2);
+            const deltaY = endRect.top + endRect.height / 2 - (startRect.top + startRect.height / 2);
             const scale = endRect.width / startRect.width;
 
             const exitTl = gsap.timeline({
                 onComplete: () => {
-                    // Some de vez, sem deixar rastro (nem no layout, nem em cliques)
                     gsap.set(container.current, { display: 'none' });
                 },
             });
 
             exitTl
                 .addLabel('voo')
-                // A) A logo do preloader voa até a posição/tamanho exatos da logo do Header
+                // A) Voo da logo do preloader
                 .to(
                     flyingLogo,
                     {
@@ -112,9 +102,17 @@ const PreLoader = () => {
                     },
                     'voo'
                 )
-                // B) Troca de guarda: no EXATO frame em que a logo chega, a do Header
-                // aparece e a do Loader some. Como as duas ocupam o mesmo lugar/tamanho
-                // nesse instante, o usuário nunca percebe a troca.
+                // B) ANTECIPAÇÃO: O fundo começa a sumir ligeiramente ANTES da logo terminar o voo.
+                .to(
+                    bgRef.current,
+                    { 
+                        opacity: 0, 
+                        duration: BG_FADE_DURATION, 
+                        ease: 'power2.out' 
+                    },
+                    `voo+=${FLIGHT_DURATION - OVERLAP_TIME}`
+                )
+                // C) TROCA DE GUARDA: Acontece no frame exato do pouso.
                 .call(
                     () => {
                         gsap.set(finalLogo, { opacity: 1 });
@@ -122,27 +120,15 @@ const PreLoader = () => {
                     },
                     null,
                     `voo+=${FLIGHT_DURATION}`
-                )
-                // C) SÓ AGORA, com a logo já no lugar, o fundo (cortina) some —
-                // nada de fade acontecendo durante o voo.
-                .to(
-                    bgRef.current,
-                    { opacity: 0, duration: BG_FADE_DURATION, ease: 'power2.out' },
-                    `voo+=${FLIGHT_DURATION}`
                 );
-        };
+        }; // <--- Chave de fechamento da runExitFlight que estava faltando!
 
         // Dispara o loop do brilho imediatamente
         playShimmerCycle();
 
         // ==========================================
-        // GATILHO REAL DE "CARREGOU" — dois sinais, não um
+        // GATILHO REAL DE "CARREGOU" — dois sinais
         // ==========================================
-        // 1) window 'load': HTML, CSS, JS, fontes, imagens do <img>/<link>
-        // 2) assetsReadyPromise: modelos 3D e afins, buscados via JS depois
-        //    do 'load' (o navegador não espera por eles sozinho)
-        // Só quando os DOIS estiverem prontos é que a flag realmente vira
-        // true — e o brilho, ao terminar a volta atual, libera a saída.
         const readiness = { page: false, assets: false };
 
         const tryMarkReady = () => {

@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { Castelo } from '../Castelo.jsx';
 import styles from './Hero.module.css';
 import { Stars } from '@react-three/drei';
-
+import { HERO_SCENES } from '../../utils/heroConfig.js';
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
 
@@ -47,6 +47,8 @@ const WAYPOINTS = [
   { x: -0.53, y: 19.40, z: -85.09, targetX: -0.49, targetY: 19.55, targetZ: -86.09 },
 ];
 
+
+
 const SCENES = {
   ponte:  { enter: 1,  exit: 4  },
   dragao: { enter: 6,  exit: 11 },
@@ -84,6 +86,30 @@ function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
 }
 
 export default function Hero() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Hook robusto de monitoramento de viewport (Padrão de Arquitetura Limpa)
+  useEffect(() => {
+    const checkViewport = () => setIsMobile(window.innerWidth <= 768);
+    checkViewport(); // Executa no mount
+    window.addEventListener('resize', checkViewport);
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
+
+  // Helper para gerar as Custom Properties dinâmicas de cada elemento de forma limpa
+  const getDynamicStyles = (scene) => {
+    const config = isMobile ? scene.layout.mobile : scene.layout.desktop;
+    return {
+      '--text-top': config.top,
+      '--text-bottom': config.bottom,
+      '--text-left': config.left,
+      '--text-right': config.right,
+      '--text-x-offset': config.x,
+      '--text-y-offset': config.y,
+      textAlign: config.align,
+      ...scene.extraStyles // Aplica estilos extras se houver (ex: letter-spacing)
+    };
+  };
   const sectionHeroRef = useRef(null);
   const heroBeltRef = useRef(null);
   const canvasContainerRef = useRef(null);
@@ -143,9 +169,10 @@ export default function Hero() {
         duration: 1, ease: 'sine.inOut',
       });
 
-      Object.entries(SCENES).forEach(([key, { enter, exit }]) => {
-        if (i === enter) tlDrone.addLabel(`${key}Enter`, "<");
-        if (i === exit) tlDrone.addLabel(`${key}Exit`, "<");
+      // CORREÇÃO DOS LABELS: Vincula o label dinamicamente ao index preciso da iteração
+      HERO_SCENES.forEach((scene) => {
+        if (i === scene.enter) tlDrone.addLabel(`${scene.refKey}Enter`, "-=1"); // Força o ponto exato do início daquele frame
+        if (i === scene.exit) tlDrone.addLabel(`${scene.refKey}Exit`, "-=1");
       });
     }
 
@@ -164,11 +191,53 @@ export default function Hero() {
       .to(textRefs.current.dragao, { x: -50, ease: "none", duration: 1 }, "dragaoEnter")
       .to(textRefs.current.dragao, { opacity: 0, duration: 0.3 }, "dragaoExit");
 
-    // Cena 3 — Guilda
-    tlDrone
-      .fromTo(textRefs.current.guilda, { scale: 0.95 }, { scale: 1, duration: 0.3 }, "guildaEnter")
-      .to(splitGuilda.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "guildaEnter")
-      .to(textRefs.current.guilda, { scale: 3, opacity: 0, ease: "power2.in", duration: 0.75 }, "guildaEnter+=0.4");
+// ============================================================
+// Cena 3 — Guilda (Efeito de Atravessar Realista corrigido)
+// ============================================================
+tlDrone
+  // 1. APROXIMAÇÃO: Define posicionamento central e traz o texto do fundo
+  .fromTo(textRefs.current.guilda, 
+    { 
+      xPercent: -50,    // Substitui o translate(-50%) do CSS com segurança
+      yPercent: -50,    // Substitui o translate(-50%) do CSS com segurança
+      left: "50%",
+      top: "50%",
+      z: -500,          // Começa bem recuado no espaço
+      opacity: 0 
+    }, 
+    { 
+      z: 0,             // Para no ponto zero de leitura
+      opacity: 1, 
+      duration: 0.6,
+      ease: "power2.out",
+      force3D: true
+    }, 
+    "guildaEnter"
+  )
+  // Revelação interna das palavras do SplitText
+  .to(splitGuilda.words, { 
+    y: 0, 
+    rotationX: 0, 
+    opacity: 1, 
+    duration: 0.5, 
+    stagger: STAGGER_TIME, 
+    ease: "power3.out" 
+  }, "guildaEnter")
+
+  // 2. ATRAVESSAR A CÂMERA: Dispara o avanço agressivo para as costas do ponto de visão
+  .to(textRefs.current.guilda, {
+    z: 3500,            // Avança muito além da lente (estoura o ponto de fuga)
+    duration: 1.4,      // Tempo estendido para acompanhar a passagem física
+    ease: "power2.in",  // Aceleração progressiva geométrica
+    force3D: true
+  }, "guildaEnter+=0.8") // Espera a leitura antes de iniciar a passagem
+
+  // 3. FADE PÓS-CÂMERA: Só começa a sumir quando já estiver colado/passando do visor
+  .to(textRefs.current.guilda, {
+    opacity: 0,
+    duration: 0.3,
+    ease: "none"
+  }, "guildaEnter+=1.9"); // Dispara bem no final do trajeto Z (0.8 de espera + 1.1 de avanço)
 
     // Cena 4 — Portão
     tlDrone
@@ -215,24 +284,48 @@ export default function Hero() {
             </svg>
           </div>
 
-          <section className={styles.textOverlayContainer} aria-label="Introdução Montanha Burguer">
-            <h1 className={`${styles.sceneText} ${styles.ponteText}`} ref={(el) => (textRefs.current.ponte = el)}>
-              Atravesse a ponte entre o comum e o <strong>extraordinário</strong>. Bem-vindo ao reino onde grandes aventuras despertam <strong>grandes fomes</strong>.
-            </h1>
+        <section className={styles.textOverlayContainer} aria-label="Introdução Montanha Burguer">
+          {HERO_SCENES.map((scene) => {
+            if (scene.type === 'wrapper') {
+              return (
+                <h2
+                  key={scene.id}
+                  className={`${styles.sceneText} ${styles.portaoWrapper}`}
+                  style={getDynamicStyles(scene)}
+                  ref={(el) => (textRefs.current[scene.refKey] = el)}
+                >
+                  <span className={styles.portaoLeft} ref={portaoLeftRef}>
+                    {scene.tokensLeft.map((token, i) => (
+                      <React.Fragment key={i}>{token.text}</React.Fragment>
+                    ))}
+                  </span>
+                  <span className={styles.portaoRight} ref={portaoRightRef}>
+                    {scene.tokensRight.map((token, i) => (
+                      <strong key={i} style={token.highlight ? { color: '#e5b82e', fontWeight: 700 } : { color: 'inherit', fontWeight: 'inherit' }}>
+                        {token.text}
+                      </strong>
+                    ))}
+                  </span>
+                </h2>
+              );
+            }
 
-            <h2 className={`${styles.sceneText} ${styles.dragaoText}`} ref={(el) => (textRefs.current.dragao = el)}>
-              <span className={styles.cuidado}>Cuidado!</span> Criaturas lendárias cobiçam nossas <strong>receitas secretas</strong>. Mas aqui, até o <strong>fogo do dragão</strong> trabalha para grelhar o burger perfeito.
-            </h2>
-
-            <h2 className={`${styles.sceneText} ${styles.guildaText}`} ref={(el) => (textRefs.current.guilda = el)}>
-              <strong>REÚNA SUA GALERA.</strong> As campanhas mais gloriosas são feitas ao lado dos aliados mais próximos. E depois do combate, a <strong>taverna</strong> aguarda para a festa.
-            </h2>
-
-            <h2 className={`${styles.sceneText} ${styles.portaoWrapper}`} ref={(el) => (textRefs.current.portao = el)}>
-              <span className={styles.portaoLeft} ref={portaoLeftRef}>O portal está aberto. Deixe o mundo virtual</span>
-              <span className={styles.portaoRight} ref={portaoRightRef}>e venha viver a <strong>experiência real</strong> na nossa verdadeira <strong>fortaleza do sabor</strong>!</span>
-            </h2>
-          </section>
+            return (
+              <h1
+                key={scene.id}
+                className={styles.sceneText}
+                style={getDynamicStyles(scene)}
+                ref={(el) => (textRefs.current[scene.refKey] = el)}
+              >
+                {scene.tokens.map((token, i) => {
+                  if (token.highlight) return <strong key={i}>{token.text}</strong>;
+                  if (token.alert) return <span key={i} className={styles.cuidado}>{token.text}</span>;
+                  return <React.Fragment key={i}>{token.text}</React.Fragment>;
+                })}
+              </h1>
+            );
+          })}
+        </section>
         </div>
       </div>
     </section>
