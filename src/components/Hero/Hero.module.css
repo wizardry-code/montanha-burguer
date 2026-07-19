@@ -72,7 +72,6 @@
   color: #ffffff;
   font-size: clamp(1.2rem, 2.2vw, 2rem);
   line-height: 1.4;
-  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
   opacity: 0; 
   margin: 0;
   font-weight: 400;
@@ -93,7 +92,10 @@
 .sceneText :global(.cuidado) {
   color: #ff3333 !important;
 }
-
+.cuidado {
+  color: #ff3333; /* Um vermelho vibrante que contrasta bem com o fundo escuro #050811 */
+  font-weight: 700; /* Opcional: deixa em negrito para dar ainda mais destaque ao alerta */
+}
 :global(.split-line) {
   overflow: hidden !important;
   display: block;

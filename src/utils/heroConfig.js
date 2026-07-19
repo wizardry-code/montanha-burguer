@@ -25,7 +25,7 @@ export const HERO_SCENES = [
     enter: 6,
     exit: 11,
     tokens: [
-      { text: "Cuidado! ", alert: true },
+      { text: "<Cuidado> ", alert: true },
       { text: "Criaturas lendárias cobiçam nossas " },
       { text: "receitas secretas", highlight: true },
       { text: ". Mas aqui, até o " },

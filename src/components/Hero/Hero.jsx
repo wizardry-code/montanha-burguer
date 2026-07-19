@@ -179,73 +179,42 @@ export default function Hero() {
     // ---- AJUSTE RÍTMO DO REVEAL (Awwwards Standard) ----
     const STAGGER_TIME = 0.02;
 
-    // Cena 1 — Ponte
+    // Cena 1 — Ponte (Entra por baixo, sai por cima)
     tlDrone
       .to(splitPonte.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "ponteEnter")
-      .to(textRefs.current.ponte, { opacity: 0, duration: 0.4 }, "ponteExit");
+      // SAÍDA: joga o y para -60 (sobe) e zera a opacidade das palavras individuais
+      .to(splitPonte.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "ponteExit");
 
-    // Cena 2 — Dragão
+    // Cena 2 — Dragão (Entra por baixo com slide horizontal, sai por cima)
     tlDrone
       .fromTo(textRefs.current.dragao, { x: 50 }, { x: 0, duration: 0.4, ease: "power1.out" }, "dragaoEnter")
       .to(splitDragao.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "dragaoEnter")
       .to(textRefs.current.dragao, { x: -50, ease: "none", duration: 1 }, "dragaoEnter")
-      .to(textRefs.current.dragao, { opacity: 0, duration: 0.3 }, "dragaoExit");
+      // SAÍDA: palavras continuam subindo para fora da máscara
+      .to(splitDragao.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "dragaoExit");
 
-// ============================================================
-// Cena 3 — Guilda (Efeito de Atravessar Realista corrigido)
-// ============================================================
-tlDrone
-  // 1. APROXIMAÇÃO: Define posicionamento central e traz o texto do fundo
-  .fromTo(textRefs.current.guilda, 
-    { 
-      xPercent: -50,    // Substitui o translate(-50%) do CSS com segurança
-      yPercent: -50,    // Substitui o translate(-50%) do CSS com segurança
-      left: "50%",
-      top: "50%",
-      z: -500,          // Começa bem recuado no espaço
-      opacity: 0 
-    }, 
-    { 
-      z: 0,             // Para no ponto zero de leitura
-      opacity: 1, 
-      duration: 0.6,
-      ease: "power2.out",
-      force3D: true
-    }, 
-    "guildaEnter"
-  )
-  // Revelação interna das palavras do SplitText
-  .to(splitGuilda.words, { 
-    y: 0, 
-    rotationX: 0, 
-    opacity: 1, 
-    duration: 0.5, 
-    stagger: STAGGER_TIME, 
-    ease: "power3.out" 
-  }, "guildaEnter")
+    // ============================================================
+    // Cena 3 — Guilda (Efeito de Atravessar Realista Mantido)
+    // ============================================================
+    tlDrone
+      .fromTo(textRefs.current.guilda, 
+        { xPercent: -50, yPercent: -50, left: "50%", top: "50%", z: -500, opacity: 0 }, 
+        { z: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true }, 
+        "guildaEnter"
+      )
+      .to(splitGuilda.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "guildaEnter")
+      .to(textRefs.current.guilda, { z: 3500, duration: 1.4, ease: "power2.in", force3D: true }, "guildaEnter+=0.8")
+      .to(textRefs.current.guilda, { opacity: 0, duration: 0.3, ease: "none" }, "guildaEnter+=1.9");
 
-  // 2. ATRAVESSAR A CÂMERA: Dispara o avanço agressivo para as costas do ponto de visão
-  .to(textRefs.current.guilda, {
-    z: 3500,            // Avança muito além da lente (estoura o ponto de fuga)
-    duration: 1.4,      // Tempo estendido para acompanhar a passagem física
-    ease: "power2.in",  // Aceleração progressiva geométrica
-    force3D: true
-  }, "guildaEnter+=0.8") // Espera a leitura antes de iniciar a passagem
-
-  // 3. FADE PÓS-CÂMERA: Só começa a sumir quando já estiver colado/passando do visor
-  .to(textRefs.current.guilda, {
-    opacity: 0,
-    duration: 0.3,
-    ease: "none"
-  }, "guildaEnter+=1.9"); // Dispara bem no final do trajeto Z (0.8 de espera + 1.1 de avanço)
-
-    // Cena 4 — Portão
+    // Cena 4 — Portão (Entra por baixo, sai subindo e abrindo)
     tlDrone
       .to(splitPortaoLeft.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "portaoEnter")
       .to(splitPortaoRight.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "portaoEnter+=0.1")
+      // SAÍDA: as palavras sobem (-60) enquanto os blocos se afastam lateralmente (x: -150 / 150)
+      .to(splitPortaoLeft.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "portaoExit")
+      .to(splitPortaoRight.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "portaoExit")
       .to(portaoLeftRef.current, { x: -150, opacity: 0, ease: "power2.in", duration: 0.5 }, "portaoExit")
       .to(portaoRightRef.current, { x: 150, opacity: 0, ease: "power2.in", duration: 0.5 }, "portaoExit");
-
     // Handoff final SVG
     if (svgPathRef.current && svgContainer) {
       tlDrone
@@ -285,47 +254,47 @@ tlDrone
           </div>
 
         <section className={styles.textOverlayContainer} aria-label="Introdução Montanha Burguer">
-          {HERO_SCENES.map((scene) => {
-            if (scene.type === 'wrapper') {
-              return (
-                <h2
-                  key={scene.id}
-                  className={`${styles.sceneText} ${styles.portaoWrapper}`}
-                  style={getDynamicStyles(scene)}
-                  ref={(el) => (textRefs.current[scene.refKey] = el)}
-                >
-                  <span className={styles.portaoLeft} ref={portaoLeftRef}>
-                    {scene.tokensLeft.map((token, i) => (
-                      <React.Fragment key={i}>{token.text}</React.Fragment>
-                    ))}
-                  </span>
-                  <span className={styles.portaoRight} ref={portaoRightRef}>
-                    {scene.tokensRight.map((token, i) => (
-                      <strong key={i} style={token.highlight ? { color: '#e5b82e', fontWeight: 700 } : { color: 'inherit', fontWeight: 'inherit' }}>
-                        {token.text}
-                      </strong>
-                    ))}
-                  </span>
-                </h2>
-              );
-            }
-
+        {HERO_SCENES.map((scene) => {
+          if (scene.type === 'wrapper') {
             return (
-              <h1
+              <h2
                 key={scene.id}
-                className={styles.sceneText}
+                className={`${styles.sceneText} ${styles.portaoWrapper}`}
                 style={getDynamicStyles(scene)}
                 ref={(el) => (textRefs.current[scene.refKey] = el)}
               >
-                {scene.tokens.map((token, i) => {
-                  if (token.highlight) return <strong key={i}>{token.text}</strong>;
-                  if (token.alert) return <span key={i} className={styles.cuidado}>{token.text}</span>;
-                  return <React.Fragment key={i}>{token.text}</React.Fragment>;
-                })}
-              </h1>
+                <span className={styles.portaoLeft} ref={portaoLeftRef}>
+                  {scene.tokensLeft.map((token, i) => (
+                    <React.Fragment key={i}>{token.text}</React.Fragment>
+                  ))}
+                </span>
+                <span className={styles.portaoRight} ref={portaoRightRef}>
+                  {scene.tokensRight.map((token, i) => (
+                    <strong key={i} style={token.highlight ? { color: '#e5b82e', fontWeight: 700 } : { color: 'inherit', fontWeight: 'inherit' }}>
+                      {token.text}
+                    </strong>
+                  ))}
+                </span>
+              </h2>
             );
-          })}
-        </section>
+          }
+
+          return (
+            <h1
+              key={scene.id}
+              className={styles.sceneText}
+              style={getDynamicStyles(scene)}
+              ref={(el) => (textRefs.current[scene.refKey] = el)}
+            >
+              {scene.tokens.map((token, i) => {
+                if (token.highlight) return <strong key={i}>{token.text}</strong>;
+                if (token.alert) return <span key={i} className={styles.cuidado}>{token.text}</span>;
+                return <React.Fragment key={i}>{token.text}</React.Fragment>;
+              })}
+            </h1>
+          );
+        })}
+      </section>
         </div>
       </div>
     </section>
