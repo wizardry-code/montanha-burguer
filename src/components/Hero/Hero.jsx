@@ -90,10 +90,20 @@ export default function Hero() {
 
   // Hook robusto de monitoramento de viewport (Padrão de Arquitetura Limpa)
   useEffect(() => {
-    const checkViewport = () => setIsMobile(window.innerWidth <= 768);
-    checkViewport(); // Executa no mount
+    const checkViewport = () => {
+      // Pega de forma estrita telas mobile normais e intermediárias
+      setIsMobile(window.innerWidth <= 500);
+    };
+
+    checkViewport();
+    // Delay sutil para garantir renderização correta em navegadores baseados em Chromium (como o do Pixel)
+    const timeoutId = setTimeout(checkViewport, 100);
+
     window.addEventListener('resize', checkViewport);
-    return () => window.removeEventListener('resize', checkViewport);
+    return () => {
+      window.removeEventListener('resize', checkViewport);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Helper para gerar as Custom Properties dinâmicas de cada elemento de forma limpa
@@ -122,20 +132,19 @@ export default function Hero() {
   
   const [liveCoords, setLiveCoords] = useState({ x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 });
 
-  useEffect(() => {
+useEffect(() => {
     // 1. CRIAÇÃO DOS SPLIT TEXTS NATIVOS
-    // 'lines,words' cria divs estruturadas automaticamente. O types "lines" serve como máscara (overflow: hidden via CSS)
     const splitPonte = new SplitText(textRefs.current.ponte, { type: "lines,words", linesClass: "split-line" });
     const splitDragao = new SplitText(textRefs.current.dragao, { type: "lines,words", linesClass: "split-line" });
     const splitGuilda = new SplitText(textRefs.current.guilda, { type: "lines,words", linesClass: "split-line" });
     const splitPortaoLeft = new SplitText(portaoLeftRef.current, { type: "lines,words", linesClass: "split-line" });
     const splitPortaoRight = new SplitText(portaoRightRef.current, { type: "lines,words", linesClass: "split-line" });
 
-    // Configura o estado inicial: deixa os blocos visíveis, mas esconde as palavras rotacionadas/abaixadas
+    // Configura o estado inicial
     gsap.set([textRefs.current.ponte, textRefs.current.dragao, textRefs.current.guilda, textRefs.current.portao], { opacity: 1 });
     gsap.set([splitPonte.words, splitDragao.words, splitGuilda.words, splitPortaoLeft.words, splitPortaoRight.words], {
       y: 60,
-      rotationX: -30, // Dá uma inclinação 3D cinemática ao surgir
+      rotationX: -30,
       opacity: 0
     });
 
@@ -169,36 +178,31 @@ export default function Hero() {
         duration: 1, ease: 'sine.inOut',
       });
 
-      // CORREÇÃO DOS LABELS: Vincula o label dinamicamente ao index preciso da iteração
       HERO_SCENES.forEach((scene) => {
-        if (i === scene.enter) tlDrone.addLabel(`${scene.refKey}Enter`, "-=1"); // Força o ponto exato do início daquele frame
+        if (i === scene.enter) tlDrone.addLabel(`${scene.refKey}Enter`, "-=1");
         if (i === scene.exit) tlDrone.addLabel(`${scene.refKey}Exit`, "-=1");
       });
     }
 
-    // ---- AJUSTE RÍTMO DO REVEAL (Awwwards Standard) ----
     const STAGGER_TIME = 0.02;
 
-    // Cena 1 — Ponte (Entra por baixo, sai por cima)
+    // Cena 1 — Ponte
     tlDrone
       .to(splitPonte.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "ponteEnter")
-      // SAÍDA: joga o y para -60 (sobe) e zera a opacidade das palavras individuais
       .to(splitPonte.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "ponteExit");
 
-    // Cena 2 — Dragão (Entra por baixo com slide horizontal, sai por cima)
+    // Cena 2 — Dragão (RESOLVIDO: Sem translação horizontal que quebrava as margens de segurança)
     tlDrone
-      .fromTo(textRefs.current.dragao, { x: 50 }, { x: 0, duration: 0.4, ease: "power1.out" }, "dragaoEnter")
       .to(splitDragao.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "dragaoEnter")
-      .to(textRefs.current.dragao, { x: -50, ease: "none", duration: 1 }, "dragaoEnter")
-      // SAÍDA: palavras continuam subindo para fora da máscara
       .to(splitDragao.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "dragaoExit");
 
-    // ============================================================
-    // Cena 3 — Guilda (Efeito de Atravessar Realista Mantido)
-    // ============================================================
+    // Cena 3 — Guilda (RESOLVIDO: Removidos left/top injetados diretamente para respeitar o heroConfig)
     tlDrone
       .fromTo(textRefs.current.guilda, 
-        { xPercent: -50, yPercent: -50, left: "50%", top: "50%", z: -500, opacity: 0 }, 
+        { 
+          z: -500, 
+          opacity: 0 
+        }, 
         { z: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true }, 
         "guildaEnter"
       )
@@ -206,16 +210,15 @@ export default function Hero() {
       .to(textRefs.current.guilda, { z: 3500, duration: 1.4, ease: "power2.in", force3D: true }, "guildaEnter+=0.8")
       .to(textRefs.current.guilda, { opacity: 0, duration: 0.3, ease: "none" }, "guildaEnter+=1.9");
 
-    // Cena 4 — Portão (Entra por baixo, sai subindo e abrindo)
+    // Cena 4 — Portão
     tlDrone
       .to(splitPortaoLeft.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "portaoEnter")
       .to(splitPortaoRight.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "portaoEnter+=0.1")
-      // SAÍDA: as palavras sobem (-60) enquanto os blocos se afastam lateralmente (x: -150 / 150)
       .to(splitPortaoLeft.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "portaoExit")
       .to(splitPortaoRight.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "portaoExit")
       .to(portaoLeftRef.current, { x: -150, opacity: 0, ease: "power2.in", duration: 0.5 }, "portaoExit")
       .to(portaoRightRef.current, { x: 150, opacity: 0, ease: "power2.in", duration: 0.5 }, "portaoExit");
-    // Handoff final SVG
+
     if (svgPathRef.current && svgContainer) {
       tlDrone
         .to(svgContainer, { opacity: 1, duration: 0.1 })
@@ -231,7 +234,8 @@ export default function Hero() {
       splitPortaoLeft.revert();
       splitPortaoRight.revert();
     };
-  }, []);
+  }, [isMobile]);
+  
 
   return (
     <section className={styles.hero} ref={sectionHeroRef}>
@@ -249,7 +253,7 @@ export default function Hero() {
 
           <div className={styles.divSVGTransS2}>
             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1316 664" fill="none" preserveAspectRatio="none">
-              <path ref={svgPathRef} d="M13.4746 291.27C13.4746 291.27 100.646 -18.6724 255.617 16.8418C410.588 52.356 61.0296 431.197 233.017 546.326C431.659 679.299 444.494 21.0125 652.73 100.784C860.967 180.556 468.663 430.709 617.216 546.326C765.769 661.944 819.097 48.2722 988.501 120.156C1174.21 198.957 809.424 543.841 988.501 636.726C1189.37 740.915 1301.67 149.213 1301.67 149.213" stroke="#ff0000" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" />
+              <path ref={svgPathRef} d="M13.4746 291.27C13.4746 291.27 100.646 -18.6724 255.617 16.8418C410.588 52.356 61.0296 431.197 233.017 546.326C431.659 679.299 444.494 21.0125 652.73 100.784C860.967 180.556 468.663 430.709 617.216 546.326C765.769 661.944 819.097 48.2722 988.501 120.156C1174.21 198.957 809.424 543.841 988.501 636.726C1189.37 740.915 1301.67 149.213 1301.67 149.213" stroke="#F0E3CF" strokeWidth="0" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
 

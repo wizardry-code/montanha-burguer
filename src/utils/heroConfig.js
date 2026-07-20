@@ -5,7 +5,6 @@ export const HERO_SCENES = [
     refKey: "ponte",
     enter: 1,
     exit: 4,
-    // Passamos um array de tokens para o React renderizar nativamente
     tokens: [
       { text: "Atravesse a ponte entre o comum e o " },
       { text: "extraordinário", highlight: true },
@@ -15,7 +14,7 @@ export const HERO_SCENES = [
     ],
     layout: {
       desktop: { top: "auto", bottom: "18%", left: "50%", right: "auto", x: "-50%", y: "0%", align: "center" },
-      mobile:  { top: "auto", bottom: "8%", left: "50%", right: "auto", x: "-50%", y: "0%", align: "center" }
+      mobile:  { top: "auto", bottom: "25%", left: "50%", right: "auto", x: "-50%", y: "0%", align: "center" }
     }
   },
   {
@@ -34,7 +33,7 @@ export const HERO_SCENES = [
     ],
     layout: {
       desktop: { top: "auto", bottom: "25%", left: "auto", right: "10%", x: "0%", y: "-50%", align: "left" },
-      mobile:  { top: "15%", bottom: "auto", left: "50%", right: "auto", x: "-50%", y: "0%", align: "center" }
+      mobile:  { top: "auto", bottom: "20%", left: "5%", right: "5%", x: "0%", y: "0%", align: "center" }
     }
   },
   {
@@ -51,7 +50,8 @@ export const HERO_SCENES = [
     ],
     layout: {
       desktop: { top: "50%", bottom: "auto", left: "50%", right: "auto", x: "-50%", y: "-50%", align: "center" },
-      mobile:  { top: "50%", bottom: "auto", left: "50%", right: "auto", x: "-50%", y: "-50%", align: "center" }
+      // 💡 RESOLVIDO VERTICAL: top 50% e y -50% garante alinhamento central absoluto perfeito no mobile
+      mobile:  { top: "50%", bottom: "auto", left: "50%", right: "auto", x: "-50%", y: "-50%", align: "center" } 
     }
   },
   {

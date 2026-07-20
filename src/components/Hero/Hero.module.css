@@ -65,16 +65,24 @@
   bottom: var(--text-bottom);
   left: var(--text-left);
   right: var(--text-right);
+  
+  /* Modificado para aceitar o alinhamento do config e tratar o transform de forma segura */
   transform: translate(var(--text-x-offset), var(--text-y-offset));
   
-  width: 85%;
-  max-width: 600px;
+  width: 90%;
+  max-width: 540px; /* Reduzido levemente para melhor leitura */
   color: #ffffff;
   font-size: clamp(1.2rem, 2.2vw, 2rem);
   line-height: 1.4;
   opacity: 0; 
   margin: 0;
   font-weight: 400;
+
+  /* 💡 Seguranças contra estouro de texto */
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -102,24 +110,29 @@
 }
 
 /* ============================================================
-   MEDIA QUERIES APENAS PARA ESCALA DE TIPOGRAFIA
+   MEDIA QUERIES PARA RESPONSIVIDADE E TRAVA DE QUEBRA
    ============================================================ */
 @media (max-width: 768px) {
   .sceneText {
-    width: 90%;
-    max-width: none;
+    width: 88%;
+    /* 💡 Em vez de 'none', limitamos a largura em pixels reais.
+       Isso força o texto a quebrar linha elegantemente antes de tocar na borda do Pixel ou iPhone */
+    max-width: 350px; 
     font-size: clamp(1rem, 4.5vw, 1.3rem);
     line-height: 1.5;
   }
   
   .portaoWrapper {
-    width: 90%;
+    width: 88%;
+    max-width: 350px;
     gap: 0.5em;
   }
 }
 
 @media (max-width: 440px) {
   .sceneText {
+    width: 90%;
+    max-width: 320px; /* Para celulares muito estreitos */
     font-size: clamp(0.9rem, 5.2vw, 1.1rem);
   }
 }

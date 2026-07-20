@@ -12,7 +12,10 @@ import Section2 from './components/Section2/Section2'
 function Playground () {
 return (
     <div>
-        
+        <PreLoader/>
+        <Header/>
+        <Hero/>
+        <Section2/>
     </div>
 );
 }

@@ -1,50 +1,467 @@
-.section2 {
-  position: relative;
-  width: 100%;
-  z-index: 0;
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Merriweather:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=ABeeZee:ital@0;1&display=swap');
+
+.root {
+  --color-cream: #F0E3CF;
+  --color-slate: #58595B;
+  --color-orange: #FA9A00;
+  --color-amber: #F7AC34;
+  --color-red: #DB2C00;
+  --color-purple: #8300AE;
+  --color-blue: #009AC4;
+  --color-wine: #620100;
+  --color-gold: #CA9401;
+  --color-white: #FFFFFF;
+
+  --font-display: 'Cinzel', serif;
+  --font-body: 'Merriweather', serif;
+  --font-body-alt: 'ABeeZee', sans-serif;
+
+  background: var(--color-cream);
+  color: var(--color-slate);
   isolation: isolate;
 }
 
-/* Controla a duração/"velocidade" do recolhimento do SVG.
-   Aumente para um reveal mais lento e suave. */
-.revealBelt {
+/* ============================================================
+   1. SEÇÃO FIXADA (PIN) + TRILHO HORIZONTAL
+   ============================================================ */
+
+.pinSection {
   position: relative;
   width: 100%;
-  height: 250dvh;
-}
-
-.stickyStage {
-  position: sticky;
-  top: 0;
-  height: 100dvh;
-  width: 100%;
+  height: 100vh;
   overflow: hidden;
+  background: var(--color-cream);
 }
-
-.purpleBg {
+.pinSection::before {
+  content: "";
   position: absolute;
   inset: 0;
-  background-color: blueviolet;
+  
+  /* 1. Altere para o caminho da sua imagem PNG/WebP transparente */
+  background-image: url('../../assets/pattern/patternCompress.webp'); 
+  background-repeat: repeat;
+  
+  /* 2. Ajuste o tamanho do padrão (ex: 300px, 500px, etc) */
+  background-size: 400px 400px; 
+  
+  /* 3. Efeito para mesclar os veios/linhas com a cor pastel */
+  mix-blend-mode: multiply; 
+  
+  /* 4. Controle o quão forte o pattern fica (0.1 a 1.0) */
+  opacity: 0.2; 
+  
+  /* Garante que o pattern não atrapalhe cliques e nem trave a rolagem */
+  pointer-events: none;
   z-index: 1;
 }
-
-.svgOverlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
+.track {
+  position: relative;
+  z-index: 2; 
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: max-content;
+  padding: 0 8vw;
+  gap: 7vw;
+  will-change: transform;
 }
 
-.svgOverlay svg {
+/* ============================================================
+   2. CARDS
+   ============================================================ */
+
+.card {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(24px, 3vw, 56px);
+  width: min(74vw, 980px);
+  will-change: transform;
+}
+
+.cardFigure {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(34vw, 420px);
+  height: min(72vh, 640px);
+  margin: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  box-shadow: 0 24px 48px -18px rgba(24, 18, 10, 0.55);
+}
+
+.cardImage {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
+  object-fit: cover;
+  will-change: transform;
 }
 
-.content {
+.chapterTag {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 0.6em 1.1em;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-cream);
+  background: rgba(35, 27, 17, 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.playButton {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 68px;
+  height: 68px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-white);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease;
+}
+
+.playButton:hover .playRing,
+.playButton:focus-visible .playRing {
+  transform: scale(1.08);
+}
+
+.playTriangle {
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 14px solid var(--color-white);
+}
+
+.cardContent {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  padding-top: 0.6rem;
+  border-top: 3px solid var(--color-slate);
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 0;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-slate);
+  font-size: clamp(1.35rem, 1.9vw, 1.7rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 1.16;
+  letter-spacing: 0.01em;
+}
+
+
+
+.paragraph {
+  margin: 0;
+  max-width: 46ch;
+  text-align: justify;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+}
+
+.merriweather,
+.merriweatherBody {
+  font-family: var(--font-body);
+}
+
+.abeezee,
+.abeezeeBody {
+  font-family: var(--font-body-alt);
+}
+
+.cinzel {
+  font-family: var(--font-display);
+}
+
+/* --- variações de cor de texto, extraídas do Figma (sem inline style) --- */
+
+.base { color: var(--color-slate); font-weight: 400; }
+.baseMedium { color: var(--color-slate); font-weight: 500; }
+.baseSemibold { color: var(--color-slate); font-weight: 600; }
+.baseItalicBold { color: var(--color-slate); font-weight: 600; font-style: italic; }
+.orangeItalic { color: var(--color-orange); font-style: italic; }
+.amber { color: var(--color-amber); }
+.gold { color: var(--color-gold); }
+.red { color: var(--color-red); }
+.purple { color: var(--color-purple); }
+.blue { color: var(--color-blue); }
+.wine { color: var(--color-wine); }
+
+/* ============================================================
+   3. LINHAS SVG "STROKE DRAW"
+   ============================================================ */
+
+.ruleSvg {
+  display: block;
+  width: 100%;
+  height: 2px;
+  overflow: visible;
+}
+
+.ruleLine {
+  stroke: var(--color-slate);
+  stroke-width: 1.4;
+}
+
+/* ============================================================
+   4. RODAPÉ DE CARD — ENDEREÇO / GOOGLE MAPS
+   ============================================================ */
+
+.footerBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.addressText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-slate);
+}
+
+.pin {
+  font-style: normal;
+}
+
+.mapsButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: fit-content;
+  padding: 0.7rem 1.4rem;
+  background: var(--color-white);
+  border-radius: 6px;
+  text-decoration: none;
+  color: #004DB1;
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease;
+}
+
+.mapsButton:hover,
+.mapsButton:focus-visible {
+  transform: translateY(-2px);
+}
+
+.mapsIcon {
+  position: relative;
+  width: 20px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.mapsIconG {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from -45deg,
+    #4285F4 0deg 90deg,
+    #34A853 90deg 180deg,
+    #FBBC04 180deg 270deg,
+    #EA4335 270deg 360deg
+  );
+}
+
+.mapsIconShadowA,
+.mapsIconShadowB {
+  position: absolute;
+  bottom: -3px;
+  width: 9px;
+  height: 4px;
+  background: #5F6368;
+  border-radius: 2px;
+}
+
+.mapsIconShadowA { left: -1px; }
+.mapsIconShadowB { right: -1px; background: #63666A; }
+
+/* ============================================================
+   5. BADGES (drinks / hidromel)
+   ============================================================ */
+
+.badgeGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.badge {
+  padding: 1rem 1.2rem;
+  background: var(--color-white);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.4);
+}
+
+.badgeText {
+  display: block;
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+  color: var(--color-slate);
+}
+
+/* ============================================================
+   6. BLOCO FINAL — RESERVAS (FULL BLEED)
+   ============================================================ */
+
+.s3Section {
   position: relative;
   width: 100%;
-  min-height: 100vh;
-  background-color: blueviolet;
-  z-index: 0;
+  height: 100vh;
+  background-image: var(--s3-image);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  background-position: right center;
+}
+
+.s3Overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(20, 14, 8, 0.92) 0%,
+    rgba(20, 14, 8, 0.75) 32%,
+    rgba(20, 14, 8, 0.2) 62%,
+    rgba(20, 14, 8, 0) 80%
+  );
+}
+
+.s3Content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  max-width: 640px;
+  padding: 0 6vw 9vh;
+}
+
+.s3Title {
+  margin: 0;
+  color: var(--color-cream);
+  font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.14;
+  text-shadow: 0 6px 6px rgba(0, 0, 0, 0.35);
+}
+
+.s3Letter {
+  overflow: hidden;
+}
+.letter, .s3Letter,.word,.s3Word{
+  display: inline-block;
+}
+
+.s3Paragraph {
+  margin: 0;
+  max-width: 52ch;
+  text-align: justify;
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: var(--color-cream);
+  text-shadow: 0 6px 6px rgba(0, 0, 0, 0.35);
+}
+
+
+
+.s3Cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: fit-content;
+  margin-top: 0.4rem;
+  padding: 0.95rem 2rem;
+  border: 1px solid var(--color-cream);
+  color: var(--color-cream);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.s3Cta:hover,
+.s3Cta:focus-visible {
+  background: var(--color-cream);
+  color: #201509;
+}
+
+/* ============================================================
+   7. RESPONSIVO
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .track {
+    padding: 0 6vw;
+    gap: 10vw;
+  }
+
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+    width: min(84vw, 460px);
+  }
+
+  .cardFigure {
+    width: 100%;
+    height: 46vh;
+  }
+
+  .s3Content {
+    max-width: 90vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .cardImage,
+  .letter,
+  .word,
+  .s3Letter,
+  .s3Word,
+  .ruleLine {
+    transition: none !important;
+  }
 }
