@@ -75,7 +75,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: clamp(24px, 3vw, 56px);
   width: min(74vw, 980px);
   will-change: transform;
@@ -434,19 +434,33 @@
 
 @media (max-width: 900px) {
   .track {
-    padding: 0 6vw;
-    gap: 10vw;
+    padding: 0 8vw;
+    gap: 14vw;
   }
 
   .card {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
-    width: min(84vw, 460px);
+    width: auto;
+    gap: 6vw;
   }
 
   .cardFigure {
-    width: 100%;
-    height: 46vh;
+    flex: 0 0 auto;
+    width: auto;
+    height: 80vh;
+  }
+
+  .cardContent {
+    flex: 0 0 auto;
+    width: min(70vw, 340px);
+    border-top-width: 2px;
+    gap: 1.2rem;
+  }
+
+  .paragraph {
+    max-width: none;
+    font-size: 0.98rem;
   }
 
   .s3Content {
