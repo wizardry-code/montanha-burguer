@@ -1,24 +1,23 @@
 @charset "UTF-8";
-@font-face {
-    font-family: 'MedievalSharp';
-    src: url('assets/fonts/MedievalSharp/MedievalSharp-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Cinzel';
-    src: url('assets/fonts/Cinzel/Cinzel-VariableFont_wght.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Merriweather';
-    src: url('assets/fonts/Merriweather/Merriweather-VariableFont_opsz\,wdth\,wght.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-*{margin:0; padding:0;box-sizing:border-box;}
 
+/* 1. IMPORTAÇÃO CORRETA DO GOOGLE FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=MedievalSharp&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+
+:root {
+/* Alinhe com o nome exato das variáveis que você usa no seu Section2.module.css */
+--font-display: 'Cinzel', serif;
+--font-body: 'Merriweather', Georgia, serif;
+--font-medieval: 'MedievalSharp', cursive;
+
+--weight-regular: 400;
+--weight-bold: 700;
+--weight-black: 900;
+}
+
+/* Remova o bloco @font-face manual do Cinzel daqui */
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}

@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Merriweather:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
+
+.section {
+--color-cream: #F0E3CF;
+
+position: relative;
+width: 100%;
+height: 100vh;
+background-size: cover;
+background-position: right center;
+display: flex;
+align-items: flex-end;
+isolation: isolate;
+background-image: var(--section3-image);
+}
+
+.overlay {
+position: absolute;
+inset: 0;
+background: linear-gradient(
+    100deg,
+    rgba(20, 14, 8, 0.92) 0%,
+    rgba(20, 14, 8, 0.75) 32%,
+    rgba(20, 14, 8, 0.2) 62%,
+    rgba(20, 14, 8, 0) 80%
+);
+}
+
+.content {
+position: relative;
+z-index: 1;
+display: flex;
+flex-direction: column;
+gap: 1.4rem;
+max-width: 640px;
+padding: 0 6vw 9vh;
+}
+
+.title {
+margin: 0;
+color: var(--color-cream);
+font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+font-weight: 700;
+text-transform: uppercase;
+line-height: 1.14;
+text-shadow: 0 6px 6px rgba(0, 0, 0, 0.35);
+}
+
+.cinzel {
+font-family: 'Cinzel', serif;
+}
+
+.word {
+display: inline-block;
+}
+
+.paragraph {
+margin: 0;
+max-width: 52ch;
+text-align: justify;
+font-family: 'Merriweather', serif;
+font-size: 1.15rem;
+line-height: 1.5;
+color: var(--color-cream);
+text-shadow: 0 6px 6px rgba(0, 0, 0, 0.35);
+}
+
+.cta {
+display: inline-flex;
+align-items: center;
+gap: 0.6rem;
+width: fit-content;
+margin-top: 0.4rem;
+padding: 0.95rem 2rem;
+border: 1px solid var(--color-cream);
+color: var(--color-cream);
+font-family: 'Cinzel', serif;
+font-size: 0.85rem;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+text-decoration: none;
+transition: background 0.3s ease, color 0.3s ease;
+}
+
+.cta:hover,
+.cta:focus-visible {
+background: var(--color-cream);
+color: #201509;
+}
+
+/* ============================================================
+LINHA SVG "STROKE DRAW"
+============================================================ */
+
+.ruleSvg {
+display: block;
+width: 100%;
+height: 2px;
+overflow: visible;
+}
+
+.ruleLine {
+stroke: var(--color-cream);
+stroke-width: 1.4;
+}
+
+/* ============================================================
+RESPONSIVO
+============================================================ */
+
+@media (max-width: 900px) {
+.content {
+    max-width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 100px 6vw 4vh 6vw; /* 100px no topo dá o espaço do header */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Mantém topo no topo e base na base */
+}
+
+/* Cria um grupo implícito ou margem para afastar o texto do fundo */
+.title {
+    font-size: 1.6rem;
+    margin-bottom: auto; /* Empurra o parágrafo e o CTA para o fundo da página */
+}
+
+.paragraph {
+    font-size: 0.95rem;
+    max-width: 85%;
+}
+
+/* Ajuste no gradiente para escurecer o topo (título) e o rodapé (texto) sem tapar o bebê no meio */
+.overlay {
+    background: linear-gradient(
+    180deg,
+    rgba(20, 14, 8, 0.9) 0%,
+    rgba(20, 14, 8, 0.3) 35%,
+    rgba(20, 14, 8, 0.3) 65%,
+    rgba(20, 14, 8, 0.95) 100%
+    );
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+.word,
+.ruleLine {
+    transition: none !important;
+}
+}

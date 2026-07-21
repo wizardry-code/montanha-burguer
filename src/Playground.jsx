@@ -8,14 +8,11 @@ import Header from './components/Header/Header'
 import Hero from './components/Hero/Hero'
 import { Section } from 'postprocessing'
 import Section2 from './components/Section2/Section2'
+import Section3 from './components/Section3/Section3'
 
 function Playground () {
 return (
     <div>
-        <PreLoader/>
-        <Header/>
-        <Hero/>
-        <Section2/>
     </div>
 );
 }
