@@ -151,7 +151,7 @@
   font-family: var(--font-display);
   font-size: 0.72rem;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--color-cream);
   background: rgba(35, 27, 17, 0.62);
   backdrop-filter: blur(2px);

@@ -1,11 +1,8 @@
+import { forwardRef } from 'react';
 import { useLayoutEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './Section3.module.css';
 
-import imgBebe from '../../assets/imgs/imgS3.jpg';
-
-gsap.registerPlugin(ScrollTrigger);
+import imgBebe from '../../assets/imgs/imgS3.avif';
 
 const section3Data = {
 image: imgBebe,
@@ -16,7 +13,6 @@ paragraph:
 cta: 'Fazer Reserva',
 };
 
-/** Divide um texto em <span> por palavra. */
 function splitIntoWords(text) {
 return text.split(' ').map((word, i, arr) => (
     <span className={styles.word} key={i}>
@@ -40,35 +36,11 @@ return (
 );
 }
 
-export default function Section3() {
-const sectionRef = useRef(null);
-
-useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-    const words = sectionRef.current.querySelectorAll(`.${styles.word}`);
-    const line = sectionRef.current.querySelector(`.${styles.ruleLine}`);
-
-    gsap.set(words, { y: 16, autoAlpha: 0 });
-    if (line) gsap.set(line, { strokeDasharray: 100, strokeDashoffset: 100 });
-
-    ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top 75%',
-        end: 'top 25%',
-        scrub: 1,
-        animation: gsap
-        .timeline()
-        .to(line, { strokeDashoffset: 0, ease: 'none' }, 0)
-        .to(words, { y: 0, autoAlpha: 1, stagger: 0.025, ease: 'none' }, 0.05),
-    });
-    }, sectionRef);
-
-    return () => ctx.revert();
-}, []);
-
+// Usamos forwardRef aqui para repassar a ref para o GSAP da Section2
+const Section3 = forwardRef(function Section3(props, ref) {
 return (
     <section
-    ref={sectionRef}
+    ref={ref}
     className={styles.section}
     style={{ '--section3-image': `url(${section3Data.image})` }}
     aria-labelledby="reservas-title"
@@ -86,4 +58,6 @@ return (
     </div>
     </section>
 );
-}
+});
+
+export default Section3;
