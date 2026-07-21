@@ -9,6 +9,7 @@ import Hero from './sections/Hero/Hero'
 import Section2 from './sections/Section2/Section2'
 import Section3 from './sections/Section3/Section3'
 
+
 function Playground () {
 return (
     <div>

@@ -1,17 +1,13 @@
 import styles from './Header.module.css';
-import Logo from '../../components/Logo/Logo';
+import Logo from '../../components/ui/icons/Logo';
 import { headerLogoRef } from "../../utils/logoRef";
 const Header = () => {
     return (
         <header className={styles.headerContainer}>
             <div className={styles.headerContent}>
                 
-                {/* Logo Inline idêntico para cálculo de coordenadas do GSAP */}
                 <div className={styles.logoWrapper}>
-                    <Logo
-                            className={styles.logo}
-                            svgRef={headerLogoRef}
-                        />
+                    <Logo className={styles.logo} svgRef={headerLogoRef}/>
                 </div>
 
                 {/* Centro: Menu */}

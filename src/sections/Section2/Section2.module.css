@@ -11,7 +11,6 @@
   --color-white: #FFFFFF;
   --strong-font-weight: bold; 
   
-  /* Variáveis locais apontando com fallbacks */
   --font-card-title: 'Cinzel', serif;
   --font-body: 'Merriweather', Georgia, serif;
   --font-body-alt: 'ABeeZee', sans-serif;
@@ -20,71 +19,26 @@
   color: var(--color-slate);
   isolation: isolate;
 }
-/* ============================================================
-   1. SEÇÃO FIXADA (PIN) + TRILHO HORIZONTAL
-   ============================================================ */
-.bgWrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-.bgImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background-position: center center;
-}
+
 .pinSection {
   position: relative;
   width: 100%;
   height: 100dvh;
   overflow: hidden;
+  background: var(--color-cream);
 }
+
 .pinSection::before {
   content: "";
   position: absolute;
   inset: 0;
-
-  /* 1. Altere para o caminho da sua imagem PNG/WebP transparente */
   background-image: url('../../assets/pattern/patternCompress.webp');
   background-repeat: repeat;
-
-  /* 2. Ajuste o tamanho do padrão (ex: 300px, 500px, etc) */
   background-size: 400px 400px;
-
-  /* 3. Efeito para mesclar os veios/linhas com a cor pastel */
   mix-blend-mode: multiply;
-
-  /* 4. Controle o quão forte o pattern fica (0.1 a 1.0) */
   opacity: 0.2;
-
-  /* Garante que o pattern não atrapalhe cliques e nem trave a rolagem */
   pointer-events: none;
   z-index: 1;
-}
-.iconWrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;     
-  height: 20px;    
-  flex-shrink: 0;   
-}
-
-/* Força o elemento SVG interno a respeitar a área do wrapper */
-.iconWrapper svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.transitionBelt {
-  position: relative;
-  z-index: 3;
-  width: 100%;
-  height: 100%;
 }
 
 .track {
@@ -94,322 +48,30 @@
   align-items: center;
   height: 100%;
   width: max-content;
-  background-color: #f7ebe1; /* Cor de fundo pastel/salmão do seu layout */
-  will-change: transform;
   padding: 0 8vw;
   gap: 16vw;
+  will-change: transform;
 }
 
-
-/* Espaçador no fim da trilha: cria a pausa/"fôlego" de background puro
-   depois do último card, antes do pin soltar para a Seção 3. */
 .trackEnd {
   flex: 0 0 auto;
   width: 45vw;
   height: 1px;
 }
 
-/* ============================================================
-   2. CARDS
-   ============================================================ */
-
-.card {
-  position: relative;
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: clamp(24px, 3vw, 56px);
-  width: min(74vw, 980px);
-  will-change: transform;
-}
-
-.cardFigure {
-  position: relative;
-  flex: 0 0 auto;
-  width: min(34vw, 420px);
-  height: min(72dvh, 640px);
-  margin: 0;
-  overflow: hidden;
-  border-radius: 2px;
-  box-shadow: 0 24px 48px -18px rgba(24, 18, 10, 0.55);
-}
-
-.cardImage {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  will-change: transform;
-}
-
-.chapterTag {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  padding: 0.6em 1.1em;
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: lowercase;
-  color: var(--color-cream);
-  background: rgba(35, 27, 17, 0.62);
-  backdrop-filter: blur(2px);
-}
-
-
-
-.cardContent {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.6rem;
-  padding-top: 0.6rem;
-  border-top: 3px solid var(--color-slate);
-}
-
-.cardHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  padding: 1rem;
-}
-
-.title {
-  margin: 0;
-  color: var(--color-slate);
-  font-size: clamp(1.35rem, 1.9vw, 1.7rem);
-  font-weight: 400;
-  text-transform: uppercase;
-  line-height: 1.16;
-  letter-spacing: 0.01em;
-  font-family: var(--font-card-title);
-}
-
-.paragraph {
-  margin: 0;
-  max-width: 46ch;
-  text-align: justify;
-  font-size: 1.05rem;
-  line-height: 1.55;
-  letter-spacing: 0.01em;
-  font-family: var(--font-body);
-}
-.paragraph strong {
-  font-weight: 700; 
-}
-.word {
-  display: inline-block;
-}
-
-.merriweather {
-  font-family: var(--font-body);
-}
-
-.abeezee,
-.abeezeeBody {
-  font-family: var(--font-body-alt);
-}
-
-.cinzel {
-  font-family: var(--font-display);
-}
-
-/* --- variações de cor de texto, extraídas do Figma (sem inline style) --- */
-
-.base { color: var(--color-slate); font-weight: 400; }
-.baseMedium { color: var(--color-slate); font-weight: 500; }
-.baseSemibold { color: var(--color-slate); font-weight: 600; }
-.baseItalicBold { color: var(--color-slate); font-weight: 600; font-style: italic; }
-.orangeItalic { color: var(--color-orange); font-style: italic; }
-.amber { color: var(--color-amber); }
-.gold { color: var(--color-gold); }
-.red { color: var(--color-red); }
-.purple { color: var(--color-purple); }
-.blue { color: var(--color-blue); }
-.wine { color: var(--color-wine); }
-
-/* ============================================================
-   3. LINHAS SVG "STROKE DRAW"
-   ============================================================ */
-
-.ruleSvg {
-  display: block;
-  width: 100%;
-  height: 2px;
-  overflow: visible;
-}
-
-.ruleLine {
-  stroke: var(--color-slate);
-  stroke-width: 1.4;
-  stroke-dasharray: none;
-}
-
-/* ============================================================
-   4. RODAPÉ DE CARD — ENDEREÇO / GOOGLE MAPS
-   ============================================================ */
-
-.footerBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1 rem;
-  margin-top: 1rem;
-}
-.footerBlock p {
-  margin-bottom: 2rem;
-}
-.footerBlock address {
-  margin-bottom: 0.5rem;
-}
-.addresText {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  color: var(--color-slate);
-  font-style: italic; 
-}
-
-.pin {
-  font-style: normal;
-}
-
-.addresButton {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  padding: 0.75rem 0.6rem;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  color: #1a1a1a;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.addresButton:hover,
-.addresButton:focus-visible {
-  transform: translateY(-2px);
-  color: #00008B;
-}
-
-.addresIcon {
-  position: relative;
-  width: 20px;
-  height: 18px;
-  flex: 0 0 auto;
-}
-
-
-.addresButtonsGroup {
-  display: flex;
-  flex-direction: column; /* ⬇️ Força os botões a ficarem um embaixo do outro */
-  gap: 10px;              /* ↕️ Espaçamento vertical entre os dois botões */
-  width: 60%;             /* (Opcional) Faz os botões ocuparem a mesma largura se quiser */
-}
-.addresIconShadowA,
-.addresIconShadowB {
-  position: absolute;
-  bottom: -3px;
-  width: 9px;
-  height: 4px;
-  background: #5F6368;
-  border-radius: 2px;
-}
-
-.addresIconShadowA { left: -1px; }
-.addresIconShadowB { right: -1px; background: #63666A; }
-
-/* ============================================================
-   5. BADGES (drinks / hidromel)
-   ============================================================ */
-
-.badgeGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-}
-
-.badge {
-  padding: 1rem 1.2rem;
-  background: var(--color-white);
-  border-radius: 6px;
-  box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.4);
-}
-
-
-
-/* ============================================================
-   6. RESPONSIVO
-   ============================================================ */
-
 @media (max-width: 900px) {
   .track {
     padding: 0 8vw;
-    /* espaço maior entre cada conjunto foto+texto no mobile também */
     gap: 26vw;
   }
-  .addresButtonsGroup {
-  width: 100%;           
-}
 
   .trackEnd {
     width: 60vw;
   }
-
-  .card {
-    flex-direction: row;
-    align-items: flex-start;
-    width: auto;
-    gap: 6vw;
-  }
-
-  .cardFigure {
-    /* invertido: agora é a LARGURA que é limitada a 80%, a altura
-       acompanha a proporção natural da imagem — nunca vaza a tela. */
-    flex: 0 0 auto;
-    width: 80vw;
-    height: auto;
-  }
-
-  .cardImage {
-    height: auto;
-  }
-
-  .cardContent {
-    flex: 0 0 auto;
-    width: min(70vw, 340px);
-    border-top-width: 2px;
-    gap: 1.2rem;
-  }
-
-  .paragraph {
-    max-width: none;
-    font-size: 0.98rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .track,
-  .cardImage,
-  .word,
-  .ruleLine {
+  .track {
     transition: none !important;
   }
-}
-
-
-:global(.divSVGTransS2) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  pointer-events: none;
 }

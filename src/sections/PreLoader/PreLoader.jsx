@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
-import Logo from '../../components/Logo/Logo';
+import Logo from '../../components/ui/icons/Logo';
 import { headerLogoRef } from '../../utils/logoRef';
 import { assetsReadyPromise } from '../../utils/assetsReady';
 import styles from './PreLoader.module.css';

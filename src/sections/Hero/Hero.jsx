@@ -9,8 +9,7 @@ import { Castelo } from '../../components/Castelo/Castelo.jsx';
 import styles from './Hero.module.css';
 import { Stars } from '@react-three/drei';
 import { HERO_SCENES } from '../../utils/heroConfig.js';
-import { SvgTrans } from '../../components/SvgTrans/SvgTrans';
-
+import { SvgTrans } from '../../components/ui/svgs/SvgTrans/SvgTrans.jsx';
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
 

@@ -3,7 +3,7 @@
 .section {
     flex: 0 0 auto; 
 height: 100dvh;
-width: 100vw;
+width: 100%;
 position: relative;
 --color-cream: #F0E3CF;
 background-size: cover;

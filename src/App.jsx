@@ -9,11 +9,11 @@ import Section3 from './sections/Section3/Section3'
 function App() {
   return (
     <div className="appContainer">
-      <PreLoader />
-      <Header />
-      <Hero />
-      <Section2 />
-      <Section3 />
+      <PreLoader/>
+      <Header/>
+      <Hero/>
+      <Section2/>
+      <Section3/>
     </div>
   );
 }
