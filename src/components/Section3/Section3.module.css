@@ -5,7 +5,7 @@
 
 position: relative;
 width: 100%;
-height: 100vh;
+height: 100dvh;
 background-size: cover;
 background-position: right center;
 display: flex;
@@ -33,7 +33,7 @@ display: flex;
 flex-direction: column;
 gap: 1.4rem;
 max-width: 640px;
-padding: 0 6vw 9vh;
+padding: 0 6vw 9dvh;
 }
 
 .title {
@@ -113,7 +113,7 @@ RESPONSIVO
     max-width: 100%;
     height: 100%;
     box-sizing: border-box;
-    padding: 100px 6vw 4vh 6vw; /* 100px no topo dá o espaço do header */
+    padding: 100px 6vw 4dvh 6vw; /* 100px no topo dá o espaço do header */
     display: flex;
     flex-direction: column;
     justify-content: space-between; /* Mantém topo no topo e base na base */
