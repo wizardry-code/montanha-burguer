@@ -4,9 +4,10 @@ import imgPatio from '../assets/imgs/imgS2A2.avif';
 import imgRefugio from '../assets/imgs/imgS2A3.avif';
 import imgMesas from '../assets/imgs/imgS2A4.avif';
 import imgDrinks from '../assets/imgs/imgS2A5.avif';
+import imgBebe from '../assets/imgs/imgS3.avif';
 
 
-export const sectionsData = [
+export const Section2articlesData = [
 {
     id: 'portal-do-reino',
     chapter: 'I',
@@ -88,3 +89,12 @@ export const sectionsData = [
     ],
 },
 ];
+
+export const section3AData = {
+image: imgBebe,
+imageAlt: 'Entrada da taverna Montanha iluminada à noite, pronta para receber celebrações',
+title: 'Explorar Opções de Aluguel & Reservas',
+paragraph:
+    'Aniversários, sessões exclusivas de RPG, eventos corporativos ou encontros de família. Descubra como reservar nosso espaço para tornar sua comemoração lendária.',
+cta: 'Fazer Reserva',
+};

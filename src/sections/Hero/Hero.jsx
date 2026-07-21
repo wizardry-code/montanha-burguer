@@ -13,12 +13,13 @@ import { SvgTrans } from '../../components/ui/svgs/SvgTrans/SvgTrans.jsx';
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
 
+
+//Dados das cenas e voos
 const SCENE_TARGETS = {
   dragon: new THREE.Vector3(10.13, 35.34, 56.16),
   fire: new THREE.Vector3(4.40, 20.24, 54.95),
   castle: new THREE.Vector3(-0.42, 25.97, 19.19)
 };
-
 const WAYPOINTS = [
   { x: -47.63, y: 35.78, z: 44.66, targetX: -46.73, targetY: 35.27, targetZ: 44.22 },
   { x: -33.32, y: 29.15, z: 38.50, targetX: -32.52, targetY: 28.34, targetZ: 37.90 },
@@ -47,16 +48,13 @@ const WAYPOINTS = [
   { x: -0.77, y: 18.88, z: -81.34, targetX: -0.75, targetY: 19.20, targetZ: -82.34 },
   { x: -0.53, y: 19.40, z: -85.09, targetX: -0.49, targetY: 19.55, targetZ: -86.09 },
 ];
-
-
-
 const SCENES = {
   ponte:  { enter: 1,  exit: 4  },
   dragao: { enter: 6,  exit: 11 },
   guilda: { enter: 18, exit: 22 },
   portao: { enter: 23, exit: 25 },
 };
-
+//Função que faz a camera voar
 function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
   const lookAtVector = useRef(
     new THREE.Vector3(WAYPOINTS[0].targetX, WAYPOINTS[0].targetY, WAYPOINTS[0].targetZ)
@@ -135,19 +133,19 @@ export default function Hero() {
       '--text-x-offset': config.x,
       '--text-y-offset': config.y,
       textAlign: config.align,
-      ...scene.extraStyles // Aplica estilos extras se houver (ex: letter-spacing)
+      //...scene.extraStyles // Aplica estilos extras se houver (ex: letter-spacing)
     };
   };
+
+//mapeando Referencias
   const sectionHeroRef = useRef(null);
   const heroBeltRef = useRef(null);
   const canvasContainerRef = useRef(null);
   const svgPathRef = useRef(null);
   const cameraTarget = useRef({ ...WAYPOINTS[0] });
-
   const textRefs = useRef({});
   const portaoLeftRef = useRef(null);
   const portaoRightRef = useRef(null);
-  
   const [liveCoords, setLiveCoords] = useState({ x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 });
 
 useEffect(() => {
@@ -168,10 +166,10 @@ useEffect(() => {
 
     const svgContainer = svgPathRef.current?.closest(`.${styles.divSVGTransS2}`);
     if (svgPathRef.current && svgContainer) {
-      gsap.set(svgContainer, { opacity: 0 });
+      gsap.set(svgContainer, { opacity: 1 });
       gsap.set(svgPathRef.current, { 
         drawSVG: "0% 0%", 
-        strokeWidth: 1
+        attr: { "stroke-width": 0 },
   });
   }
 

@@ -7,7 +7,7 @@ import './App.css'
 import Header from './sections/Header/Header'
 import Hero from './sections/Hero/Hero'
 import Section2 from './sections/Section2/Section2'
-import Section3 from './sections/Section3/Section3'
+import Section3 from './sections/Section3/Section3a'
 
 
 function Playground () {
