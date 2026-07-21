@@ -23,13 +23,25 @@
 /* ============================================================
    1. SEÇÃO FIXADA (PIN) + TRILHO HORIZONTAL
    ============================================================ */
-
+.bgWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.bgImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-position: center center;
+}
 .pinSection {
   position: relative;
   width: 100%;
   height: 100dvh;
   overflow: hidden;
-  background: var(--color-cream);
 }
 .pinSection::before {
   content: "";
@@ -68,6 +80,12 @@
   height: 100%;
   display: block;
 }
+.transitionBelt {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+}
 
 .track {
   position: relative;
@@ -76,11 +94,12 @@
   align-items: center;
   height: 100%;
   width: max-content;
-  /* espaço extra antes do primeiro card + "respiro" entre cards */
+  background-color: #f7ebe1; /* Cor de fundo pastel/salmão do seu layout */
+  will-change: transform;
   padding: 0 8vw;
   gap: 16vw;
-  will-change: transform;
 }
+
 
 /* Espaçador no fim da trilha: cria a pausa/"fôlego" de background puro
    depois do último card, antes do pin soltar para a Seção 3. */
@@ -382,4 +401,15 @@
   .ruleLine {
     transition: none !important;
   }
+}
+
+
+:global(.divSVGTransS2) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
 }

@@ -5,10 +5,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { SplitText } from 'gsap/SplitText'; // <-- IMPORTAÇÃO DO PLUGIN OFICIAL
 import * as THREE from 'three';
-import { Castelo } from '../Castelo.jsx';
+import { Castelo } from '../../components/Castelo/Castelo.jsx';
 import styles from './Hero.module.css';
 import { Stars } from '@react-three/drei';
 import { HERO_SCENES } from '../../utils/heroConfig.js';
+import { SvgTrans } from '../../components/SvgTrans/SvgTrans';
+
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
 
@@ -57,31 +59,48 @@ const SCENES = {
 };
 
 function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
-  const lookAtVector = useRef(new THREE.Vector3(WAYPOINTS[0].targetX, WAYPOINTS[0].targetY, WAYPOINTS[0].targetZ)).current;
+  const lookAtVector = useRef(
+    new THREE.Vector3(WAYPOINTS[0].targetX, WAYPOINTS[0].targetY, WAYPOINTS[0].targetZ)
+  ).current;
   const cameraDirection = useRef(new THREE.Vector3()).current;
+  
+  // Usamos um acumulador de tempo próprio baseado no delta
+  const timerAcc = useRef(0); 
   const DAMP_FACTOR = 1.8;
 
   useFrame((state, delta) => {
     const t = cameraTarget.current;
+    if (!t) return;
+
+    // 1. Interpolação suave de posição e rotação
     state.camera.position.x = THREE.MathUtils.damp(state.camera.position.x, t.x, DAMP_FACTOR, delta);
     state.camera.position.y = THREE.MathUtils.damp(state.camera.position.y, t.y, DAMP_FACTOR, delta);
     state.camera.position.z = THREE.MathUtils.damp(state.camera.position.z, t.z, DAMP_FACTOR, delta);
 
-    lookAtVector.set(
-      THREE.MathUtils.damp(lookAtVector.x, t.targetX, DAMP_FACTOR, delta),
-      THREE.MathUtils.damp(lookAtVector.y, t.targetY, DAMP_FACTOR, delta),
-      THREE.MathUtils.damp(lookAtVector.z, t.targetZ, DAMP_FACTOR, delta)
-    );
+    lookAtVector.x = THREE.MathUtils.damp(lookAtVector.x, t.targetX, DAMP_FACTOR, delta);
+    lookAtVector.y = THREE.MathUtils.damp(lookAtVector.y, t.targetY, DAMP_FACTOR, delta);
+    lookAtVector.z = THREE.MathUtils.damp(lookAtVector.z, t.targetZ, DAMP_FACTOR, delta);
+
     state.camera.lookAt(lookAtVector);
     state.camera.getWorldDirection(cameraDirection);
 
-    onUpdateLiveCoords({
-      x: state.camera.position.x, y: state.camera.position.y, z: state.camera.position.z,
-      targetX: state.camera.position.x + cameraDirection.x * 10,
-      targetY: state.camera.position.y + cameraDirection.y * 10,
-      targetZ: state.camera.position.z + cameraDirection.z * 10,
-    });
+    // 2. Acumula o delta para controlar a frequência da atualização do estado (Throttling)
+    timerAcc.current += delta;
+
+    if (onUpdateLiveCoords && timerAcc.current > 0.1) {
+      timerAcc.current = 0; // Reseta o timer interno
+      
+      onUpdateLiveCoords({
+        x: Number(state.camera.position.x.toFixed(2)),
+        y: Number(state.camera.position.y.toFixed(2)),
+        z: Number(state.camera.position.z.toFixed(2)),
+        targetX: Number((state.camera.position.x + cameraDirection.x * 10).toFixed(2)),
+        targetY: Number((state.camera.position.y + cameraDirection.y * 10).toFixed(2)),
+        targetZ: Number((state.camera.position.z + cameraDirection.z * 10).toFixed(2)),
+      });
+    }
   });
+
   return null;
 }
 
@@ -151,8 +170,11 @@ useEffect(() => {
     const svgContainer = svgPathRef.current?.closest(`.${styles.divSVGTransS2}`);
     if (svgPathRef.current && svgContainer) {
       gsap.set(svgContainer, { opacity: 0 });
-      gsap.set(svgPathRef.current, { drawSVG: "0% 0%", attr: { "stroke-width": 0 } });
-    }
+      gsap.set(svgPathRef.current, { 
+        drawSVG: "0% 0%", 
+        strokeWidth: 1
+  });
+  }
 
     const tlDrone = gsap.timeline({
       scrollTrigger: {
@@ -241,7 +263,7 @@ useEffect(() => {
     <section className={styles.hero} ref={sectionHeroRef}>
       <div className={styles.heroBelt} ref={heroBeltRef}>
         <div className={styles.canvasContainer} ref={canvasContainerRef}>
-          <Canvas shadows camera={{ position: [WAYPOINTS[0].x, WAYPOINTS[0].y, WAYPOINTS[0].z], fov: 90 }}>
+          <Canvas shadows={{ type: THREE.PCFShadowMap }} camera={{ position: [WAYPOINTS[0].x, WAYPOINTS[0].y, WAYPOINTS[0].z], fov: 90 }}>
             <ambientLight intensity={0.2} />
             <directionalLight castShadow position={[25, 40, 20]} intensity={1.5} shadow-mapSize={[2048, 2048]} shadow-camera-far={200} shadow-camera-left={-60} shadow-camera-right={60} shadow-camera-top={60} shadow-camera-bottom={-60} shadow-bias={-0.0005} />
             <color attach="background" args={['#050811']} />
@@ -251,11 +273,7 @@ useEffect(() => {
             <CameraRig cameraTarget={cameraTarget} onUpdateLiveCoords={setLiveCoords} />
           </Canvas>
 
-          <div className={styles.divSVGTransS2}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1316 664" fill="none" preserveAspectRatio="none">
-              <path ref={svgPathRef} d="M13.4746 291.27C13.4746 291.27 100.646 -18.6724 255.617 16.8418C410.588 52.356 61.0296 431.197 233.017 546.326C431.659 679.299 444.494 21.0125 652.73 100.784C860.967 180.556 468.663 430.709 617.216 546.326C765.769 661.944 819.097 48.2722 988.501 120.156C1174.21 198.957 809.424 543.841 988.501 636.726C1189.37 740.915 1301.67 149.213 1301.67 149.213" stroke="#F0E3CF" strokeWidth="0" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
+          <SvgTrans ref={svgPathRef} />
 
         <section className={styles.textOverlayContainer} aria-label="Introdução Montanha Burguer">
         {HERO_SCENES.map((scene) => {

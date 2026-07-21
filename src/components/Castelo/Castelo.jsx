@@ -2,7 +2,7 @@ import { useGLTF } from "@react-three/drei"
 import React from "react"
 
 export const Castelo = () => {
-const modelo = useGLTF("modelos/wrath_of_the_dragon-compressed.glb");
+const modelo = useGLTF("modelos/wrath_of_the_dragon-compressedTeste.glb");
 
   // Percorre o modelo e força todas as malhas a projetarem e receberem sombra
 React.useMemo(() => {
@@ -24,4 +24,4 @@ return <primitive object={modelo.scene} />;
 };
 
 export default Castelo
-useGLTF.preload("modelos/wrath_of_the_dragon-compressed.glb")
+useGLTF.preload("modelos/wrath_of_the_dragon-compressedTeste.glb")

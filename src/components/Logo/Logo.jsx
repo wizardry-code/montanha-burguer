@@ -1,11 +1,11 @@
 import { useId } from 'react';
 
 const Logo = ({ svgRef, className, shimmer = false, gradientRef }) => {
-    const uid = useId().replace(/[:]/g, '');
+    const rawId = useId();
+    const uid = rawId.replace(/:/g, ''); // Garante um ID válido para SVG
     const clipId = `logoClip-${uid}`;
     const gradId = `logoShimmer-${uid}`;
     const maskId = `logoMask-${uid}`;
-
     return (
         <svg
             ref={svgRef}

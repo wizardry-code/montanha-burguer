@@ -1,9 +1,9 @@
 import './App.css';
-import PreLoader from './components/PreLoader/PreLoader';
-import Header from './components/Header/Header';
-import Hero from './components/Hero/Hero';
-import Section2 from './components/Section2/Section2';
-import Section3 from './components/Section3/Section3'
+import PreLoader from './sections/PreLoader/PreLoader';
+import Header from './sections/Header/Header';
+import Hero from './sections/Hero/Hero';
+import Section2 from './sections/Section2/Section2';
+import Section3 from './sections/Section3/Section3'
 
 
 function App() {
