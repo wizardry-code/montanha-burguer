@@ -335,6 +335,9 @@
     /* espaço maior entre cada conjunto foto+texto no mobile também */
     gap: 26vw;
   }
+  .addresButtonsGroup {
+  width: 100%;           
+}
 
   .trackEnd {
     width: 60vw;
