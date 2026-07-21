@@ -16,8 +16,9 @@ width: min(34vw, 420px);
 height: min(72dvh, 640px);
 margin: 0;
 overflow: hidden;
-border-radius: 2px;
-box-shadow: 0 24px 48px -18px rgba(24, 18, 10, 0.55);
+border-radius: 3px;
+/* Sombra externa suave + Sombra de baixo para destacar do fundo pastel */
+
 }
 
 .cardImage {
@@ -28,18 +29,37 @@ object-fit: cover;
 will-change: transform;
 }
 
+/* ============================================================
+OVERLAY COM BOX-SHADOW INSET (Efeito de profundidade/recesso)
+============================================================ */
+.imageOverlay {
+position: absolute;
+inset: 0;
+z-index: 1; /* Fica acima da imagem, mas abaixo do chapterTag */
+pointer-events: none; /* Não interfere no hover ou clique */
+border-radius: inherit;
+
+/* Sombra interna nas 4 bordas para dar aspecto de imagem "encavada" na parede/papel */
+box-shadow: 
+    inset 0 4px 20px rgba(0, 0, 0, 0.25),   /* Topo: desfoque de 20px e apenas 25% de opacidade */
+    inset 4px 0 15px rgba(0, 0, 0, 0.15),   /* Esquerda */
+    inset -4px 0 15px rgba(0, 0, 0, 0.15),  /* Direita */
+    inset 0 -4px 20px rgba(0, 0, 0, 0.20);  /* Base */
+}
+
 .chapterTag {
 position: absolute;
 left: 0;
 bottom: 0;
+z-index: 2; /* Garante que fique acima da sombra do overlay */
 padding: 0.6em 1.1em;
 font-family: var(--font-display, 'Cinzel', serif);
 font-size: 0.72rem;
 letter-spacing: 0.18em;
 text-transform: uppercase;
 color: var(--color-cream, #F0E3CF);
-background: rgba(35, 27, 17, 0.62);
-backdrop-filter: blur(2px);
+background: rgba(35, 27, 17, 0.72);
+backdrop-filter: blur(4px);
 }
 
 .cardContent {

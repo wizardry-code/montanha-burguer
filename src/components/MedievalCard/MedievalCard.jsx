@@ -18,6 +18,10 @@ return (
         alt={section.imageAlt} 
         loading="lazy" 
         />
+        
+        {/* Overlay responsável pela sombra interna (box-shadow: inset) */}
+        <div className={styles.imageOverlay} />
+
         <span className={styles.chapterTag} aria-hidden="true">
         Capítulo {section.chapter}
         </span>
@@ -50,7 +54,7 @@ return (
                 target="_blank"
                 rel="noreferrer"
             >
-                <span className={styles.iconWrapper}><GoogleMapsIcon /></span>
+                <span className={styles.iconWrapper}><MapsIcon /></span>
                 <span>Ir pelo Maps</span>
             </a>
 

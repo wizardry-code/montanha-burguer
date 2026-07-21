@@ -1,3 +1,4 @@
+//importação de cpluggins e variados
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { gsap } from 'gsap';
@@ -5,11 +6,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { SplitText } from 'gsap/SplitText'; // <-- IMPORTAÇÃO DO PLUGIN OFICIAL
 import * as THREE from 'three';
+//importação de componentes
 import { Castelo } from '../../components/Castelo/Castelo.jsx';
-import styles from './Hero.module.css';
 import { Stars } from '@react-three/drei';
 import { HERO_SCENES } from '../../utils/heroConfig.js';
 import { SvgTrans } from '../../components/ui/svgs/SvgTrans/SvgTrans.jsx';
+//importação de estilos
+import styles from './Hero.module.css';
+import svgStyles from '../../components/ui/svgs/SvgTrans/SvgTrans.module.css';
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
 
@@ -164,7 +168,7 @@ useEffect(() => {
       opacity: 0
     });
 
-    const svgContainer = svgPathRef.current?.closest(`.${styles.divSVGTransS2}`);
+    const svgContainer = svgPathRef.current?.closest(`.${svgStyles.divSVGTransS2}`);
     if (svgPathRef.current && svgContainer) {
       gsap.set(svgContainer, { opacity: 1 });
       gsap.set(svgPathRef.current, { 
