@@ -1,5 +1,5 @@
 //import de imagens
-import imgPortal from '../assets/imgs/imgS2A1.avif';
+import imgPortal from '../assets/imgs/imgTranS2.avif';
 import imgPatio from '../assets/imgs/imgS2A2.avif';
 import imgRefugio from '../assets/imgs/imgS2A3.avif';
 import imgMesas from '../assets/imgs/imgS2A4.avif';

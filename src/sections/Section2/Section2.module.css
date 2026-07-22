@@ -10,12 +10,10 @@
   --color-gold: #CA9401;
   --color-white: #FFFFFF;
   --strong-font-weight: bold; 
-  
+
   --font-card-title: 'Cinzel', serif;
   --font-body: 'Merriweather', Georgia, serif;
   --font-body-alt: 'ABeeZee', sans-serif;
-
-  background: var(--color-cream);
   color: var(--color-slate);
   isolation: isolate;
 }
@@ -23,11 +21,52 @@
 .pinSection {
   position: relative;
   width: 100%;
-  height: 100dvh;
+  height: 100vh;
   overflow: hidden;
 }
 
-.pinSection::before {
+.bgWrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.imgPlaceholder {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url(../../assets/imgs/imgTranS2.avif);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  aspect-ratio: inherit;
+}
+
+/* Esteira Principal que Desliza */
+.track {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  width: max-content;
+  will-change: transform;
+  flex-wrap: nowrap;
+}
+
+/* Lona contínua pastel para os Cards Medievais */
+.cardsWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  padding: 0 8vw;
+  gap: 16vw;
+  background-color: var(--color-cream);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+}
+
+.cardsWrapper::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -40,25 +79,11 @@
   z-index: 1;
 }
 
-.track {
-  padding-left: 30vw;
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  height: 100%;
-  width: max-content;
-  gap: 16vw;
-  will-change: transform;
-  flex-wrap: nowrap;
-}
-
-
 @media (max-width: 900px) {
-  .track {
+  .cardsWrapper {
     gap: 26vw;
+    padding: 0 5vw;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {

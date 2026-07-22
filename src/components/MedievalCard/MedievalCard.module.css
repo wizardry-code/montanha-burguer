@@ -220,7 +220,6 @@ border-radius: 6px;
 box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.4);
 }
 
-/* Responsivo para o Card */
 @media (max-width: 900px) {
 .card {
     flex-direction: row;
@@ -231,12 +230,17 @@ box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.4);
 
 .cardFigure {
     flex: 0 0 auto;
-    width: 80vw;
-    height: auto;
+    width: 70vw;                  /* Largura do container da imagem no mobile */
+    height: auto;                 /* A altura será calculada pelo aspect-ratio */
+    aspect-ratio: 9 / 16;         /* FORÇA uma proporção vertical fixa para TODAS as imagens! */
+    overflow: hidden;             /* Corta tudo que estourar a moldura */
 }
 
 .cardImage {
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;            /* Preenche a moldura 9:16 e CORTA as bordas que sobrarem */
+    object-position: center center;/* Mantém o centro da foto focado */
 }
 
 .cardContent {

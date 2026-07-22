@@ -17,8 +17,17 @@
 /* Remova o bloco @font-face manual do Cinzel daqui */
 
 * {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-body{background-color: #3f3b37;}
+
+body {
+  background-color: #3f3b37;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
