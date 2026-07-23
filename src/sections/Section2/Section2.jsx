@@ -224,6 +224,7 @@ return (
             <div className={styles.avaliacoesCard}>
             <Avaliacoes/>
             </div>
+            <div className={styles.finalTrack}></div>
         </div>
         {/* Seção Adicional (Section3a) continua na esteira */}
         <Section3a ref={s3Ref} svgRuleRef={svgRuleRef} />

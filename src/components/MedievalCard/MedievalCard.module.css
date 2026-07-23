@@ -17,8 +17,6 @@ height: min(72dvh, 640px);
 margin: 0;
 overflow: hidden;
 border-radius: 3px;
-/* Sombra externa suave + Sombra de baixo para destacar do fundo pastel */
-
 }
 
 .cardImage {
@@ -35,23 +33,21 @@ OVERLAY COM BOX-SHADOW INSET (Efeito de profundidade/recesso)
 .imageOverlay {
 position: absolute;
 inset: 0;
-z-index: 1; /* Fica acima da imagem, mas abaixo do chapterTag */
-pointer-events: none; /* Não interfere no hover ou clique */
+z-index: 1;
+pointer-events: none;
 border-radius: inherit;
-
-/* Sombra interna nas 4 bordas para dar aspecto de imagem "encavada" na parede/papel */
-box-shadow: 
-    inset 0 4px 20px rgba(0, 0, 0, 0.25),   /* Topo: desfoque de 20px e apenas 25% de opacidade */
-    inset 4px 0 15px rgba(0, 0, 0, 0.15),   /* Esquerda */
-    inset -4px 0 15px rgba(0, 0, 0, 0.15),  /* Direita */
-    inset 0 -4px 20px rgba(0, 0, 0, 0.20);  /* Base */
+box-shadow:
+    inset 0 4px 20px rgba(0, 0, 0, 0.25),
+    inset 4px 0 15px rgba(0, 0, 0, 0.15),
+    inset -4px 0 15px rgba(0, 0, 0, 0.15),
+    inset 0 -4px 20px rgba(0, 0, 0, 0.20);
 }
 
 .chapterTag {
 position: absolute;
 left: 0;
 bottom: 0;
-z-index: 2; /* Garante que fique acima da sombra do overlay */
+z-index: 2;
 padding: 0.6em 1.1em;
 font-family: var(--font-display, 'Cinzel', serif);
 font-size: 0.72rem;
@@ -151,44 +147,71 @@ margin-top: 1rem;
 .footerBlock p { margin-bottom: 2rem; }
 .footerBlock address { margin-bottom: 0.5rem; }
 
+/* Botão de copiar endereço (pin + texto) */
 .addresText {
+position: relative;
+display: inline-flex;
 margin: 0;
 font-family: var(--font-body, 'Merriweather', serif);
 font-size: 1rem;
-color: var(--color-slate, #58595B);
 font-style: italic;
 }
 
+.addresCopyBtn {
+display: inline-flex;
+align-items: center;
+gap: 0.4em;
+background: none;
+border: none;
+padding: 0;
+margin: 0;
+font: inherit;
+color: var(--color-slate, #58595B);
+text-align: left;
+cursor: pointer;
+text-decoration: underline;
+text-decoration-style: dotted;
+text-underline-offset: 3px;
+transition: color 0.2s ease;
+}
+
+.addresCopyBtn:hover,
+.addresCopyBtn:focus-visible {
+color: var(--color-orange, #FA9A00);
+}
+
 .pin { font-style: normal; }
+
+/* Toast minimalista de confirmação */
+.copyToast {
+position: absolute;
+left: 0;
+bottom: calc(100% + 10px);
+padding: 0.4em 0.9em;
+border-radius: 6px;
+background: rgba(35, 27, 17, 0.92);
+color: var(--color-cream, #F0E3CF);
+font-family: var(--font-body-alt, 'ABeeZee', sans-serif);
+font-size: 0.75rem;
+font-style: normal;
+white-space: nowrap;
+opacity: 0;
+transform: translateY(6px);
+transition: opacity 0.2s ease, transform 0.2s ease;
+pointer-events: none;
+z-index: 3;
+}
+
+.copyToastVisible {
+opacity: 1;
+transform: translateY(0);
+}
 
 .addresButtonsGroup {
 display: flex;
 flex-direction: column;
 gap: 10px;
-width: 60%;
-}
-
-.addresButton {
-flex: 1;
-display: inline-flex;
-align-items: center;
-justify-content: center;
-gap: 0.8rem;
-padding: 0.75rem 0.6rem;
-background-color: #ffffff;
-border-radius: 8px;
-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-color: #1a1a1a;
-font-size: 0.85rem;
-font-weight: 600;
-text-decoration: none;
-transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.addresButton:hover,
-.addresButton:focus-visible {
-transform: translateY(-2px);
-color: #00008B;
+width: 100%;
 }
 
 .iconWrapper {
@@ -213,43 +236,64 @@ flex-direction: column;
 gap: 0.9rem;
 }
 
+.badge {
+align-self: flex-start;
+padding: 0.5em 0.9em;
+border-radius: 999px;
+background: var(--color-white, #FFFFFF);
+color: black;
+font-family: var(--font-body-alt, 'ABeeZee', sans-serif);
+font-size: 0.8rem;
+font-weight: 600;
+box-shadow: 0 4px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+/* Botão base (WhatsApp / Maps / Waze) */
 .ctaButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  width: 100%;
-  padding: 0.85rem 1rem;
-  background-color: #25D366;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  color: #ffffff;
-  font-family: var(--font-body, 'Merriweather', serif);
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 0.8rem;
+width: 100%;
+padding: 0.85rem 1rem;
+background-color: #25D366;
+border-radius: 8px;
+color: #ffffff;
+font-family: var(--font-body, 'Merriweather', serif);
+font-size: 0.9rem;
+font-weight: 700;
+text-decoration: none;
+transition: transform 0.8s ease, box-shadow 0.8s ease, background-color 0.8s ease, color 0.8s ease;
 }
 
 .ctaButton:hover,
 .ctaButton:focus-visible {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+transform: translateY(-2px);
+box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
-.badge {
-  align-self: flex-start;
-  padding: 0.5em 0.9em;
-  border-radius: 999px;
-  background: var(--color-white, #FFFFFF);
-  color: black;
-  font-family: var(--font-body-alt, 'ABeeZee', sans-serif);
-  font-size: 0.8rem;
-  font-weight: 600;
-  box-shadow: 0 4px 10px -6px rgba(0, 0, 0, 0.5);
+.ctaButtonMaps {
+background-color: #ffffff;
+color: #1a1a1a;
+}
+
+.ctaButtonMaps:hover,
+.ctaButtonMaps:focus-visible {
+color: #00008B;
+}
+
+.ctaButtonWaze {
+background-color: #05C8F7;
+color: #ffffff;
+}
+
+.ctaButtonWaze:hover,
+.ctaButtonWaze:focus-visible {
+background-color: #03A9D9;
 }
 
 @media (max-width: 900px) {
+/* Layout padrão (S2): imagem ao lado do texto, scroll horizontal */
 .card {
     flex-direction: row;
     align-items: flex-start;
@@ -259,17 +303,17 @@ gap: 0.9rem;
 
 .cardFigure {
     flex: 0 0 auto;
-    width: 70vw;                  /* Largura do container da imagem no mobile */
-    height: auto;                 /* A altura será calculada pelo aspect-ratio */
-    aspect-ratio: 9 / 16;         /* FORÇA uma proporção vertical fixa para TODAS as imagens! */
-    overflow: hidden;             /* Corta tudo que estourar a moldura */
+    width: 70vw;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
 }
 
 .cardImage {
     width: 100%;
     height: 100%;
-    object-fit: cover;            /* Preenche a moldura 9:16 e CORTA as bordas que sobrarem */
-    object-position: center center;/* Mantém o centro da foto focado */
+    object-fit: cover;
+    object-position: center center;
 }
 
 .cardContent {
@@ -284,8 +328,30 @@ gap: 0.9rem;
     font-size: 0.98rem;
 }
 
-.addresButtonsGroup {
+
+.ctaButtonMaps,
+.ctaButtonWaze {
+    flex: 1 1 0;
+    padding: 0.65rem 0.4rem;
+    font-size: 0.78rem;
+    gap: 0.5rem;
+}
+
+/* Modificador (S3): imagem em cima, conteúdo embaixo, scroll vertical */
+.card.cardVertical {
+    flex-direction: column;
+    align-items: stretch;
+    width: 88vw;
+    gap: 1.4rem;
+}
+
+.card.cardVertical .cardFigure {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
+}
+
+.card.cardVertical .cardContent {
     width: 100%;
 }
 }
-

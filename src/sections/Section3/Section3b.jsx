@@ -19,6 +19,23 @@ useLayoutEffect(() => {
     const cards = gsap.utils.toArray(`.${cardStyles.card}`, rootRef.current);
     if (!cards.length) return;
 
+    // Deslocamento horizontal aleatório — SOMENTE em telas desktop (> 900px)
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 901px)', () => {
+        cards.forEach((card, i) => {
+        const direction = i % 2 === 0 ? -1 : 1;
+        gsap.set(card, {
+            x: direction * gsap.utils.random(20, 60, 1),
+        });
+        });
+
+        // Limpa o offset ao sair do breakpoint desktop (ex: resize pra mobile)
+        return () => {
+        gsap.set(cards, { x: 0 });
+        };
+    });
+
+    // Animações individuais de cada Card (rodam em qualquer largura)
     cards.forEach((card) => {
         const lines = card.querySelectorAll(`.${cardStyles.ruleLine}`);
         const headerCard = card.querySelector(`.${cardStyles.cardHeader}`);
@@ -67,7 +84,7 @@ return (
     <section ref={rootRef} className={styles.root} aria-label="Aluguel do espaço e eventos na taverna Montanha">
     <div className={styles.cardsWrapper}>
         {Section3articlesData.map((section, index) => (
-        <MedievalCard section={section} index={index} tag='Aventura' key={section.id} />
+        <MedievalCard section={section} index={index} mobileLayout="column" tag="Aventura" key={section.id} />
         ))}
     </div>
     </section>
