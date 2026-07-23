@@ -1,0 +1,65 @@
+.root {
+--color-cream: #F0E3CF;
+--color-slate: #F0E3CF;   /* cor do TEXTO dentro dos cards */
+--color-dark: #58595B;    /* fundo escuro real da S3 */
+
+--color-orange: #FA9A00;
+--color-amber: #FFC875;
+--color-red: #FF7A5C;
+--color-purple: #D68CFF;
+--color-blue: #5FD8FF;
+--color-wine: #FF9E85;
+--color-gold: #F4C430;
+--color-white: #FFFFFF;
+--strong-font-weight: bold;
+
+--font-card-title: 'Cinzel', serif;
+--font-body: 'Merriweather', Georgia, serif;
+--font-body-alt: 'ABeeZee', sans-serif;
+
+position: relative;
+width: 100%;
+color: var(--color-slate);
+background-color: var(--color-dark);
+isolation: isolate;
+overflow: hidden;
+}
+
+.root::before {
+content: "";
+position: absolute;
+inset: 0;
+background-image: url('../../assets/pattern/patternCompress.webp');
+background-repeat: repeat;
+background-size: 400px 400px;
+mix-blend-mode: soft-light;
+opacity: 0.15;
+pointer-events: none;
+z-index: 0;
+}
+
+/* Container vertical dos cards (substitui .track/.pinSection) */
+.cardsWrapper {
+position: relative;
+z-index: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 14vh;
+padding: 14vh 8vw;
+box-shadow: inset 0 20px 40px -30px rgba(0, 0, 0, 0.5),
+            inset 0 -20px 40px -30px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 900px) {
+.cardsWrapper {
+    gap: 10vh;
+    padding: 10vh 5vw;
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+.cardsWrapper {
+    transition: none !important;
+}
+}

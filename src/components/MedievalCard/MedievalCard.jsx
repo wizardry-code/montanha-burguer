@@ -1,29 +1,16 @@
 import { splitIntoWords } from '../../utils/textUtils';
 import { DrawnRule } from '../ui/DrawnRule';
 import { CardParagraph } from '../ui/CardParagraph';
-import { MapsIcon, WazeIcon } from '../ui/icons';
+import { MapsIcon, WazeIcon, WhatsappIcon } from '../ui/icons';
 import styles from './MedievalCard.module.css';
 
-export function MedievalCard({ section, index }) {
+export function MedievalCard({ section, index, tag = 'Capítulo' }) {
 
-let tag = "Capítulo"
 return (
-    <article 
-    className={styles.card} 
-    data-index={index} 
-    aria-labelledby={`${section.id}-title`}
-    >
+    <article className={styles.card} data-index={index} aria-labelledby={`${section.id}-title`}>
     <figure className={styles.cardFigure}>
-        <img 
-        className={styles.cardImage} 
-        src={section.image} 
-        alt={section.imageAlt} 
-        loading="lazy" 
-        />
-        
-        {/* Overlay responsável pela sombra interna (box-shadow: inset) */}
+        <img className={styles.cardImage} src={section.image} alt={section.imageAlt} loading="lazy" />
         <div className={styles.imageOverlay} />
-
         <span className={styles.chapterTag} aria-hidden="true">
         {tag} {section.chapter}
         </span>
@@ -46,32 +33,33 @@ return (
         {section.footer?.type === 'addres' && (
         <div className={styles.footerBlock}>
             <address className={styles.addresText}>
-            <span className={styles.pin} aria-hidden="true">📍</span> {section.footer.addres}
+            <span className={styles.pin} aria-hidden="true">📍</span> {section.footer.address}
             </address>
-            
+
             <div className={styles.addresButtonsGroup}>
-            <a
-                className={styles.addresButton}
-                href={section.footer.mapsHref}
-                target="_blank"
-                rel="noreferrer"
-            >
+            <a className={styles.addresButton} href={section.footer.mapsHref} target="_blank" rel="noreferrer">
                 <span className={styles.iconWrapper}><MapsIcon /></span>
                 <span>Ir pelo Maps</span>
             </a>
 
             {section.footer.wazeHref && (
-                <a
-                className={styles.addresButton}
-                href={section.footer.wazeHref}
-                target="_blank"
-                rel="noreferrer"
-                >
+                <a className={styles.addresButton} href={section.footer.wazeHref} target="_blank" rel="noreferrer">
                 <span className={styles.iconWrapper}><WazeIcon /></span>
                 <span>Ir pelo Waze</span>
                 </a>
             )}
             </div>
+        </div>
+        )}
+
+        {section.footer?.type === 'cta' && (
+        <div className={styles.footerBlock}>
+            {section.footer.badge && <span className={styles.badge}>{section.footer.badge}</span>}
+
+            <a className={styles.ctaButton} href={section.footer.whatsappHref} target="_blank" rel="noreferrer">
+            <span className={styles.iconWrapper}><WhatsappIcon /></span>
+            <span>{section.footer.buttonText}</span>
+            </a>
         </div>
         )}
     </div>

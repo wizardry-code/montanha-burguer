@@ -93,8 +93,8 @@ export const Section2articlesData = [
 export const section3AData = {
 image: imgBebe,
 imageAlt: 'Entrada da taverna Montanha iluminada à noite, pronta para receber celebrações',
-title: 'Explorar Opções de Aluguel & Reservas',
+title: 'Alugue ou Reserve a Taverna',
 paragraph:
-    'Aniversários, sessões exclusivas de RPG, eventos corporativos ou encontros de família. Descubra como reservar nosso espaço para tornar sua comemoração lendária.',
+    'De aniversários e sessões exclusivas de RPG até eventos corporativos ou banquetes em família.Transforme qualquer comemoração em uma lenda.Reserve nosso espaço e viva uma experiência Inesquecível .',
 cta: 'Fazer Reserva',
 };

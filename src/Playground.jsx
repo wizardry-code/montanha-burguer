@@ -10,11 +10,11 @@ import Section2 from './sections/Section2/Section2'
 import ScrollIndicator from './components/ScrollIndicator/ScrollIndicator';
 import TrilhaHero from './components/TrilhaHero/TrilhaHero';
 import Avaliacoes from './components/Avaliacoes/Avaliacoes'
+import Section3b from './sections/Section3/Section3b'
 
 function Playground () {
 return (
     <div>
-        <Section2/>
     </div>
 );
 }

@@ -213,11 +213,40 @@ flex-direction: column;
 gap: 0.9rem;
 }
 
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background-color: #25D366;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #ffffff;
+  font-family: var(--font-body, 'Merriweather', serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ctaButton:hover,
+.ctaButton:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
 .badge {
-padding: 1rem 1.2rem;
-background: var(--color-white, #FFFFFF);
-border-radius: 6px;
-box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.4);
+  align-self: flex-start;
+  padding: 0.5em 0.9em;
+  border-radius: 999px;
+  background: var(--color-white, #FFFFFF);
+  color: black;
+  font-family: var(--font-body-alt, 'ABeeZee', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 4px 10px -6px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 900px) {
@@ -259,3 +288,4 @@ box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.4);
     width: 100%;
 }
 }
+

@@ -19,7 +19,7 @@ export const Section3articlesData = [
     ],
     footer: {
     type: 'cta',
-    buttonText: 'Agendar Aniversário',
+    buttonText: 'Agendar Festa',
     badge: '🎂 Espaço Privativo + Figurinos',
     whatsappHref: 'https://wa.me/5561999999999?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20reservas%20para%20anivers%C3%A1rio.',
     },
@@ -32,13 +32,13 @@ export const Section3articlesData = [
     title: 'Cine-Taverna & Eventos Especiais',
     font: 'Merriweather',
     paragraph: [
-    { text: 'Uma experiência audiovisual ao ar livre sob o céu noturno. ', variant: 'base' },
+    { text: 'Experiências audiovisuais ao ar livre sob o céu noturno. ', variant: 'base' },
     { text: 'Projeções em alta definição diretamente nas paredes de pedra da fortaleza, ', variant: 'gold' },
-    { text: 'perfeitas para exibições privadas de filmes, campeonatos geek, transmissões e eventos corporativos exclusivos.', variant: 'baseMedium' },
+    { text: 'perfeitas para exibições privadas de filmes, campeonatos, eventos geek, transmissões ou eventos corporativos exclusivos.', variant: 'baseMedium' },
     ],
     footer: {
     type: 'cta',
-    buttonText: 'Consultar Datas de Eventos',
+    buttonText: 'Consultar Disponibilidade',
     badge: '🎬 Telão ao Ar Livre',
     whatsappHref: 'https://wa.me/5561999999999?text=Ol%C3%A1!%20Gostaria%20de%20consultar%20datas%20para%20eventos%20no%20p%C3%A1tio.',
     },
@@ -51,14 +51,14 @@ export const Section3articlesData = [
     title: 'A Mesa dos Grandes Mestres',
     font: 'Merriweather',
     paragraph: [
-    { text: 'Reúna sua guilda no ambiente perfeito para a sua jogatina. ', variant: 'base' },
+    { text: 'O cenário perfeito para a sua campanha, com mesas preparadas para o seu grupo de aventureiros. ', variant: 'base' },
     { text: 'Mesas espaçosas de madeira rústica, iluminação temática ', variant: 'purple' },
     { text: 'e combos especiais de hambúrgueres e poções para manter o grupo forte durante toda a campanha de RPG ou board games.', variant: 'baseSemibold' },
     ],
     footer: {
     type: 'cta',
     buttonText: 'Reservar Mesa de RPG',
-    badge: '🎲 Reservas de Grupos',
+    badge: '🎲 Reservas de Grupos / Imersão Completa',
     whatsappHref: 'https://wa.me/5561999999999?text=Ol%C3%A1!%20Quero%20reservar%20uma%20mesa%20para%20jogar%20RPG%20com%20meu%20grupo.',
     },
 },

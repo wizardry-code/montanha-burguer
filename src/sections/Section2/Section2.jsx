@@ -219,7 +219,7 @@ return (
         {/* Envelope dos Cards Medievais */}
         <div className={styles.cardsWrapper}>
             {Section2articlesData.map((section, index) => (
-            <MedievalCard section={section} index={index} key={section.id} />
+            <MedievalCard section={section} index={index} tag='Capítulo' key={section.id} />
             ))}
             <div className={styles.avaliacoesCard}>
             <Avaliacoes/>
