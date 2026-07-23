@@ -16,7 +16,7 @@ import { Section2articlesData } from '../../data/sectionsData';
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
-const SVG_MAX_STROKE = 1200;
+const SVG_MAX_STROKE = 600;
 const INTRO_SCROLL_VH = 1.3;
 
 export default function Section2() {
@@ -24,7 +24,6 @@ const rootRef = useRef(null);
 const trackRef = useRef(null);
 const bgWrapperRef = useRef(null);
 const svgIntroRef = useRef(null);
-
 const s3Ref = useRef(null);
 const svgRuleRef = useRef(null);
 
@@ -44,7 +43,6 @@ useLayoutEffect(() => {
         gsap.set(svgIntroRef.current, {
         drawSVG: '0% 100%',
         attr: { 'stroke-width': SVG_MAX_STROKE },
-        opacity: 1,
         });
     }
 
@@ -62,14 +60,14 @@ useLayoutEffect(() => {
         },
     });
 
+    // 2. Animação no Master Timeline
     if (svgIntroRef.current) {
         master.to(
         svgIntroRef.current,
         {
             drawSVG: '100% 100%',
             attr: { 'stroke-width': 0 },
-            opacity: 0,
-            ease: 'power1.in',
+            ease: 'power1.inOut',
             duration: introDistance,
         },
         0
@@ -99,16 +97,17 @@ useLayoutEffect(() => {
         );
     });
 
+    // Animações individuais de cada Card
     cards.forEach((card) => {
         const lines = card.querySelectorAll(`.${cardStyles.ruleLine}`);
-        const header = card.querySelector(`.${cardStyles.cardHeader}`);
+        const headerCard = card.querySelector(`.${cardStyles.cardHeader}`);
         const words = card.querySelectorAll(`.${cardStyles.word}`);
         const image = card.querySelector(`.${cardStyles.cardImage}`);
         const content = card.querySelector(`.${cardStyles.cardContent}`);
 
         gsap.set(lines, { drawSVG: '0%' });
         gsap.set(words, { y: 16, autoAlpha: 0 });
-        gsap.set(image, { scale: 1.12 });
+        gsap.set(image, { scale: 2 });
 
         if (image) {
         gsap.to(image, {
@@ -117,22 +116,23 @@ useLayoutEffect(() => {
             scrollTrigger: {
             trigger: card,
             containerAnimation: master,
-            start: 'left 95%',
+            start: 'left 80%',
             end: 'left 30%',
             scrub: 0.5,
             },
         });
         }
 
-        if (header && lines.length) {
+        // Configurado para iniciar quando a esquerda do header bater em 80% da tela
+        if (headerCard && lines.length) {
         gsap.to(lines, {
             drawSVG: '100%',
             ease: 'none',
             scrollTrigger: {
-            trigger: header,
+            trigger: headerCard,
             containerAnimation: master,
-            start: 'left 90%',
-            end: 'left 60%',
+            start: 'left 60%',
+            end: 'left 20%',
             scrub: 0.3,
             },
         });
@@ -147,18 +147,20 @@ useLayoutEffect(() => {
             scrollTrigger: {
             trigger: content,
             containerAnimation: master,
-            start: 'left 85%',
-            end: 'left 40%',
+            start: 'left 80%',
+            end: 'left 30%',
             scrub: 0.5,
             },
         });
         }
     });
 
+    // Animações da Section 3a
     if (s3Ref.current) {
         const s3El = s3Ref.current;
         const line = svgRuleRef.current ? svgRuleRef.current.querySelector('line') : null;
         const words = gsap.utils.toArray(`.${s3Styles.word}`, s3El);
+        const s3Header = s3El.querySelector('header') || s3El;
 
         if (line) gsap.set(line, { drawSVG: '0%' });
         if (words.length) gsap.set(words, { y: 16, autoAlpha: 0 });
@@ -168,11 +170,12 @@ useLayoutEffect(() => {
             drawSVG: '100%',
             ease: 'none',
             scrollTrigger: {
-            trigger: s3El,
+            trigger: s3Header,
             containerAnimation: master,
-            start: 'left 85%',
-            end: 'left 55%',
+            start: 'left 80%',
+            end: 'left 40%',
             scrub: 0.3,
+            markers: true,
             },
         });
         }
@@ -211,7 +214,7 @@ return (
 
         {/* Esteira de Scroll Horizontal */}
         <div ref={trackRef} className={styles.track}>
-        {/* Envelope Pastellizado dos Cards Medievais */}
+        {/* Envelope dos Cards Medievais */}
         <div className={styles.cardsWrapper}>
             {Section2articlesData.map((section, index) => (
             <MedievalCard section={section} index={index} key={section.id} />

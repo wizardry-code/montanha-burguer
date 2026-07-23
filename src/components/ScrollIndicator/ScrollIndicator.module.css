@@ -1,0 +1,64 @@
+.container {
+position: absolute;
+bottom: 40px;
+left: 50%;
+transform: translateX(-50%);
+z-index: 10;
+pointer-events: none;
+
+}
+
+/* O Círculo Base */
+.circle {
+position: relative;
+display: flex;
+align-items: center;
+justify-content: center;
+width: 100px;
+height: 100px;
+background-color: #1111115d;
+border-radius: 50%;
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+overflow: hidden;
+}
+
+/* Seta minimalista centralizada */
+.arrow {
+position: absolute;
+font-size: 18px;
+color: #ffffff;
+font-family: sans-serif;
+z-index: 2;
+}
+
+/* Anel de texto interno */
+.textRing {
+position: absolute;
+width: 100%;
+height: 100%;
+top: 0;
+left: 0;
+z-index: 1;
+}
+
+.char {
+  position: absolute;
+  top: 10px; /* Distância uniforme a partir do topo do círculo */
+  left: 50%;
+  
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fffcfc;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+
+  /* CORREÇÃO DO EIXO: */
+  /* O primeiro valor (50%) centraliza a rotação no meio de cada letra. */
+  /* O segundo valor (40px) é o raio exato até o centro do círculo de 100px (50px - 10px do top). */
+  transform-origin: 50% 40px; 
+
+  /* Aplica a rotação individual combinando o alinhamento central */
+  transform: translateX(-50%) rotate(calc(var(--i) * 15deg));
+}
+

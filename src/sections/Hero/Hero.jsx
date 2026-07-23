@@ -245,7 +245,7 @@ useEffect(() => {
     if (svgPathRef.current && svgContainer) {
       tlDrone
         .to(svgContainer, { opacity: 1, duration: 0.1 })
-        .to(svgPathRef.current, { drawSVG: "0% 100%", attr: { "stroke-width": 1200 }, ease: "power1.in", duration: 1.5 }, "<");
+        .to(svgPathRef.current, { drawSVG: "0% 100%", attr: { "stroke-width": 600 }, ease: "power1.in", duration: 1.5 }, "<");
     }
 
     return () => {
