@@ -1,12 +1,12 @@
 .trilhaHero {
-background-color: rgb(33, 33, 105);
 position: relative;
 width: 100%;
 max-width: 1271px;
 margin: 0 auto;
-aspect-ratio: 1271 / 317; 
+aspect-ratio: 1271 / 317;
+pointer-events: none;
+opacity: 0;
 }
-
 
 .caminhoDiv {
 width: 100%;
@@ -19,12 +19,27 @@ display: block;
 .dragaoSvgDiv,
 .casteloDiv {
 position: absolute;
-width: 3.5%; 
+width: 3.5%;
 height: auto;
 color: white;
-transform: translate(-50%, -50%); 
+
+/* Mantém a ancoragem no ponto exato da curva do SVG.
+    NÃO deve ser animado via GSAP: quem recebe scale/filter é o
+    .iconScaler filho. */
+transform: translate(-50%, -50%);
 }
 
+/* Wrapper interno que recebe scale + filter do GSAP.
+Estado inicial (antes do JS rodar) já reflete o estado "passivo":
+cinza e semi-transparente, tamanho normal. O gsap.set() no Hero.jsx
+reforça isso via JS assim que a timeline é montada. */
+.iconScaler {
+width: 100%;
+height: 100%;
+transform-origin: center center;
+will-change: transform, filter;
+filter: grayscale(100%) opacity(0.4);
+}
 
 .magoHatDiv {
 top: 40%;
@@ -32,17 +47,17 @@ left: 12%;
 }
 
 .dragaoSvgDiv {
-top: 36%;
+top: 25%;
 left: 30%;
 }
 
 .espadaDiv {
-top: 83%;
+top: 75%;
 left: 70%;
 }
 
 .casteloDiv {
-top: 50%;
-left: 93%;
-width: 4.5%;
+top: 45%;
+left: 92%;
+width: 5.5%;
 }

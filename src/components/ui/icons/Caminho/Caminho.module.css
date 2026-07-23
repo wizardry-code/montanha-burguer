@@ -1,0 +1,11 @@
+.caminhoSvg {
+width: 100%;
+height: 100%;
+display: block;
+overflow: visible;
+pointer-events: none;
+}
+
+.pathActive {
+pointer-events: none;
+}

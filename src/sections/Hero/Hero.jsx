@@ -1,29 +1,34 @@
-//importação de cpluggins e variados
+//importação de pluggins e variados
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
-import { SplitText } from 'gsap/SplitText'; // <-- IMPORTAÇÃO DO PLUGIN OFICIAL
+import { SplitText } from 'gsap/SplitText';
 import * as THREE from 'three';
+
 //importação de componentes
 import { Castelo } from '../../components/Castelo/Castelo.jsx';
 import { Stars } from '@react-three/drei';
 import { HERO_SCENES } from '../../utils/heroConfig.js';
 import { SvgTrans } from '../../components/ui/svgs/SvgTrans/SvgTrans.jsx';
+import TrilhaHero from '../../components/TrilhaHero/TrilhaHero.jsx';
+import ScrollIndicator from '../../components/ScrollIndicator/ScrollIndicator.jsx';
+
 //importação de estilos
 import styles from './Hero.module.css';
 import svgStyles from '../../components/ui/svgs/SvgTrans/SvgTrans.module.css';
+
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
 
-
-//Dados das cenas e voos
+// Dados das cenas e voos
 const SCENE_TARGETS = {
   dragon: new THREE.Vector3(10.13, 35.34, 56.16),
   fire: new THREE.Vector3(4.40, 20.24, 54.95),
   castle: new THREE.Vector3(-0.42, 25.97, 19.19)
 };
+
 const WAYPOINTS = [
   { x: -47.63, y: 35.78, z: 44.66, targetX: -46.73, targetY: 35.27, targetZ: 44.22 },
   { x: -33.32, y: 29.15, z: 38.50, targetX: -32.52, targetY: 28.34, targetZ: 37.90 },
@@ -52,28 +57,27 @@ const WAYPOINTS = [
   { x: -0.77, y: 18.88, z: -81.34, targetX: -0.75, targetY: 19.20, targetZ: -82.34 },
   { x: -0.53, y: 19.40, z: -85.09, targetX: -0.49, targetY: 19.55, targetZ: -86.09 },
 ];
-const SCENES = {
+
+// Intervalos de Waypoints para os TEXTOS
+const TEXT_SCENES = {
   ponte:  { enter: 1,  exit: 4  },
   dragao: { enter: 6,  exit: 11 },
   guilda: { enter: 18, exit: 22 },
   portao: { enter: 23, exit: 25 },
 };
-//Função que faz a camera voar
+
 function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
   const lookAtVector = useRef(
     new THREE.Vector3(WAYPOINTS[0].targetX, WAYPOINTS[0].targetY, WAYPOINTS[0].targetZ)
   ).current;
   const cameraDirection = useRef(new THREE.Vector3()).current;
-  
-  // Usamos um acumulador de tempo próprio baseado no delta
-  const timerAcc = useRef(0); 
+  const timerAcc = useRef(0);
   const DAMP_FACTOR = 1.8;
 
   useFrame((state, delta) => {
     const t = cameraTarget.current;
     if (!t) return;
 
-    // 1. Interpolação suave de posição e rotação
     state.camera.position.x = THREE.MathUtils.damp(state.camera.position.x, t.x, DAMP_FACTOR, delta);
     state.camera.position.y = THREE.MathUtils.damp(state.camera.position.y, t.y, DAMP_FACTOR, delta);
     state.camera.position.z = THREE.MathUtils.damp(state.camera.position.z, t.z, DAMP_FACTOR, delta);
@@ -85,12 +89,10 @@ function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
     state.camera.lookAt(lookAtVector);
     state.camera.getWorldDirection(cameraDirection);
 
-    // 2. Acumula o delta para controlar a frequência da atualização do estado (Throttling)
     timerAcc.current += delta;
 
     if (onUpdateLiveCoords && timerAcc.current > 0.1) {
-      timerAcc.current = 0; // Reseta o timer interno
-      
+      timerAcc.current = 0;
       onUpdateLiveCoords({
         x: Number(state.camera.position.x.toFixed(2)),
         y: Number(state.camera.position.y.toFixed(2)),
@@ -108,17 +110,10 @@ function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(false);
 
-  // Hook robusto de monitoramento de viewport (Padrão de Arquitetura Limpa)
   useEffect(() => {
-    const checkViewport = () => {
-      // Pega de forma estrita telas mobile normais e intermediárias
-      setIsMobile(window.innerWidth <= 500);
-    };
-
+    const checkViewport = () => setIsMobile(window.innerWidth <= 500);
     checkViewport();
-    // Delay sutil para garantir renderização correta em navegadores baseados em Chromium (como o do Pixel)
     const timeoutId = setTimeout(checkViewport, 100);
-
     window.addEventListener('resize', checkViewport);
     return () => {
       window.removeEventListener('resize', checkViewport);
@@ -126,7 +121,6 @@ export default function Hero() {
     };
   }, []);
 
-  // Helper para gerar as Custom Properties dinâmicas de cada elemento de forma limpa
   const getDynamicStyles = (scene) => {
     const config = isMobile ? scene.layout.mobile : scene.layout.desktop;
     return {
@@ -137,11 +131,9 @@ export default function Hero() {
       '--text-x-offset': config.x,
       '--text-y-offset': config.y,
       textAlign: config.align,
-      //...scene.extraStyles // Aplica estilos extras se houver (ex: letter-spacing)
     };
   };
 
-//mapeando Referencias
   const sectionHeroRef = useRef(null);
   const heroBeltRef = useRef(null);
   const canvasContainerRef = useRef(null);
@@ -152,15 +144,36 @@ export default function Hero() {
   const portaoRightRef = useRef(null);
   const [liveCoords, setLiveCoords] = useState({ x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 });
 
-useEffect(() => {
-    // 1. CRIAÇÃO DOS SPLIT TEXTS NATIVOS
+  const scrollIndicatorRef = useRef(null);
+  const trilhaContainerRef = useRef(null);
+  const trilhaPathActiveRef = useRef(null);
+  const magoHatScaleRef = useRef(null);
+  const dragaoScaleRef = useRef(null);
+  const espadaScaleRef = useRef(null);
+  const casteloScaleRef = useRef(null);
+
+  const trilhaIconRefs = {
+    magoHatRef: magoHatScaleRef,
+    dragaoRef: dragaoScaleRef,
+    espadaRef: espadaScaleRef,
+    casteloRef: casteloScaleRef,
+  };
+
+  useEffect(() => {
+    // Definimos o mapa de ícones AQUI DENTRO para que as refs já estejam disponíveis
+    const ICON_SCENES = {
+      mago:   { enter: 1,  exit: 2,  ref: magoHatScaleRef },
+      dragao: { enter: 6,  exit: 8, ref: dragaoScaleRef },
+      espada: { enter: 18, exit: 19, ref: espadaScaleRef },
+      castelo:{ enter: 24, exit: 27, ref: casteloScaleRef },
+    };
+
     const splitPonte = new SplitText(textRefs.current.ponte, { type: "lines,words", linesClass: "split-line" });
     const splitDragao = new SplitText(textRefs.current.dragao, { type: "lines,words", linesClass: "split-line" });
     const splitGuilda = new SplitText(textRefs.current.guilda, { type: "lines,words", linesClass: "split-line" });
     const splitPortaoLeft = new SplitText(portaoLeftRef.current, { type: "lines,words", linesClass: "split-line" });
     const splitPortaoRight = new SplitText(portaoRightRef.current, { type: "lines,words", linesClass: "split-line" });
 
-    // Configura o estado inicial
     gsap.set([textRefs.current.ponte, textRefs.current.dragao, textRefs.current.guilda, textRefs.current.portao], { opacity: 1 });
     gsap.set([splitPonte.words, splitDragao.words, splitGuilda.words, splitPortaoLeft.words, splitPortaoRight.words], {
       y: 60,
@@ -171,11 +184,21 @@ useEffect(() => {
     const svgContainer = svgPathRef.current?.closest(`.${svgStyles.divSVGTransS2}`);
     if (svgPathRef.current && svgContainer) {
       gsap.set(svgContainer, { opacity: 1 });
-      gsap.set(svgPathRef.current, { 
-        drawSVG: "0% 0%", 
+      gsap.set(svgPathRef.current, {
+        drawSVG: "0% 0%",
         attr: { "stroke-width": 0 },
-  });
-  }
+      });
+    }
+
+    gsap.set(scrollIndicatorRef.current, { opacity: 1, scale: 1 });
+    gsap.set(trilhaContainerRef.current, { opacity: 0 });
+    gsap.set(
+      [magoHatScaleRef.current, dragaoScaleRef.current, espadaScaleRef.current, casteloScaleRef.current],
+      { scale: 1, filter: 'grayscale(100%) opacity(0.4)', transformOrigin: '50% 50%' }
+    );
+    if (trilhaPathActiveRef.current) {
+      gsap.set(trilhaPathActiveRef.current, { drawSVG: '0% 0%' });
+    }
 
     const tlDrone = gsap.timeline({
       scrollTrigger: {
@@ -187,7 +210,25 @@ useEffect(() => {
       },
     });
 
-    // Loop de movimento da câmera
+    const totalWaypointDuration = WAYPOINTS.length - 1;
+    const introDuration = totalWaypointDuration * 0.05;
+    const trilhaRevealDuration = introDuration;
+
+    tlDrone.to(scrollIndicatorRef.current, {
+      opacity: 0,
+      scale: 0.7,
+      duration: introDuration,
+      ease: 'power2.out',
+    }, 0);
+
+    tlDrone.to(trilhaContainerRef.current, {
+      opacity: 1,
+      duration: trilhaRevealDuration,
+      ease: 'power2.out',
+    }, introDuration);
+
+    const totalSteps = WAYPOINTS.length - 1;
+
     for (let i = 1; i < WAYPOINTS.length; i++) {
       const point = WAYPOINTS[i];
       const currentPointNumber = i + 1;
@@ -198,55 +239,89 @@ useEffect(() => {
       tlDrone.to(cameraTarget.current, {
         x: point.x, y: point.y, z: point.z,
         targetX: finalTargetX, targetY: finalTargetY, targetZ: finalTargetZ,
-        duration: 1, ease: 'sine.inOut',
+        duration: 1, 
+        ease: 'sine.inOut',
+      }, i === 1 ? 0 : undefined);
+
+      if (trilhaPathActiveRef.current) {
+        const targetPercent = Math.round((i / totalSteps) * 100);
+        tlDrone.to(trilhaPathActiveRef.current, {
+          drawSVG: `0% ${targetPercent}%`,
+          duration: 1,
+          ease: 'sine.inOut',
+        }, "<");
+      }
+
+      // Adiciona Labels dos Textos
+      Object.entries(TEXT_SCENES).forEach(([key, scene]) => {
+        if (i === scene.enter) tlDrone.addLabel(`text_${key}Enter`, "-=1");
+        if (i === scene.exit) tlDrone.addLabel(`text_${key}Exit`, "-=1");
       });
 
-      HERO_SCENES.forEach((scene) => {
-        if (i === scene.enter) tlDrone.addLabel(`${scene.refKey}Enter`, "-=1");
-        if (i === scene.exit) tlDrone.addLabel(`${scene.refKey}Exit`, "-=1");
+      // Adiciona Labels dos Ícones
+      Object.entries(ICON_SCENES).forEach(([key, scene]) => {
+        if (i === scene.enter) tlDrone.addLabel(`icon_${key}Enter`, "-=1");
+        if (i === scene.exit) tlDrone.addLabel(`icon_${key}Exit`, "-=1");
       });
     }
 
     const STAGGER_TIME = 0.02;
 
-    // Cena 1 — Ponte
+    // Animações dos Textos
     tlDrone
-      .to(splitPonte.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "ponteEnter")
-      .to(splitPonte.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "ponteExit");
+      .to(splitPonte.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_ponteEnter")
+      .to(splitPonte.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "text_ponteExit");
 
-    // Cena 2 — Dragão (RESOLVIDO: Sem translação horizontal que quebrava as margens de segurança)
     tlDrone
-      .to(splitDragao.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "dragaoEnter")
-      .to(splitDragao.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "dragaoExit");
+      .to(splitDragao.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_dragaoEnter")
+      .to(splitDragao.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "text_dragaoExit");
 
-    // Cena 3 — Guilda (RESOLVIDO: Removidos left/top injetados diretamente para respeitar o heroConfig)
     tlDrone
-      .fromTo(textRefs.current.guilda, 
-        { 
-          z: -500, 
-          opacity: 0 
-        }, 
-        { z: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true }, 
-        "guildaEnter"
+      .fromTo(textRefs.current.guilda,
+        { z: -500, opacity: 0 },
+        { z: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true },
+        "text_guildaEnter"
       )
-      .to(splitGuilda.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "guildaEnter")
-      .to(textRefs.current.guilda, { z: 3500, duration: 1.4, ease: "power2.in", force3D: true }, "guildaEnter+=0.8")
-      .to(textRefs.current.guilda, { opacity: 0, duration: 0.3, ease: "none" }, "guildaEnter+=1.9");
+      .to(splitGuilda.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_guildaEnter")
+      .to(textRefs.current.guilda, { z: 3500, duration: 1.4, ease: "power2.in", force3D: true }, "text_guildaEnter+=0.8")
+      .to(textRefs.current.guilda, { opacity: 0, duration: 0.3, ease: "none" }, "text_guildaEnter+=1.9");
 
-    // Cena 4 — Portão
     tlDrone
-      .to(splitPortaoLeft.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "portaoEnter")
-      .to(splitPortaoRight.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "portaoEnter+=0.1")
-      .to(splitPortaoLeft.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "portaoExit")
-      .to(splitPortaoRight.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "portaoExit")
-      .to(portaoLeftRef.current, { x: -150, opacity: 0, ease: "power2.in", duration: 0.5 }, "portaoExit")
-      .to(portaoRightRef.current, { x: 150, opacity: 0, ease: "power2.in", duration: 0.5 }, "portaoExit");
+      .to(splitPortaoLeft.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_portaoEnter")
+      .to(splitPortaoRight.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_portaoEnter+=0.1")
+      .to(splitPortaoLeft.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "text_portaoExit")
+      .to(splitPortaoRight.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "text_portaoExit")
+      .to(portaoLeftRef.current, { x: -150, opacity: 0, ease: "power2.in", duration: 0.5 }, "text_portaoExit")
+      .to(portaoRightRef.current, { x: 150, opacity: 0, ease: "power2.in", duration: 0.5 }, "text_portaoExit");
 
     if (svgPathRef.current && svgContainer) {
       tlDrone
         .to(svgContainer, { opacity: 1, duration: 0.1 })
         .to(svgPathRef.current, { drawSVG: "0% 100%", attr: { "stroke-width": 600 }, ease: "power1.in", duration: 1.5 }, "<");
     }
+
+    // Animação Dinâmica dos Ícones
+    Object.entries(ICON_SCENES).forEach(([key, scene]) => {
+      const enterLabel = `icon_${key}Enter`;
+      const exitLabel = `icon_${key}Exit`;
+
+      if (tlDrone.labels[enterLabel] === undefined) return;
+
+      tlDrone.to(scene.ref.current, {
+        filter: 'grayscale(0%) opacity(1)',
+        scale: 1.5,
+        duration: 0.5,
+        ease: 'back.out(1.7)',
+      }, enterLabel);
+
+      if (tlDrone.labels[exitLabel] !== undefined) {
+        tlDrone.to(scene.ref.current, {
+          scale: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+        }, exitLabel);
+      }
+    });
 
     return () => {
       if (tlDrone.scrollTrigger) tlDrone.scrollTrigger.kill();
@@ -258,7 +333,6 @@ useEffect(() => {
       splitPortaoRight.revert();
     };
   }, [isMobile]);
-  
 
   return (
     <section className={styles.hero} ref={sectionHeroRef}>
@@ -276,48 +350,57 @@ useEffect(() => {
 
           <SvgTrans ref={svgPathRef} />
 
-        <section className={styles.textOverlayContainer} aria-label="Introdução Montanha Burguer">
-        {HERO_SCENES.map((scene) => {
-          if (scene.type === 'wrapper') {
-            return (
-              <h2
-                key={scene.id}
-                className={`${styles.sceneText} ${styles.portaoWrapper}`}
-                style={getDynamicStyles(scene)}
-                ref={(el) => (textRefs.current[scene.refKey] = el)}
-              >
-                <span className={styles.portaoLeft} ref={portaoLeftRef}>
-                  {scene.tokensLeft.map((token, i) => (
-                    <React.Fragment key={i}>{token.text}</React.Fragment>
-                  ))}
-                </span>
-                <span className={styles.portaoRight} ref={portaoRightRef}>
-                  {scene.tokensRight.map((token, i) => (
-                    <strong key={i} style={token.highlight ? { color: '#e5b82e', fontWeight: 700 } : { color: 'inherit', fontWeight: 'inherit' }}>
-                      {token.text}
-                    </strong>
-                  ))}
-                </span>
-              </h2>
-            );
-          }
+          <div className={styles.trilhaOverlay}>
+            <TrilhaHero
+              ref={trilhaContainerRef}
+              iconRefs={trilhaIconRefs}
+              activePathRef={trilhaPathActiveRef}
+            />
+          </div>
+          <ScrollIndicator ref={scrollIndicatorRef} />
 
-          return (
-            <h1
-              key={scene.id}
-              className={styles.sceneText}
-              style={getDynamicStyles(scene)}
-              ref={(el) => (textRefs.current[scene.refKey] = el)}
-            >
-              {scene.tokens.map((token, i) => {
-                if (token.highlight) return <strong key={i}>{token.text}</strong>;
-                if (token.alert) return <span key={i} className={styles.cuidado}>{token.text}</span>;
-                return <React.Fragment key={i}>{token.text}</React.Fragment>;
-              })}
-            </h1>
-          );
-        })}
-      </section>
+          <section className={styles.textOverlayContainer} aria-label="Introdução Montanha Burguer">
+            {HERO_SCENES.map((scene) => {
+              if (scene.type === 'wrapper') {
+                return (
+                  <h2
+                    key={scene.id}
+                    className={`${styles.sceneText} ${styles.portaoWrapper}`}
+                    style={getDynamicStyles(scene)}
+                    ref={(el) => (textRefs.current[scene.refKey] = el)}
+                  >
+                    <span className={styles.portaoLeft} ref={portaoLeftRef}>
+                      {scene.tokensLeft.map((token, i) => (
+                        <React.Fragment key={i}>{token.text}</React.Fragment>
+                      ))}
+                    </span>
+                    <span className={styles.portaoRight} ref={portaoRightRef}>
+                      {scene.tokensRight.map((token, i) => (
+                        <strong key={i} style={token.highlight ? { color: '#e5b82e', fontWeight: 700 } : { color: 'inherit', fontWeight: 'inherit' }}>
+                          {token.text}
+                        </strong>
+                      ))}
+                    </span>
+                  </h2>
+                );
+              }
+
+              return (
+                <h1
+                  key={scene.id}
+                  className={styles.sceneText}
+                  style={getDynamicStyles(scene)}
+                  ref={(el) => (textRefs.current[scene.refKey] = el)}
+                >
+                  {scene.tokens.map((token, i) => {
+                    if (token.highlight) return <strong key={i}>{token.text}</strong>;
+                    if (token.alert) return <span key={i} className={styles.cuidado}>{token.text}</span>;
+                    return <React.Fragment key={i}>{token.text}</React.Fragment>;
+                  })}
+                </h1>
+              );
+            })}
+          </section>
         </div>
       </div>
     </section>

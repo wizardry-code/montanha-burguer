@@ -1,12 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, forwardRef } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './ScrollIndicator.module.css';
 
-gsap.registerPlugin(ScrollTrigger);
-
-function ScrollIndicator() {
-const containerRef = useRef(null);
+// NOTA DE INTEGRAÇÃO:
+// O antigo ScrollTrigger interno (trigger: "body", start/end "+=100") foi removido
+// porque ele não tinha relação real com o `heroBelt`/`tlDrone`, que é quem de fato
+// controla o progresso do scroll na Hero (scrub ao longo de ~25 waypoints).
+// Agora o componente só cuida das próprias animações de loop (seta + anel de texto).
+// A opacidade/escala de entrada e saída é 100% controlada pelo Hero.jsx via ref,
+// dentro da mesma timeline `tlDrone`, garantindo sincronismo com a câmera 3D.
+const ScrollIndicator = forwardRef(function ScrollIndicator(props, ref) {
 const arrowRef = useRef(null);
 const ringRef = useRef(null);
 
@@ -15,52 +18,37 @@ const text = "Desça para ver o reino";
 const chars = text.split("");
 
 useEffect(() => {
-    // 1. Rotação contínua e suave do texto interno
-    const rotateTween = gsap.to(ringRef.current, {
-    rotation: 360,
-    duration: 10,
-    repeat: -1,
-    ease: "none"
+    const ctx = gsap.context(() => {
+    // Rotação contínua e suave do texto interno
+    gsap.to(ringRef.current, {
+        rotation: 360,
+        duration: 10,
+        repeat: -1,
+        ease: "none",
     });
 
-    // 2. Seta normal pulando com vai e vem sutil
-    const bounceTween = gsap.to(arrowRef.current, {
-    y: 6,
-    duration: 0.5,
-    repeat: -1,
-    yoyo: true,
-    ease: "power1.inOut"
+    // Seta pulando com vai e vem sutil
+    gsap.to(arrowRef.current, {
+        y: 6,
+        duration: 0.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut",
+    });
     });
 
-    // 3. ScrollTrigger para sumir logo no primeiro movimento de rolagem
-    gsap.to(containerRef.current, {
-    opacity: 0,
-    y: 20,
-    scrollTrigger: {
-        trigger: "body",
-        start: "top top",
-        end: "+=100",
-        scrub: true,
-    }
-    });
-
-    return () => {
-    rotateTween.kill();
-    bounceTween.kill();
-    ScrollTrigger.getAll().forEach(t => t.kill());
-    };
+    return () => ctx.revert();
 }, []);
 
 return (
-    <div ref={containerRef} className={styles.container}>
+    <div ref={ref} className={styles.container}>
     <div className={styles.circle}>
-        
         {/* Texto rodando por dentro */}
         <div ref={ringRef} className={styles.textRing}>
         {chars.map((char, index) => (
-            <span 
-            key={index} 
-            className={styles.char} 
+            <span
+            key={index}
+            className={styles.char}
             style={{ '--i': index }}
             >
             {char}
@@ -70,10 +58,9 @@ return (
 
         {/* Seta isolada no centro */}
         <span ref={arrowRef} className={styles.arrow}>↓</span>
-        
     </div>
     </div>
 );
-}
+});
 
 export default ScrollIndicator;

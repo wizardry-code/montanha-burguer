@@ -10,6 +10,16 @@
   height: 2700dvh;
 }
 
+.trilhaOverlay {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90%, 900px);
+  z-index: 15;
+  pointer-events: none;
+}
+
 .canvasContainer {
   position: sticky;
   top: 0;

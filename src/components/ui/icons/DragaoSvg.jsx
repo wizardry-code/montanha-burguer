@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import Caminho from './Caminho';
+import Caminho from './Caminho/Caminho';
 
 export const DragaoSvg = forwardRef(({ size = 44, className = '', ...props }, ref) => {
 return (
