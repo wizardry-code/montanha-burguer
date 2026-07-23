@@ -19,6 +19,8 @@ import ScrollIndicator from '../../components/ScrollIndicator/ScrollIndicator.js
 import styles from './Hero.module.css';
 import svgStyles from '../../components/ui/svgs/SvgTrans/SvgTrans.module.css';
 
+//import de dados
+
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
 

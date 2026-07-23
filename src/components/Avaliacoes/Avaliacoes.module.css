@@ -1,0 +1,88 @@
+
+.root {
+  --color-cream: #F0E3CF;
+  --color-slate: #58595B;
+  --color-orange: #FA9A00;
+  --color-amber: #F7AC34;
+  --color-red: #DB2C00;
+  --color-purple: #8300AE;
+  --color-blue: #009AC4;
+  --color-wine: #620100;
+  --color-gold: #CA9401;
+  --color-white: #FFFFFF;
+  --strong-font-weight: bold; 
+
+  --font-card-title: 'Cinzel', serif;
+  --font-body: 'Merriweather', Georgia, serif;
+  --font-body-alt: 'ABeeZee', sans-serif;
+  color: var(--color-slate);
+  isolation: isolate;
+}
+
+/* Título em Cinzel */
+.titulo {
+font-family: var(--font-display);
+font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+font-weight: 700;
+color: var(--color-slate);
+text-transform: uppercase;
+letter-spacing: 1px;
+margin: 0 0 0.5rem 0;
+}
+
+.titulo span {
+color: #ac8204;
+}
+
+/* Subtítulo em Merriweather */
+.subtitulo {
+font-family: var(--font-body);
+font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+font-weight: 300;
+color: rgb(0, 0, 0);
+margin: 0;
+font-style: italic;
+opacity: 1;
+}
+
+/* Container do componente */
+.container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* Agrupamento do Cabeçalho */
+.headerGroup {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0; /* Impede o título de encolher */
+}
+
+/* ... mantenha .titulo e .subtitulo como estão ... */
+
+/* Wrapper que segura o widget */
+.widgetWrapper {
+  flex: 1;
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* flex-start evita que o widget estique/deforme verticalmente */
+}
+
+@media (max-width: 600px) {
+  .headerGroup {
+    margin-bottom: 0.75rem;
+  }
+
+  .titulo {
+    font-size: 1.4rem;
+  }
+
+  .subtitulo {
+    font-size: 0.85rem;
+  }
+}

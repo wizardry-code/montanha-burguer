@@ -41,7 +41,15 @@
   background-position: center center;
   aspect-ratio: inherit;
 }
-
+.avaliacoesCard {
+  width: 80vw;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;       /* Mantém acima do background pattern */
+}
 /* Esteira Principal que Desliza */
 .track {
   position: relative;

@@ -13,6 +13,8 @@ import { MedievalCard } from '../../components/MedievalCard/MedievalCard';
 import Section3a from '../Section3/Section3a';
 import { SvgTrans } from '../../components/ui/svgs/SvgTrans/SvgTrans';
 import { Section2articlesData } from '../../data/sectionsData';
+import Avaliacoes from '../../components/Avaliacoes/Avaliacoes';
+
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
@@ -219,8 +221,10 @@ return (
             {Section2articlesData.map((section, index) => (
             <MedievalCard section={section} index={index} key={section.id} />
             ))}
+            <div className={styles.avaliacoesCard}>
+            <Avaliacoes/>
+            </div>
         </div>
-
         {/* Seção Adicional (Section3a) continua na esteira */}
         <Section3a ref={s3Ref} svgRuleRef={svgRuleRef} />
         </div>

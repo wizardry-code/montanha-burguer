@@ -9,12 +9,12 @@ import Hero from './sections/Hero/Hero'
 import Section2 from './sections/Section2/Section2'
 import ScrollIndicator from './components/ScrollIndicator/ScrollIndicator';
 import TrilhaHero from './components/TrilhaHero/TrilhaHero';
+import Avaliacoes from './components/Avaliacoes/Avaliacoes'
 
 function Playground () {
 return (
     <div>
-        <ScrollIndicator/>
-        <TrilhaHero/>
+        <Section2/>
     </div>
 );
 }

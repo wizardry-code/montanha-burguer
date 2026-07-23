@@ -5,6 +5,8 @@ import { MapsIcon, WazeIcon } from '../ui/icons';
 import styles from './MedievalCard.module.css';
 
 export function MedievalCard({ section, index }) {
+
+let tag = "Capítulo"
 return (
     <article 
     className={styles.card} 
@@ -23,7 +25,7 @@ return (
         <div className={styles.imageOverlay} />
 
         <span className={styles.chapterTag} aria-hidden="true">
-        Capítulo {section.chapter}
+        {tag} {section.chapter}
         </span>
     </figure>
 
