@@ -4,10 +4,7 @@ import { DrawnRule } from '../../components/ui/DrawnRule';
 import { splitIntoWords } from '../../utils/textUtils';
 import styles from './Section3a.module.css';
 
-// Section3a fica DENTRO da esteira da Section2 de propósito: ela é animada
-// pelo scroll horizontal único da Section2 (mesmo master timeline / mesmo
-// ScrollTrigger com pin). Por isso ela não cria nenhum ScrollTrigger próprio,
-// apenas expõe refs (via forwardRef + props) para a Section2 controlar.
+
 export const Section3a = forwardRef(function Section3a({ svgRuleRef }, ref) {
 const bgImage = section3AData?.image ? `url(${section3AData.image})` : 'none';
 

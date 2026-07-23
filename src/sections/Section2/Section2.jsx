@@ -17,6 +17,8 @@ import Avaliacoes from '../../components/Avaliacoes/Avaliacoes';
 
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
+ScrollTrigger.config({ ignoreMobileResize: true });
+ScrollTrigger.normalizeScroll(true);
 
 const SVG_MAX_STROKE = 600;
 const INTRO_SCROLL_VH = 1.3;

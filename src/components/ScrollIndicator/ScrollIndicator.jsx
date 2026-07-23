@@ -2,13 +2,7 @@ import React, { useEffect, useRef, forwardRef } from 'react';
 import gsap from 'gsap';
 import styles from './ScrollIndicator.module.css';
 
-// NOTA DE INTEGRAÇÃO:
-// O antigo ScrollTrigger interno (trigger: "body", start/end "+=100") foi removido
-// porque ele não tinha relação real com o `heroBelt`/`tlDrone`, que é quem de fato
-// controla o progresso do scroll na Hero (scrub ao longo de ~25 waypoints).
-// Agora o componente só cuida das próprias animações de loop (seta + anel de texto).
-// A opacidade/escala de entrada e saída é 100% controlada pelo Hero.jsx via ref,
-// dentro da mesma timeline `tlDrone`, garantindo sincronismo com a câmera 3D.
+
 const ScrollIndicator = forwardRef(function ScrollIndicator(props, ref) {
 const arrowRef = useRef(null);
 const ringRef = useRef(null);

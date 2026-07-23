@@ -23,7 +23,8 @@ import svgStyles from '../../components/ui/svgs/SvgTrans/SvgTrans.module.css';
 
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
-
+ScrollTrigger.config({ ignoreMobileResize: true });
+ScrollTrigger.normalizeScroll(true);
 // Dados das cenas e voos
 const SCENE_TARGETS = {
   dragon: new THREE.Vector3(10.13, 35.34, 56.16),
