@@ -1,0 +1,44 @@
+/* Tag completa (ícone + texto) — usada abaixo do nomeFicticio */
+.tagFull {
+display: inline-flex;
+align-items: center;
+gap: 0.4rem;
+padding: 0.35em 0.75em;
+border-radius: 999px;
+background: rgba(255, 255, 255, 0.9);
+color: #18181b;
+font-size: 0.72rem;
+font-weight: 600;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+border: 1px solid rgba(228, 228, 231, 0.5);
+white-space: nowrap;
+}
+
+/* Tag apenas ícone — usada no footer/selos secundários */
+.tagIconOnly {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 32px;
+height: 32px;
+border-radius: 999px;
+background: rgba(255, 255, 255, 0.9);
+font-size: 0.9rem;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+border: 1px solid rgba(228, 228, 231, 0.5);
+cursor: default;
+flex-shrink: 0;
+}
+
+/* Texto acessível, escondido visualmente (o label vira tooltip via title) */
+.srOnly {
+position: absolute;
+width: 1px;
+height: 1px;
+padding: 0;
+margin: -1px;
+overflow: hidden;
+clip: rect(0, 0, 0, 0);
+white-space: nowrap;
+border: 0;
+}

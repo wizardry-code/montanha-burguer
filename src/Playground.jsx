@@ -17,6 +17,7 @@ import Section4 from './sections/Section4/Section4'
 function Playground () {
 return (
     <div>
+        <Section3/>
         <Section4/>
     </div>
 );

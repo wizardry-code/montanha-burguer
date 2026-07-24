@@ -15,7 +15,6 @@ transform: scale(1.05);
 box-shadow: 0 0 0 1px var(--rarity-border), 0 0 40px -10px var(--rarity-glow);
 }
 
-/* Linha interna (inner frame), acompanhando os cantos */
 .card::after {
 content: '';
 position: absolute;
@@ -63,7 +62,15 @@ gap: 12px;
 transition: opacity 0.35s ease;
 }
 
+.headerLeft {
+display: flex;
+flex-direction: column;
+gap: 0.5rem;
+min-width: 0;
+}
+
 .nameBadge {
+align-self: flex-start;
 padding: 0.5em 0.9em;
 border-radius: 999px;
 background: rgba(20, 20, 20, 0.45);
@@ -73,7 +80,13 @@ border: 1px solid rgba(255, 255, 255, 0.18);
 color: #fff;
 font-size: 0.85rem;
 font-weight: 600;
-max-width: 65%;
+max-width: 100%;
+}
+
+.mainTagsRow {
+display: flex;
+flex-wrap: wrap;
+gap: 0.4rem;
 }
 
 .priceTag {
@@ -131,24 +144,32 @@ font-size: 0.95rem;
 font-weight: 700;
 }
 
-/* Ingredientes: tags lado a lado, sem quebrar o texto de uma tag ao meio */
+/* Lista de ingredientes — semântica real (<ul>/<li>) */
 .ingredientsList {
 margin: 0;
 padding: 0;
 list-style: none;
 display: flex;
-flex-wrap: wrap;
+flex-wrap: wrap; /* permite a lista quebrar linha */
 gap: 0.35rem 0.6rem;
 font-size: 0.78rem;
 }
 
 .ingredientTag {
-white-space: nowrap;
+white-space: nowrap; /* impede quebra de linha DENTRO do item */
 opacity: 0.9;
+position: relative;
+}
+
+/* Separador visual sutil entre ingredientes (bolinha), opcional */
+.ingredientTag:not(:last-child)::after {
+content: '•';
+margin-left: 0.6rem;
+opacity: 0.4;
 }
 
 /* ============================================
-RODAPÉ DO BLOCO: Categoria + Tags + Status
+RODAPÉ DO BLOCO: Selos secundários + Status
 ============================================ */
 .statusRow {
 display: flex;
@@ -161,25 +182,11 @@ border-top: 1px solid rgba(255, 255, 255, 0.12);
 font-size: 0.72rem;
 }
 
-.tagsGroup {
+.secondaryTagsGroup {
 display: flex;
 align-items: center;
 flex-wrap: wrap;
 gap: 0.4rem;
-}
-
-.categoryTag {
-padding: 0.25em 0.6em;
-border-radius: 999px;
-background: rgba(255, 255, 255, 0.08);
-white-space: nowrap;
-}
-
-.specialTag {
-padding: 0.25em 0.6em;
-border-radius: 999px;
-background: var(--tag-color, rgba(255, 255, 255, 0.15));
-white-space: nowrap;
 }
 
 .statusStats {
@@ -188,7 +195,7 @@ white-space: nowrap;
 }
 
 /* ============================================
-MODO FOCUS — oculta UI, deixa só a foto
+MODO FOCUS
 ============================================ */
 .hidden {
 opacity: 0;
