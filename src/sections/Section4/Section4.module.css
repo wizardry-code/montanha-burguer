@@ -1,0 +1,10 @@
+.root {
+  padding: 4rem 5vw;
+}
+
+.cardsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}

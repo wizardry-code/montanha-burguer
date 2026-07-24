@@ -12,11 +12,12 @@ import TrilhaHero from './components/TrilhaHero/TrilhaHero';
 import Avaliacoes from './components/Avaliacoes/Avaliacoes'
 import Section3b from './sections/Section3/Section3b'
 import { MedievalCard } from './components/MedievalCard/MedievalCard'
-import Teste from './sections/Section4/Teste'
+import Section4 from './sections/Section4/Section4'
 
 function Playground () {
 return (
     <div>
+        <Section4/>
     </div>
 );
 }
