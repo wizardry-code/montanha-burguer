@@ -1,8 +1,29 @@
 import { useEffect, useRef } from 'react';
 
-const SPAWN_CHANCE = 0.5; // chance de spawnar partícula a cada movimento (ajuste à vontade)
-const PARTICLE_LIFE = 1000; // ms
-const MAX_PARTICLES = 150; // teto de segurança
+const SPAWN_CHANCE = 0.5;
+const PARTICLE_LIFE = 1000;
+const MAX_PARTICLES = 150;
+
+function createEmberSprite() {
+const size = 32;
+const spriteCanvas = document.createElement('canvas');
+spriteCanvas.width = size;
+spriteCanvas.height = size;
+const sctx = spriteCanvas.getContext('2d');
+
+const gradient = sctx.createRadialGradient(
+    size / 2, size / 2, 0,
+    size / 2, size / 2, size / 2
+);
+gradient.addColorStop(0, 'rgba(242, 202, 80, 1)');
+gradient.addColorStop(0.4, 'rgba(242, 202, 80, 0.6)');
+gradient.addColorStop(1, 'rgba(255, 107, 0, 0)');
+
+sctx.fillStyle = gradient;
+sctx.fillRect(0, 0, size, size);
+
+return spriteCanvas;
+}
 
 export default function EmberCursor() {
 const canvasRef = useRef(null);
@@ -10,6 +31,8 @@ const canvasRef = useRef(null);
 useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
+    const emberSprite = createEmberSprite();
+
     let particles = [];
     let animationId;
     let mouseX = -100;
@@ -28,8 +51,6 @@ useEffect(() => {
     mouseX = e.clientX;
     mouseY = e.clientY;
 
-    // spawna baseado na distância percorrida, não só em "todo evento"
-    // evita rajada de partículas quando o mouse anda pouco (movimento lento)
     const dx = mouseX - lastX;
     const dy = mouseY - lastY;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -42,7 +63,7 @@ useEffect(() => {
         x: mouseX,
         y: mouseY,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 0.3, // leve tendência de subir
+        vy: Math.sin(angle) * speed - 0.3,
         size: Math.random() * 2 + 2,
         born: performance.now(),
         });
@@ -59,19 +80,23 @@ useEffect(() => {
         const age = now - p.born;
         if (age >= PARTICLE_LIFE) return false;
 
-        const t = age / PARTICLE_LIFE; // 0 -> 1
+        const t = age / PARTICLE_LIFE;
         p.x += p.vx;
         p.y += p.vy;
 
         const opacity = 1 - t;
         const scale = 1 - t * 0.9;
+        const drawSize = p.size * scale * 8;
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * scale, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(242, 202, 80, ${opacity})`;
-        ctx.shadowColor = '#ff6b00';
-        ctx.shadowBlur = 8;
-        ctx.fill();
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(
+        emberSprite,
+        p.x - drawSize / 2,
+        p.y - drawSize / 2,
+        drawSize,
+        drawSize
+        );
+        ctx.globalAlpha = 1;
 
         return true;
     });
