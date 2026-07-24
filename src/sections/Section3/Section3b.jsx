@@ -7,7 +7,7 @@ import cardStyles from '../../components/MedievalCard/MedievalCard.module.css';
 import styles from './Section3b.module.css';
 
 import { MedievalCard } from '../../components/MedievalCard/MedievalCard';
-import { Section3articlesData } from '../../data/Section3bData';
+import { Section3articlesData } from '../../data/section3bData';
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 ScrollTrigger.config({ ignoreMobileResize: true });

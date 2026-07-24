@@ -1,10 +1,10 @@
 //import de imagens
-import imgPortal from '../assets/imgs/imgTranS2.avif';
-import imgPatio from '../assets/imgs/imgS2A2.avif';
-import imgRefugio from '../assets/imgs/imgS2A3.avif';
-import imgMesas from '../assets/imgs/imgS2A4.avif';
-import imgDrinks from '../assets/imgs/imgS2A5.avif';
-import imgBebe from '../assets/imgs/imgS3.avif';
+import imgPortal from '../assets/imgs/section2/imgTranS2.avif';
+import imgPatio from '../assets/imgs/section2/imgS2A2.avif';
+import imgRefugio from '../assets/imgs/section2/imgS2A3.avif';
+import imgMesas from '../assets/imgs/section2/imgS2A4.avif';
+import imgDrinks from '../assets/imgs/section2/imgS2A5.avif';
+import imgBebe from '../assets/imgs/section2/imgS3.avif';
 
 
 export const Section2articlesData = [

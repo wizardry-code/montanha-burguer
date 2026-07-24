@@ -11,6 +11,8 @@ import ScrollIndicator from './components/ScrollIndicator/ScrollIndicator';
 import TrilhaHero from './components/TrilhaHero/TrilhaHero';
 import Avaliacoes from './components/Avaliacoes/Avaliacoes'
 import Section3b from './sections/Section3/Section3b'
+import { MedievalCard } from './components/MedievalCard/MedievalCard'
+import Teste from './sections/Section4/Teste'
 
 function Playground () {
 return (

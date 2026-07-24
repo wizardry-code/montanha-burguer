@@ -1,0 +1,108 @@
+.stage {
+position: relative;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 2rem;
+min-height: 60vh;
+padding: 4rem 2rem;
+perspective: 1200px;
+overflow: hidden;
+}
+
+.menuCard {
+display: flex;
+align-items: center;
+gap: 2.5rem;
+width: min(70vw, 900px);
+will-change: transform, opacity;
+}
+
+.menuCardImage {
+flex: 0 0 auto;
+width: 40%;
+}
+
+.menuCardImage img {
+width: 100%;
+height: auto;
+display: block;
+}
+
+.menuCardText {
+flex: 1 1 auto;
+display: flex;
+flex-direction: column;
+gap: 0.8rem;
+}
+
+.menuCardTitle {
+margin: 0;
+font-family: 'Cinzel', serif;
+font-size: clamp(1.3rem, 2vw, 1.9rem);
+text-transform: uppercase;
+}
+
+.menuCardTagline {
+margin: 0;
+font-style: italic;
+opacity: 0.85;
+}
+
+.menuCardIngredients {
+list-style: none;
+margin: 0;
+padding: 0;
+display: flex;
+flex-direction: column;
+gap: 0.4rem;
+font-family: 'Merriweather', Georgia, serif;
+}
+
+.navBtn {
+flex: 0 0 auto;
+width: 48px;
+height: 48px;
+border-radius: 50%;
+border: none;
+background: rgba(0, 0, 0, 0.6);
+color: #fff;
+font-size: 1.5rem;
+cursor: pointer;
+z-index: 2;
+transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.navBtn:hover,
+.navBtn:focus-visible {
+transform: scale(1.08);
+background: rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 900px) {
+.stage {
+    padding: 2rem 1rem;
+    gap: 1rem;
+}
+
+.menuCard {
+    flex-direction: column;
+    width: 88vw;
+    gap: 1.2rem;
+    text-align: center;
+}
+
+.menuCardImage {
+    width: 70%;
+}
+
+.menuCardIngredients {
+    align-items: center;
+}
+
+.navBtn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+}
+}

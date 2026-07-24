@@ -1,8 +1,8 @@
 // import de imagens da Seção 3 (Aluguel e Espaço)
 // Substitua os caminhos abaixo pelas suas imagens correspondentes
-import imgAniversario from '../assets/imgs/Section3/imgS3A1.avif'; // Criança fantasiada no trono
-import imgCineTaverna from '../assets/imgs/Section3/imgS3A2.avif'; // Projeção na parede de pedra
-import imgMesaRPG from '../assets/imgs/Section3/imgS3A3.avif';     // Ilustração da mesa de RPG
+import imgAniversario from '../assets/imgs/section3/imgS3A1.avif'; // Criança fantasiada no trono
+import imgCineTaverna from '../assets/imgs/section3/imgS3A2.avif'; // Projeção na parede de pedra
+import imgMesaRPG from '../assets/imgs/section3/imgS3A3.avif';     // Ilustração da mesa de RPG
 
 export const Section3articlesData = [
 {
