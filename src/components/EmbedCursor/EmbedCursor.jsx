@@ -1,8 +1,39 @@
 import { useEffect, useRef } from 'react';
 
-const SPAWN_CHANCE = 0.5;
-const PARTICLE_LIFE = 1000;
-const MAX_PARTICLES = 150;
+// ============================================
+// PALETA DE CORES — escolha uma combinação pelo nome
+// ============================================
+
+const EMBER_PALETTES = {
+dourado: { core: '#f2ca50', edge: '#ff6b00' },
+fogoIntenso: { core: '#ffb347', edge: '#ff2d00' },
+azulMagico: { core: '#7fd8ff', edge: '#0066ff' },
+roxoArcano: { core: '#d9a6ff', edge: '#7c3aed' },
+verdeVeneno: { core: '#9dffb0', edge: '#0f9b3f' },
+gelo: { core: '#e6f9ff', edge: '#5ec8e0' },
+sangue: { core: '#ff8080', edge: '#8b0000' },
+espectral: { core: '#e0e0ff', edge: '#5a4fcf' },
+};
+
+const EMBER_PALETTE_KEY = 'fogoIntenso'; // padrão: 'dourado' — troque pela chave desejada acima
+
+// ============================================
+// OUTRAS PROPRIEDADES MODIFICÁVEIS
+// ============================================
+
+const SPAWN_CHANCE = 0.5;    // padrão: 0.5
+const PARTICLE_LIFE = 1000;  // padrão: 1000 (ms)
+const MAX_PARTICLES = 150;   // padrão: 150
+
+// ============================================
+
+function hexToRgbString(hex) {
+const clean = hex.replace('#', '');
+const r = parseInt(clean.substring(0, 2), 16);
+const g = parseInt(clean.substring(2, 4), 16);
+const b = parseInt(clean.substring(4, 6), 16);
+return `${r}, ${g}, ${b}`;
+}
 
 function createEmberSprite() {
 const size = 32;
@@ -11,13 +42,17 @@ spriteCanvas.width = size;
 spriteCanvas.height = size;
 const sctx = spriteCanvas.getContext('2d');
 
+const palette = EMBER_PALETTES[EMBER_PALETTE_KEY] || EMBER_PALETTES.dourado;
+const coreRgb = hexToRgbString(palette.core);
+const edgeRgb = hexToRgbString(palette.edge);
+
 const gradient = sctx.createRadialGradient(
     size / 2, size / 2, 0,
     size / 2, size / 2, size / 2
 );
-gradient.addColorStop(0, 'rgba(242, 202, 80, 1)');
-gradient.addColorStop(0.4, 'rgba(242, 202, 80, 0.6)');
-gradient.addColorStop(1, 'rgba(255, 107, 0, 0)');
+gradient.addColorStop(0, `rgba(${coreRgb}, 1)`);
+gradient.addColorStop(0.4, `rgba(${coreRgb}, 0.6)`);
+gradient.addColorStop(1, `rgba(${edgeRgb}, 0)`);
 
 sctx.fillStyle = gradient;
 sctx.fillRect(0, 0, size, size);
@@ -86,7 +121,7 @@ useEffect(() => {
 
         const opacity = 1 - t;
         const scale = 1 - t * 0.9;
-        const drawSize = p.size * scale * 8;
+        const drawSize = p.size * scale * 2;
 
         ctx.globalAlpha = opacity;
         ctx.drawImage(
