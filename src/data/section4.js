@@ -1,8 +1,8 @@
 // Data da Seção do Cardápio Mágico (Grimório/Baralho de Cartas)
 // Substitua os imports abaixo pelas fotos reais dos hambúrgueres (fundo transparente, se possível)
-import imgCoracaoReino from '../assets/imgs/section4/images.jpg';
-import imgEscudoZander from '../assets/imgs/section4/images.jpg';
-import imgLegadoZion from '../assets/imgs/section4/images.jpg';
+import imgCoracaoReino from '../assets/imgs/section4/imagePlaceHolder.jpg';
+import imgEscudoZander from '../assets/imgs/section4/imagePlaceHolder.jpg';
+import imgLegadoZion from '../assets/imgs/section4/imagePlaceHolder.jpg';
 
 export const menuCardsData = [
 {
