@@ -15,7 +15,7 @@ sangue: { core: '#ff8080', edge: '#8b0000' },
 espectral: { core: '#e0e0ff', edge: '#5a4fcf' },
 };
 
-const EMBER_PALETTE_KEY = 'espectral'; // padrão: 'dourado' — troque pela chave desejada acima
+const EMBER_PALETTE_KEY = 'fogoIntenso'; // padrão: 'dourado' 
 
 // ============================================
 // OUTRAS PROPRIEDADES MODIFICÁVEIS
