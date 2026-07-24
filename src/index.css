@@ -31,3 +31,16 @@ html, body {
   max-width: 100%;
   overflow-x: clip;
 }
+/* Cursor de varinha padrão em todo o site */
+body {
+  /* 0 0 = ponto de clique na ponta superior esquerda */
+  cursor: url('./assets/cursor/cursor.svg') 0 0, auto;
+}
+
+/* Cursor quando o usuário passar o mouse por cima de links e botões */
+a, 
+button, 
+[role="button"], 
+input[type="submit"] {
+  cursor: url('./assets/cursor/cursorHover.svg') 0 0, pointer;
+}
