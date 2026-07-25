@@ -10,8 +10,6 @@ import { MedievalCard } from '../../components/MedievalCard/MedievalCard';
 import { Section3articlesData } from '../../data/section3bData';
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
-ScrollTrigger.config({ ignoreMobileResize: true });
-ScrollTrigger.normalizeScroll(true);
 
 export default function Section3() {
 const rootRef = useRef(null);

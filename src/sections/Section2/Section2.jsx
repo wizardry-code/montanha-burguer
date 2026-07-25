@@ -17,8 +17,6 @@ import Avaliacoes from '../../components/Avaliacoes/Avaliacoes';
 
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
-ScrollTrigger.config({ ignoreMobileResize: true });
-ScrollTrigger.normalizeScroll(true);
 
 const SVG_MAX_STROKE = 600;
 const INTRO_SCROLL_VH = 1.3;
@@ -226,7 +224,7 @@ return (
             <div className={styles.avaliacoesCard}>
             <Avaliacoes/>
             </div>
-            <div className={styles.finalTrack}></div>
+            <div className={styles.finalTrack} id='s2PreloadAnchor'></div>
         </div>
         {/* Seção Adicional (Section3a) continua na esteira */}
         <Section3a ref={s3Ref} svgRuleRef={svgRuleRef} />

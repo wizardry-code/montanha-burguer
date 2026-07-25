@@ -23,8 +23,6 @@ import svgStyles from '../../components/ui/svgs/SvgTrans/SvgTrans.module.css';
 
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
-ScrollTrigger.config({ ignoreMobileResize: true });
-ScrollTrigger.normalizeScroll(true);
 // Dados das cenas e voos
 const SCENE_TARGETS = {
   dragon: new THREE.Vector3(10.13, 35.34, 56.16),
@@ -205,9 +203,10 @@ export default function Hero() {
 
     const tlDrone = gsap.timeline({
       scrollTrigger: {
-        trigger: heroBeltRef.current,
+        trigger: sectionHeroRef.current,
+        pin:heroBeltRef.current,
         start: 'top top',
-        end: 'bottom bottom',
+        end: '+=500%',
         scrub: 1.8,
         invalidateOnRefresh: true,
       },

@@ -7,7 +7,8 @@
 .heroBelt {
   position: relative;
   width: 100%;
-  height: 2700dvh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .trilhaOverlay {
@@ -21,9 +22,9 @@
 }
 
 .canvasContainer {
-  position: sticky;
-  top: 0;
-  height: 100dvh;
+  position: absolute;
+  inset: 0;
+  height: 100%;
   width: 100%;
   overflow: hidden;
   z-index: 1;

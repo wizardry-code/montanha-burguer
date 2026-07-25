@@ -1,0 +1,21 @@
+.root {
+position: relative;
+width: 100%;
+background-color: #0d0a12; /* Cor de fundo para combinar com a sala do mago */
+}
+
+.stickyWrapper {
+width: 100%;
+height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+}
+
+.canvas {
+width: 100%;
+height: 100%;
+object-fit: cover;
+display: block;
+}
