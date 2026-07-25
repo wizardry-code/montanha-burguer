@@ -53,6 +53,14 @@ useEffect(() => {
     );
     };
 
+    // ------------------------------------------------------------
+    // 1) ScrollTrigger / pin: criado IMEDIATAMENTE.
+    // O end (+=300%) não depende das imagens, então o espaço de
+    // scroll reservado na página fica correto desde o primeiro
+    // ScrollTrigger.refresh() global (chamado no App.jsx).
+    // Isso evita o "jump" de altura que acontecia quando o pin só
+    // nascia depois que TOTAL_FRAMES imagens terminavam de carregar.
+    // ------------------------------------------------------------
     const trigger = ScrollTrigger.create({
     trigger: containerRef.current,
     start: 'top top',
@@ -71,35 +79,87 @@ useEffect(() => {
     },
     });
 
-    const preloadImages = () => {
-    let loadedCount = 0;
-    const loadedImages = [];
+    // ------------------------------------------------------------
+    // 2) Preload dos frames em LOTES (concorrência limitada), com
+    // prioridade baixa. Em vez de disparar as 240 requisições de
+    // uma vez (o que satura a banda e atrasa imagens visíveis de
+    // outras seções), carregamos MAX_CONCURRENT por vez.
+    //
+    // fetchPriority='low' avisa o navegador explicitamente que
+    // esses recursos podem ceder banda pra quem precisa mais agora
+    // (suportado em Chrome/Edge; em navegadores sem suporte, a
+    // propriedade é simplesmente ignorada, sem quebrar nada).
+    // ------------------------------------------------------------
+    const MAX_CONCURRENT = 6;
 
-    for (let i = 0; i < TOTAL_FRAMES; i++) {
+    const loadOneFrame = (index) =>
+    new Promise((resolve) => {
         const img = new Image();
-        img.src = currentFrame(i);
-        img.onload = () => {
-        loadedCount++;
-        if (i === 0) render(); // mostra o primeiro frame assim que possível
-        if (loadedCount === TOTAL_FRAMES) {
-            imagesLoadedRef.current = true;
-            setImagesLoaded(true);
-            render(); // garante que o frame correspondente ao progresso atual apareça
-        }
-        };
-        loadedImages.push(img);
-    }
+        img.fetchPriority = 'low';
+        img.src = currentFrame(index);
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(img); // não trava o lote se um frame falhar
+    });
+
+    let cancelled = false;
+
+    const preloadImages = async () => {
+    const loadedImages = new Array(TOTAL_FRAMES);
+    const indices = Array.from({ length: TOTAL_FRAMES }, (_, i) => i);
+
+    // Carrega o frame 0 primeiro e sozinho, com prioridade normal,
+    // pra garantir que algo aparece no canvas o quanto antes.
+    const first = new Image();
+    first.src = currentFrame(0);
+    await new Promise((res) => {
+        first.onload = res;
+        first.onerror = res;
+    });
+    loadedImages[0] = first;
     imagesRef.current = loadedImages;
+    render();
+
+    const rest = indices.slice(1);
+
+    for (let i = 0; i < rest.length; i += MAX_CONCURRENT) {
+        if (cancelled) return;
+
+        const batch = rest.slice(i, i + MAX_CONCURRENT);
+        const results = await Promise.all(batch.map(loadOneFrame));
+
+        batch.forEach((frameIndex, j) => {
+        loadedImages[frameIndex] = results[j];
+        });
+        imagesRef.current = loadedImages;
+    }
+
+    if (!cancelled) {
+        imagesLoadedRef.current = true;
+        setImagesLoaded(true);
+        render(); // garante que o frame correspondente ao progresso atual apareça
+    }
     };
 
-
+    // ------------------------------------------------------------
+    // 3) Gatilho de preload: ScrollTrigger apontando pra um ponto de
+    // ancoragem DENTRO da Section2 (não pra própria SectionCardapio).
+    // Isso adianta o download dos 240 frames pra um momento em que
+    // o usuário ainda está longe do canvas, sem depender de "distância
+    // em pixels" (que seria instável numa seção com pin/scroll virtual).
+    //
+    // Pré-requisito: adicione id="s2-preload-anchor" em algum elemento
+    // "calmo" da Section2 (ex: o .avaliacoesCard, no meio da esteira).
+    //
+    // once: true já garante que só dispara uma vez, sem precisar de
+    // disconnect manual como no IntersectionObserver.
+    // ------------------------------------------------------------
     let preloadTrigger = null;
     const anchor = document.getElementById('s2PreloadAnchor');
 
     if (anchor) {
     preloadTrigger = ScrollTrigger.create({
         trigger: anchor,
-        start: 'top bottom', // dispara assim que o topo do anchor entra na tela
+        start: 'left right',
         once: true,
         onEnter: preloadImages,
     });
@@ -116,10 +176,11 @@ useEffect(() => {
     }
 
     return () => {
+    cancelled = true; // interrompe o loop de lotes se ainda estiver rodando
     if (preloadTrigger) preloadTrigger.kill();
     trigger.kill();
     };
-}, []);
+}, []); // roda uma única vez no mount — sem depender de imagesLoaded
 
 return (
     <section ref={containerRef} className={styles.root}>
@@ -127,6 +188,7 @@ return (
         <canvas ref={canvasRef} className={styles.canvas} />
         {!imagesLoaded && (
         <div className={styles.loadingOverlay} aria-hidden="true">
+            {/* opcional: spinner / skeleton enquanto os 240 frames baixam */}
         </div>
         )}
     </div>
