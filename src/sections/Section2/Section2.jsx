@@ -20,7 +20,9 @@ gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
 const SVG_MAX_STROKE = 600;
 const INTRO_SCROLL_VH = 1.3;
+// Dentro de src/sections/Section2/Section2.jsx
 
+export const S2_HEAVY_PRELOAD_EVENT = 'S2_HEAVY_PRELOAD_EVENT';
 export default function Section2() {
 const rootRef = useRef(null);
 const trackRef = useRef(null);
@@ -224,10 +226,10 @@ return (
             <div className={styles.avaliacoesCard}>
             <Avaliacoes/>
             </div>
-            <div className={styles.finalTrack} id='s2PreloadAnchor'></div>
+            <div className={styles.finalTrack}></div>
         </div>
         {/* Seção Adicional (Section3a) continua na esteira */}
-        <Section3a ref={s3Ref} svgRuleRef={svgRuleRef} />
+        <Section3a ref={s3Ref} svgRuleRef={svgRuleRef} id='s2PreloadAnchor'/>
         </div>
     </div>
     </section>

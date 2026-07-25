@@ -19,11 +19,31 @@ import ScrollIndicator from '../../components/ScrollIndicator/ScrollIndicator.js
 import styles from './Hero.module.css';
 import svgStyles from '../../components/ui/svgs/SvgTrans/SvgTrans.module.css';
 
-//import de dados
-
 // Registra todos os plugins necessários no ecossistema GSAP
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, SplitText);
-// Dados das cenas e voos
+// --- PRELOADS DE IMAGENS E PATTERNS ---
+const section2ImagesMap = import.meta.glob('/src/assets/imgs/section2/*.{png,jpg,webp,avif}', {
+  eager: true,
+  import: 'default'
+});
+const section2Urls = Object.values(section2ImagesMap);
+
+const section3ImagesMap = import.meta.glob('/src/assets/imgs/section3/*.{png,jpg,webp,avif}', {
+  eager: true,
+  import: 'default'
+});
+const section3Urls = Object.values(section3ImagesMap);
+
+import patternUrl from '../../assets/pattern/patternCompress.webp';
+
+const preloadImages = (urls) => {
+  urls.forEach((url) => {
+    const img = new Image();
+    img.src = url;
+  });
+};
+
+// Dados das cenas e voos 3D
 const SCENE_TARGETS = {
   dragon: new THREE.Vector3(10.13, 35.34, 56.16),
   fire: new THREE.Vector3(4.40, 20.24, 54.95),
@@ -59,7 +79,6 @@ const WAYPOINTS = [
   { x: -0.53, y: 19.40, z: -85.09, targetX: -0.49, targetY: 19.55, targetZ: -86.09 },
 ];
 
-// Intervalos de Waypoints para os TEXTOS
 const TEXT_SCENES = {
   ponte:  { enter: 1,  exit: 4  },
   dragao: { enter: 6,  exit: 11 },
@@ -111,30 +130,6 @@ function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkViewport = () => setIsMobile(window.innerWidth <= 500);
-    checkViewport();
-    const timeoutId = setTimeout(checkViewport, 100);
-    window.addEventListener('resize', checkViewport);
-    return () => {
-      window.removeEventListener('resize', checkViewport);
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  const getDynamicStyles = (scene) => {
-    const config = isMobile ? scene.layout.mobile : scene.layout.desktop;
-    return {
-      '--text-top': config.top,
-      '--text-bottom': config.bottom,
-      '--text-left': config.left,
-      '--text-right': config.right,
-      '--text-x-offset': config.x,
-      '--text-y-offset': config.y,
-      textAlign: config.align,
-    };
-  };
-
   const sectionHeroRef = useRef(null);
   const heroBeltRef = useRef(null);
   const canvasContainerRef = useRef(null);
@@ -161,7 +156,26 @@ export default function Hero() {
   };
 
   useEffect(() => {
-    // Definimos o mapa de ícones AQUI DENTRO para que as refs já estejam disponíveis
+    const checkViewport = () => setIsMobile(window.innerWidth <= 500);
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
+
+  const getDynamicStyles = (scene) => {
+    const config = isMobile ? scene.layout.mobile : scene.layout.desktop;
+    return {
+      '--text-top': config.top,
+      '--text-bottom': config.bottom,
+      '--text-left': config.left,
+      '--text-right': config.right,
+      '--text-x-offset': config.x,
+      '--text-y-offset': config.y,
+      textAlign: config.align,
+    };
+  };
+
+  useEffect(() => {
     const ICON_SCENES = {
       mago:   { enter: 1,  exit: 2,  ref: magoHatScaleRef },
       dragao: { enter: 6,  exit: 8, ref: dragaoScaleRef },
@@ -169,171 +183,186 @@ export default function Hero() {
       castelo:{ enter: 24, exit: 27, ref: casteloScaleRef },
     };
 
-    const splitPonte = new SplitText(textRefs.current.ponte, { type: "lines,words", linesClass: "split-line" });
-    const splitDragao = new SplitText(textRefs.current.dragao, { type: "lines,words", linesClass: "split-line" });
-    const splitGuilda = new SplitText(textRefs.current.guilda, { type: "lines,words", linesClass: "split-line" });
-    const splitPortaoLeft = new SplitText(portaoLeftRef.current, { type: "lines,words", linesClass: "split-line" });
-    const splitPortaoRight = new SplitText(portaoRightRef.current, { type: "lines,words", linesClass: "split-line" });
+    const ctx = gsap.context(() => {
+      // --- LOGICA DE PRELOAD POR TRIGGER ---
+      let s2Preloaded = false;
+      let s3Preloaded = false;
 
-    gsap.set([textRefs.current.ponte, textRefs.current.dragao, textRefs.current.guilda, textRefs.current.portao], { opacity: 1 });
-    gsap.set([splitPonte.words, splitDragao.words, splitGuilda.words, splitPortaoLeft.words, splitPortaoRight.words], {
-      y: 60,
-      rotationX: -30,
-      opacity: 0
-    });
 
-    const svgContainer = svgPathRef.current?.closest(`.${svgStyles.divSVGTransS2}`);
-    if (svgPathRef.current && svgContainer) {
-      gsap.set(svgContainer, { opacity: 1 });
-      gsap.set(svgPathRef.current, {
-        drawSVG: "0% 0%",
-        attr: { "stroke-width": 0 },
+      // --- TIMELINE DA HERO ---
+      const splitPonte = new SplitText(textRefs.current.ponte, { type: "lines,words", linesClass: "split-line" });
+      const splitDragao = new SplitText(textRefs.current.dragao, { type: "lines,words", linesClass: "split-line" });
+      const splitGuilda = new SplitText(textRefs.current.guilda, { type: "lines,words", linesClass: "split-line" });
+      const splitPortaoLeft = new SplitText(portaoLeftRef.current, { type: "lines,words", linesClass: "split-line" });
+      const splitPortaoRight = new SplitText(portaoRightRef.current, { type: "lines,words", linesClass: "split-line" });
+
+      gsap.set([textRefs.current.ponte, textRefs.current.dragao, textRefs.current.guilda, textRefs.current.portao], { opacity: 1 });
+      gsap.set([splitPonte.words, splitDragao.words, splitGuilda.words, splitPortaoLeft.words, splitPortaoRight.words], {
+        y: 60,
+        rotationX: -30,
+        opacity: 0
       });
-    }
 
-    gsap.set(scrollIndicatorRef.current, { opacity: 1, scale: 1 });
-    gsap.set(trilhaContainerRef.current, { opacity: 0 });
-    gsap.set(
-      [magoHatScaleRef.current, dragaoScaleRef.current, espadaScaleRef.current, casteloScaleRef.current],
-      { scale: 1, filter: 'grayscale(100%) opacity(0.4)', transformOrigin: '50% 50%' }
-    );
-    if (trilhaPathActiveRef.current) {
-      gsap.set(trilhaPathActiveRef.current, { drawSVG: '0% 0%' });
-    }
+      const svgContainer = svgPathRef.current?.closest(`.${svgStyles.divSVGTransS2}`);
+      if (svgPathRef.current && svgContainer) {
+        gsap.set(svgContainer, { opacity: 1 });
+        gsap.set(svgPathRef.current, {
+          drawSVG: "0% 0%",
+          attr: { "stroke-width": 0 },
+        });
+      }
 
-    const tlDrone = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionHeroRef.current,
-        pin:heroBeltRef.current,
-        start: 'top top',
-        end: '+=500%',
-        scrub: 1.8,
-        invalidateOnRefresh: true,
-      },
-    });
-
-    const totalWaypointDuration = WAYPOINTS.length - 1;
-    const introDuration = totalWaypointDuration * 0.05;
-    const trilhaRevealDuration = introDuration;
-
-    tlDrone.to(scrollIndicatorRef.current, {
-      opacity: 0,
-      scale: 0.7,
-      duration: introDuration,
-      ease: 'power2.out',
-    }, 0);
-
-    tlDrone.to(trilhaContainerRef.current, {
-      opacity: 1,
-      duration: trilhaRevealDuration,
-      ease: 'power2.out',
-    }, introDuration);
-
-    const totalSteps = WAYPOINTS.length - 1;
-
-    for (let i = 1; i < WAYPOINTS.length; i++) {
-      const point = WAYPOINTS[i];
-      const currentPointNumber = i + 1;
-      const finalTargetX = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.x : point.targetX;
-      const finalTargetY = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.y : point.targetY;
-      const finalTargetZ = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.z : point.targetZ;
-
-      tlDrone.to(cameraTarget.current, {
-        x: point.x, y: point.y, z: point.z,
-        targetX: finalTargetX, targetY: finalTargetY, targetZ: finalTargetZ,
-        duration: 1, 
-        ease: 'sine.inOut',
-      }, i === 1 ? 0 : undefined);
-
+      gsap.set(scrollIndicatorRef.current, { opacity: 1, scale: 1 });
+      gsap.set(trilhaContainerRef.current, { opacity: 0 });
+      gsap.set(
+        [magoHatScaleRef.current, dragaoScaleRef.current, espadaScaleRef.current, casteloScaleRef.current],
+        { scale: 1, filter: 'grayscale(100%) opacity(0.4)', transformOrigin: '50% 50%' }
+      );
       if (trilhaPathActiveRef.current) {
-        const targetPercent = Math.round((i / totalSteps) * 100);
-        tlDrone.to(trilhaPathActiveRef.current, {
-          drawSVG: `0% ${targetPercent}%`,
-          duration: 1,
+        gsap.set(trilhaPathActiveRef.current, { drawSVG: '0% 0%' });
+      }
+
+
+      const tlDrone = gsap.timeline({
+  scrollTrigger: {
+    trigger: sectionHeroRef.current,
+    pin: heroBeltRef.current,
+    start: 'top top',
+    end: '+=500%',
+    scrub: 1.8,
+    invalidateOnRefresh: true,
+    // ADICIONE O onUpdate AQUI DENTRO:
+    onUpdate: (self) => {
+      // Progresso calculado sobre os 500% reais de scroll da Hero pinada:
+
+      // Meio do voo da Hero (~50% do scroll do pin): Baixa Section 2 + Pattern
+      if (self.progress >= 0.5 && !s2Preloaded) {
+        s2Preloaded = true;
+        console.log('⚡ Preloading S2 + Pattern no meio da Hero');
+        preloadImages([...section2Urls, patternUrl]);
+      }
+
+      // Quase no fim da Hero (~90% do scroll do pin): Baixa Section 3
+      if (self.progress >= 0.9 && !s3Preloaded) {
+        s3Preloaded = true;
+        console.log('⚡ Preloading S3 no fim da Hero');
+        preloadImages(section3Urls);
+      }
+    },
+  },
+});
+
+      const totalWaypointDuration = WAYPOINTS.length - 1;
+      const introDuration = totalWaypointDuration * 0.05;
+      const trilhaRevealDuration = introDuration;
+
+      tlDrone.to(scrollIndicatorRef.current, {
+        opacity: 0,
+        scale: 0.7,
+        duration: introDuration,
+        ease: 'power2.out',
+      }, 0);
+
+      tlDrone.to(trilhaContainerRef.current, {
+        opacity: 1,
+        duration: trilhaRevealDuration,
+        ease: 'power2.out',
+      }, introDuration);
+
+      const totalSteps = WAYPOINTS.length - 1;
+
+      for (let i = 1; i < WAYPOINTS.length; i++) {
+        const point = WAYPOINTS[i];
+        const currentPointNumber = i + 1;
+        const finalTargetX = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.x : point.targetX;
+        const finalTargetY = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.y : point.targetY;
+        const finalTargetZ = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.z : point.targetZ;
+
+        tlDrone.to(cameraTarget.current, {
+          x: point.x, y: point.y, z: point.z,
+          targetX: finalTargetX, targetY: finalTargetY, targetZ: finalTargetZ,
+          duration: 1, 
           ease: 'sine.inOut',
-        }, "<");
+        }, i === 1 ? 0 : undefined);
+
+        if (trilhaPathActiveRef.current) {
+          const targetPercent = Math.round((i / totalSteps) * 100);
+          tlDrone.to(trilhaPathActiveRef.current, {
+            drawSVG: `0% ${targetPercent}%`,
+            duration: 1,
+            ease: 'sine.inOut',
+          }, "<");
+        }
+
+        Object.entries(TEXT_SCENES).forEach(([key, scene]) => {
+          if (i === scene.enter) tlDrone.addLabel(`text_${key}Enter`, "-=1");
+          if (i === scene.exit) tlDrone.addLabel(`text_${key}Exit`, "-=1");
+        });
+
+        Object.entries(ICON_SCENES).forEach(([key, scene]) => {
+          if (i === scene.enter) tlDrone.addLabel(`icon_${key}Enter`, "-=1");
+          if (i === scene.exit) tlDrone.addLabel(`icon_${key}Exit`, "-=1");
+        });
       }
 
-      // Adiciona Labels dos Textos
-      Object.entries(TEXT_SCENES).forEach(([key, scene]) => {
-        if (i === scene.enter) tlDrone.addLabel(`text_${key}Enter`, "-=1");
-        if (i === scene.exit) tlDrone.addLabel(`text_${key}Exit`, "-=1");
-      });
+      const STAGGER_TIME = 0.02;
 
-      // Adiciona Labels dos Ícones
-      Object.entries(ICON_SCENES).forEach(([key, scene]) => {
-        if (i === scene.enter) tlDrone.addLabel(`icon_${key}Enter`, "-=1");
-        if (i === scene.exit) tlDrone.addLabel(`icon_${key}Exit`, "-=1");
-      });
-    }
-
-    const STAGGER_TIME = 0.02;
-
-    // Animações dos Textos
-    tlDrone
-      .to(splitPonte.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_ponteEnter")
-      .to(splitPonte.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "text_ponteExit");
-
-    tlDrone
-      .to(splitDragao.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_dragaoEnter")
-      .to(splitDragao.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "text_dragaoExit");
-
-    tlDrone
-      .fromTo(textRefs.current.guilda,
-        { z: -500, opacity: 0 },
-        { z: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true },
-        "text_guildaEnter"
-      )
-      .to(splitGuilda.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_guildaEnter")
-      .to(textRefs.current.guilda, { z: 3500, duration: 1.4, ease: "power2.in", force3D: true }, "text_guildaEnter+=0.8")
-      .to(textRefs.current.guilda, { opacity: 0, duration: 0.3, ease: "none" }, "text_guildaEnter+=1.9");
-
-    tlDrone
-      .to(splitPortaoLeft.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_portaoEnter")
-      .to(splitPortaoRight.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_portaoEnter+=0.1")
-      .to(splitPortaoLeft.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "text_portaoExit")
-      .to(splitPortaoRight.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "text_portaoExit")
-      .to(portaoLeftRef.current, { x: -150, opacity: 0, ease: "power2.in", duration: 0.5 }, "text_portaoExit")
-      .to(portaoRightRef.current, { x: 150, opacity: 0, ease: "power2.in", duration: 0.5 }, "text_portaoExit");
-
-    if (svgPathRef.current && svgContainer) {
       tlDrone
-        .to(svgContainer, { opacity: 1, duration: 0.1 })
-        .to(svgPathRef.current, { drawSVG: "0% 100%", attr: { "stroke-width": 600 }, ease: "power1.in", duration: 1.5 }, "<");
-    }
+        .to(splitPonte.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_ponteEnter")
+        .to(splitPonte.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "text_ponteExit");
 
-    // Animação Dinâmica dos Ícones
-    Object.entries(ICON_SCENES).forEach(([key, scene]) => {
-      const enterLabel = `icon_${key}Enter`;
-      const exitLabel = `icon_${key}Exit`;
+      tlDrone
+        .to(splitDragao.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_dragaoEnter")
+        .to(splitDragao.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, stagger: STAGGER_TIME, ease: "power3.in" }, "text_dragaoExit");
 
-      if (tlDrone.labels[enterLabel] === undefined) return;
+      tlDrone
+        .fromTo(textRefs.current.guilda,
+          { z: -500, opacity: 0 },
+          { z: 0, opacity: 1, duration: 0.6, ease: "power2.out", force3D: true },
+          "text_guildaEnter"
+        )
+        .to(splitGuilda.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_guildaEnter")
+        .to(textRefs.current.guilda, { z: 3500, duration: 1.4, ease: "power2.in", force3D: true }, "text_guildaEnter+=0.8")
+        .to(textRefs.current.guilda, { opacity: 0, duration: 0.3, ease: "none" }, "text_guildaEnter+=1.9");
 
-      tlDrone.to(scene.ref.current, {
-        filter: 'grayscale(0%) opacity(1)',
-        scale: 1.5,
-        duration: 0.5,
-        ease: 'back.out(1.7)',
-      }, enterLabel);
+      tlDrone
+        .to(splitPortaoLeft.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_portaoEnter")
+        .to(splitPortaoRight.words, { y: 0, rotationX: 0, opacity: 1, duration: 0.5, stagger: STAGGER_TIME, ease: "power3.out" }, "text_portaoEnter+=0.1")
+        .to(splitPortaoLeft.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "text_portaoExit")
+        .to(splitPortaoRight.words, { y: -60, rotationX: 30, opacity: 0, duration: 0.4, ease: "power3.in" }, "text_portaoExit")
+        .to(portaoLeftRef.current, { x: -150, opacity: 0, ease: "power2.in", duration: 0.5 }, "text_portaoExit")
+        .to(portaoRightRef.current, { x: 150, opacity: 0, ease: "power2.in", duration: 0.5 }, "text_portaoExit");
 
-      if (tlDrone.labels[exitLabel] !== undefined) {
-        tlDrone.to(scene.ref.current, {
-          scale: 1,
-          duration: 0.5,
-          ease: 'power2.out',
-        }, exitLabel);
+      if (svgPathRef.current && svgContainer) {
+        tlDrone
+          .to(svgContainer, { opacity: 1, duration: 0.1 })
+          .to(svgPathRef.current, { drawSVG: "0% 100%", attr: { "stroke-width": 600 }, ease: "power1.in", duration: 1.5 }, "<");
       }
-    });
 
-    return () => {
-      if (tlDrone.scrollTrigger) tlDrone.scrollTrigger.kill();
-      tlDrone.kill();
-      splitPonte.revert();
-      splitDragao.revert();
-      splitGuilda.revert();
-      splitPortaoLeft.revert();
-      splitPortaoRight.revert();
-    };
+      Object.entries(ICON_SCENES).forEach(([key, scene]) => {
+        const enterLabel = `icon_${key}Enter`;
+        const exitLabel = `icon_${key}Exit`;
+
+        if (tlDrone.labels[enterLabel] === undefined) return;
+
+        tlDrone.to(scene.ref.current, {
+          filter: 'grayscale(0%) opacity(1)',
+          scale: 1.5,
+          duration: 0.5,
+          ease: 'back.out(1.7)',
+        }, enterLabel);
+
+        if (tlDrone.labels[exitLabel] !== undefined) {
+          tlDrone.to(scene.ref.current, {
+            scale: 1,
+            duration: 0.5,
+            ease: 'power2.out',
+          }, exitLabel);
+        }
+      });
+    }, sectionHeroRef);
+
+    return () => ctx.revert();
   }, [isMobile]);
 
   return (

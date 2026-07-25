@@ -21,12 +21,12 @@ ScrollTrigger.config({ ignoreMobileResize: true })
 
 function App() {
   useEffect(() => {
-    // Inicializa o ScrollSmoother global do site
     const smoother = ScrollSmoother.create({
+      normalizeScroll:true,
       wrapper: '#smooth-wrapper',
       content: '#smooth-content',
       smooth: 1.5, // Suavização (1.2 a 1.8 é o ideal para o efeito amanteigado)
-      effects: true, // Habilita atributos data-speed e data-lag para efeito parallax
+      effects: true, 
     });
     ScrollTrigger.refresh()
 
@@ -37,12 +37,10 @@ function App() {
 
   return (
     <div className="appContainer">
-      {/* 🛑 Elementos fixos e overlays Globais ficam FORA do smooth-wrapper */}
       <EmberCursor />
       <PreLoader />
       <Header />
 
-      {/* 🌊 Estrutura obrigatória do ScrollSmoother */}
       <div id="smooth-wrapper">
         <div id="smooth-content">
           <Hero />
