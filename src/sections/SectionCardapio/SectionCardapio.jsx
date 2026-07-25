@@ -5,61 +5,98 @@ import styles from './SectionCardapio.module.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const TOTAL_FRAMES = 240;
+// ------------------------------------------------------------
+// CONFIGURAÇÃO DOS SPRITE SHEETS
+// Precisa bater exatamente com o comando ffmpeg usado pra gerar
+// os sheets (filtro `tile=COLSxROWS`).
+// ------------------------------------------------------------
+const TOTAL_FRAMES = 103; // atualize depois de recalcular o fps com ffprobe
+const GRID_COLS = 6;
+const GRID_ROWS = 5;
+const FRAMES_PER_SHEET = GRID_COLS * GRID_ROWS; // 30, no exemplo
+const TOTAL_SHEETS = Math.ceil(TOTAL_FRAMES / FRAMES_PER_SHEET);
 
-const currentFrame = (index) =>
-`${import.meta.env.BASE_URL}frames/frame_${(index + 1).toString().padStart(4, '0')}.webp`;
+// Resolução de CADA FRAME dentro do sheet — precisa bater com o
+// crop/scale usado no ffmpeg pra gerar os frames originais.
+const FRAME_SIZE = {
+desktop: { width: 1280, height: 720 },
+mobile: { width: 720, height: 1280 },
+};
+
+// Mesmo breakpoint de 900px já usado nos outros módulos CSS do projeto.
+const MOBILE_BREAKPOINT = '(max-width: 900px)';
+
+// 'normal' = sheet 0 carrega primeiro, frames tocam na ordem gravada (0 → fim).
+// 'reverse' = último sheet carrega primeiro, frames tocam de trás pra frente (fim → 0).
+const PLAYBACK_DIRECTION = 'reverse'; // 'normal' | 'reverse'
+
+// O ffmpeg (com output %02d) numerou os sheets em 2 dígitos começando em 01
+// (sheet_01.webp, sheet_02.webp...), enquanto sheetIndex no código é
+// 0-based (0, 1, 2...) — por isso o (sheetIndex + 1) aqui.
+const sheetPath = (sheetIndex, device) =>
+`${import.meta.env.BASE_URL}frames/${device}/sprites/sheet_${(sheetIndex + 1)
+    .toString()
+    .padStart(2, '0')}.webp`;
 
 export default function SectionCardapio() {
 const containerRef = useRef(null);
 const canvasRef = useRef(null);
 const [imagesLoaded, setImagesLoaded] = useState(false);
-const imagesRef = useRef([]);
-// Ref espelhando o state, pra usar dentro do onUpdate sem closure velha
-// e sem precisar recriar o ScrollTrigger toda vez que imagesLoaded mudar.
-const imagesLoadedRef = useRef(false);
+const sheetsRef = useRef([]);
+// Ref espelhando o "pronto pra desenhar" (só precisa do sheet 0 carregado,
+// não de todos), usado dentro do onUpdate sem closure velha.
+const readyRef = useRef(false);
 
 useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    canvas.width = 1920;
-    canvas.height = 1080;
+    // Decide UMA VEZ, no mount, qual conjunto (device) usar. Não reagimos
+    // a resize/orientationchange depois disso de propósito: trocar no meio
+    // do carregamento ou do scrub obrigaria a descartar e recarregar tudo.
+    const device = window.matchMedia(MOBILE_BREAKPOINT).matches ? 'mobile' : 'desktop';
+    const { width: frameWidth, height: frameHeight } = FRAME_SIZE[device];
+
+    // Canvas do tamanho exato de UM frame — como os frames já saíram do
+    // ffmpeg pré-cortados (cover/center) na resolução certa, não precisamos
+    // mais calcular ratio/letterbox no render, é um drawImage 1:1.
+    canvas.width = frameWidth;
+    canvas.height = frameHeight;
 
     const sequence = { frame: 0 };
 
     const render = () => {
-    const img = imagesRef.current[sequence.frame];
-    if (!img || !img.complete) return;
+    const sheetIndex = Math.floor(sequence.frame / FRAMES_PER_SHEET);
+    const frameInSheet = sequence.frame % FRAMES_PER_SHEET;
+
+    const sheet = sheetsRef.current[sheetIndex];
+    if (!sheet || !sheet.complete) return; // sheet ainda não chegou — mantém o último frame desenhado
+
+    const col = frameInSheet % GRID_COLS;
+    const row = Math.floor(frameInSheet / GRID_COLS);
+
+    const sx = col * frameWidth;
+    const sy = row * frameHeight;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
-
-    const hRatio = canvas.width / img.width;
-    const vRatio = canvas.height / img.height;
-    const ratio = Math.max(hRatio, vRatio);
-    const centerShift_x = (canvas.width - img.width * ratio) / 2;
-    const centerShift_y = (canvas.height - img.height * ratio) / 2;
-
     context.drawImage(
-        img,
+        sheet,
+        sx,
+        sy,
+        frameWidth,
+        frameHeight,
         0,
         0,
-        img.width,
-        img.height,
-        centerShift_x,
-        centerShift_y,
-        img.width * ratio,
-        img.height * ratio
+        canvas.width,
+        canvas.height
     );
     };
 
     // ------------------------------------------------------------
     // 1) ScrollTrigger / pin: criado IMEDIATAMENTE.
-    // O end (+=300%) não depende das imagens, então o espaço de
+    // O end (+=300%) não depende dos sheets, então o espaço de
     // scroll reservado na página fica correto desde o primeiro
     // ScrollTrigger.refresh() global (chamado no App.jsx).
-    // Isso evita o "jump" de altura que acontecia quando o pin só
-    // nascia depois que TOTAL_FRAMES imagens terminavam de carregar.
     // ------------------------------------------------------------
     const trigger = ScrollTrigger.create({
     trigger: containerRef.current,
@@ -68,90 +105,89 @@ useEffect(() => {
     pin: true,
     scrub: 1,
     onUpdate: (self) => {
-        // Enquanto os frames não chegaram, não tem o que desenhar.
-        if (!imagesLoadedRef.current) return;
+        if (!readyRef.current) return; // ainda não tem nem o sheet inicial
 
-        sequence.frame = Math.min(
+        const rawFrame = Math.min(
         TOTAL_FRAMES - 1,
         Math.floor(self.progress * TOTAL_FRAMES)
         );
+
+        // No modo reverse, progress 0 (topo do scroll) corresponde ao
+        // ÚLTIMO frame gravado, e progress 1 (fim do scroll) ao primeiro.
+        sequence.frame =
+        PLAYBACK_DIRECTION === 'reverse' ? TOTAL_FRAMES - 1 - rawFrame : rawFrame;
+
         render();
     },
     });
 
     // ------------------------------------------------------------
-    // 2) Preload dos frames em LOTES (concorrência limitada), com
-    // prioridade baixa. Em vez de disparar as 240 requisições de
-    // uma vez (o que satura a banda e atrasa imagens visíveis de
-    // outras seções), carregamos MAX_CONCURRENT por vez.
-    //
-    // fetchPriority='low' avisa o navegador explicitamente que
-    // esses recursos podem ceder banda pra quem precisa mais agora
-    // (suportado em Chrome/Edge; em navegadores sem suporte, a
-    // propriedade é simplesmente ignorada, sem quebrar nada).
+    // 2) Preload dos SHEETS (não mais frame a frame). Como agora são
+    // poucos arquivos (TOTAL_SHEETS, ex: 4 em vez de 103), a pressão
+    // sobre a banda já cai bastante sozinha — mesmo assim mantemos o
+    // batching + fetchPriority baixa, por segurança e escalabilidade
+    // caso você aumente TOTAL_FRAMES no futuro.
     // ------------------------------------------------------------
-    const MAX_CONCURRENT = 6;
+    const MAX_CONCURRENT = 3;
 
-    const loadOneFrame = (index) =>
+    const loadOneSheet = (sheetIndex) =>
     new Promise((resolve) => {
         const img = new Image();
         img.fetchPriority = 'low';
-        img.src = currentFrame(index);
+        img.src = sheetPath(sheetIndex, device);
         img.onload = () => resolve(img);
-        img.onerror = () => resolve(img); // não trava o lote se um frame falhar
+        img.onerror = () => resolve(img); // não trava o lote se um sheet falhar
     });
 
     let cancelled = false;
 
-    const preloadImages = async () => {
-    const loadedImages = new Array(TOTAL_FRAMES);
-    const indices = Array.from({ length: TOTAL_FRAMES }, (_, i) => i);
+    const preloadSheets = async () => {
+    const loadedSheets = new Array(TOTAL_SHEETS);
 
-    // Carrega o frame 0 primeiro e sozinho, com prioridade normal,
-    // pra garantir que algo aparece no canvas o quanto antes.
+    // Ordem de carregamento: no modo normal, começa do sheet 0 (primeiro
+    // frame da gravação). No reverse, começa do ÚLTIMO sheet, já que é
+    // ele que contém o frame inicial exibido nesse modo.
+    const loadOrder =
+        PLAYBACK_DIRECTION === 'reverse'
+        ? Array.from({ length: TOTAL_SHEETS }, (_, i) => TOTAL_SHEETS - 1 - i)
+        : Array.from({ length: TOTAL_SHEETS }, (_, i) => i);
+
+    const [firstSheetIndex, ...restOrder] = loadOrder;
+
+    // Carrega o sheet inicial sozinho, com prioridade normal, pra já
+    // poder desenhar o frame inicial o quanto antes.
     const first = new Image();
-    first.src = currentFrame(0);
+    first.src = sheetPath(firstSheetIndex, device);
     await new Promise((res) => {
         first.onload = res;
         first.onerror = res;
     });
-    loadedImages[0] = first;
-    imagesRef.current = loadedImages;
+    loadedSheets[firstSheetIndex] = first;
+    sheetsRef.current = loadedSheets;
+    readyRef.current = true;
+    setImagesLoaded(true); // já dá pra tirar o overlay de loading
     render();
 
-    const rest = indices.slice(1);
-
-    for (let i = 0; i < rest.length; i += MAX_CONCURRENT) {
+    for (let i = 0; i < restOrder.length; i += MAX_CONCURRENT) {
         if (cancelled) return;
 
-        const batch = rest.slice(i, i + MAX_CONCURRENT);
-        const results = await Promise.all(batch.map(loadOneFrame));
+        const batch = restOrder.slice(i, i + MAX_CONCURRENT);
+        const results = await Promise.all(batch.map(loadOneSheet));
 
-        batch.forEach((frameIndex, j) => {
-        loadedImages[frameIndex] = results[j];
+        batch.forEach((sheetIndex, j) => {
+        loadedSheets[sheetIndex] = results[j];
         });
-        imagesRef.current = loadedImages;
-    }
-
-    if (!cancelled) {
-        imagesLoadedRef.current = true;
-        setImagesLoaded(true);
-        render(); // garante que o frame correspondente ao progresso atual apareça
+        sheetsRef.current = loadedSheets;
     }
     };
 
     // ------------------------------------------------------------
     // 3) Gatilho de preload: ScrollTrigger apontando pra um ponto de
     // ancoragem DENTRO da Section2 (não pra própria SectionCardapio).
-    // Isso adianta o download dos 240 frames pra um momento em que
-    // o usuário ainda está longe do canvas, sem depender de "distância
-    // em pixels" (que seria instável numa seção com pin/scroll virtual).
     //
-    // Pré-requisito: adicione id="s2-preload-anchor" em algum elemento
-    // "calmo" da Section2 (ex: o .avaliacoesCard, no meio da esteira).
-    //
-    // once: true já garante que só dispara uma vez, sem precisar de
-    // disconnect manual como no IntersectionObserver.
+    // Pré-requisito: adicione id="s2PreloadAnchor" em algum elemento
+    // "calmo" da Section2 (ex: perto do fim da esteira, pra não competir
+    // com as imagens dos cards principais da própria Section2).
     // ------------------------------------------------------------
     let preloadTrigger = null;
     const anchor = document.getElementById('s2PreloadAnchor');
@@ -159,28 +195,27 @@ useEffect(() => {
     if (anchor) {
     preloadTrigger = ScrollTrigger.create({
         trigger: anchor,
-        start: 'left right',
+        start: 'top bottom',
         once: true,
-        onEnter: preloadImages,
+        onEnter: preloadSheets,
     });
     } else {
-    // Fallback de segurança: se o anchor não existir (ex: mudou o id
-    // e esqueceu de atualizar aqui), volta pro comportamento antigo
-    // baseado na própria seção, pra não quebrar o carregamento.
+    // Fallback de segurança: se o anchor não existir, volta pro
+    // comportamento baseado na própria seção.
     preloadTrigger = ScrollTrigger.create({
         trigger: containerRef.current,
         start: 'top bottom+=300',
         once: true,
-        onEnter: preloadImages,
+        onEnter: preloadSheets,
     });
     }
 
     return () => {
-    cancelled = true; // interrompe o loop de lotes se ainda estiver rodando
+    cancelled = true;
     if (preloadTrigger) preloadTrigger.kill();
     trigger.kill();
     };
-}, []); // roda uma única vez no mount — sem depender de imagesLoaded
+}, []);
 
 return (
     <section ref={containerRef} className={styles.root}>
@@ -188,7 +223,7 @@ return (
         <canvas ref={canvasRef} className={styles.canvas} />
         {!imagesLoaded && (
         <div className={styles.loadingOverlay} aria-hidden="true">
-            {/* opcional: spinner / skeleton enquanto os 240 frames baixam */}
+            {/* opcional: spinner / skeleton enquanto o primeiro sheet baixa */}
         </div>
         )}
     </div>
