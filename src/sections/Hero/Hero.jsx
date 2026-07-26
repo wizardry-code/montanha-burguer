@@ -34,14 +34,29 @@ const section3ImagesMap = import.meta.glob('/src/assets/imgs/section3/*.{png,jpg
 });
 const section3Urls = Object.values(section3ImagesMap);
 
+// DEBUG TEMPORÁRIO — remova depois de confirmar que os globs encontraram
+// os arquivos certos. Se aparecer 0 no console, o path/extensão do glob
+// não bateu com a pasta real, e é por isso que o preload não tem efeito.
+if (import.meta.env.DEV || true) {
+  console.log('DEBUG section2Urls:', section2Urls.length, section2Urls);
+  console.log('DEBUG section3Urls:', section3Urls.length, section3Urls);
+}
+
 import patternUrl from '../../assets/pattern/patternCompress.webp';
 
 const preloadImages = (urls) => {
   urls.forEach((url) => {
     const img = new Image();
+    img.fetchPriority = 'low';
     img.src = url;
   });
 };
+
+// Nome do evento customizado que avisa a Avaliacoes.jsx que já pode
+// injetar o script pesado do Elfsight (536KB). Componentes IRMÃOS
+// (Hero e Avaliacoes, que vive dentro da Section2) se comunicam via
+// window custom event, sem precisar de prop drilling/contexto.
+export const HERO_END_WIDGET_EVENT = 'heroEndWidgetReady';
 
 // Dados das cenas e voos 3D
 const SCENE_TARGETS = {
@@ -187,6 +202,7 @@ export default function Hero() {
       // --- LOGICA DE PRELOAD POR TRIGGER ---
       let s2Preloaded = false;
       let s3Preloaded = false;
+      let widgetTriggered = false;
 
 
       // --- TIMELINE DA HERO ---
@@ -243,10 +259,18 @@ export default function Hero() {
       }
 
       // Quase no fim da Hero (~90% do scroll do pin): Baixa Section 3
+      // e avisa a Avaliacoes.jsx que já pode injetar o script pesado
+      // do Elfsight (536KB) — em vez de carregar no mount do componente.
       if (self.progress >= 0.9 && !s3Preloaded) {
         s3Preloaded = true;
         console.log('⚡ Preloading S3 no fim da Hero');
         preloadImages(section3Urls);
+      }
+
+      if (self.progress >= 0.9 && !widgetTriggered) {
+        widgetTriggered = true;
+        console.log('⚡ Liberando script do widget Elfsight no fim da Hero');
+        window.dispatchEvent(new Event(HERO_END_WIDGET_EVENT));
       }
     },
   },

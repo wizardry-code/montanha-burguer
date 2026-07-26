@@ -20,9 +20,15 @@ gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
 const SVG_MAX_STROKE = 600;
 const INTRO_SCROLL_VH = 1.3;
-// Dentro de src/sections/Section2/Section2.jsx
+
+// Progresso (0 a 1) da timeline HORIZONTAL da Section2 a partir do qual
+// avisamos a SectionCardapio pra começar a baixar os sheets do Cardápio.
+// 0.8 = 80% do trajeto horizontal já percorrido, dando bom buffer de
+// tempo antes do usuário chegar na S4 (importante em conexões ruins).
+const S4_PRELOAD_THRESHOLD = 0.8;
 
 export const S2_HEAVY_PRELOAD_EVENT = 'S2_HEAVY_PRELOAD_EVENT';
+
 export default function Section2() {
 const rootRef = useRef(null);
 const trackRef = useRef(null);
@@ -52,6 +58,10 @@ useLayoutEffect(() => {
 
     gsap.set(track, { x: enterOffset });
 
+    // Flag local (não precisa ser ref do React — o efeito só roda uma
+    // vez) pra garantir que o evento dispara UMA única vez.
+    let heavyPreloadFired = false;
+
     const master = gsap.timeline({
         scrollTrigger: {
         trigger: rootRef.current,
@@ -61,6 +71,16 @@ useLayoutEffect(() => {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        // ESSENCIAL: é este onUpdate que dispara o evento de preload.
+        // self.progress mede corretamente o progresso da timeline
+        // horizontal (0 a 1), diferente de um ScrollTrigger vertical
+        // solto num elemento — que não funciona dentro de um pin.
+        onUpdate: (self) => {
+            if (!heavyPreloadFired && self.progress >= S4_PRELOAD_THRESHOLD) {
+            heavyPreloadFired = true;
+            window.dispatchEvent(new Event(S2_HEAVY_PRELOAD_EVENT));
+            }
+        },
         },
     });
 
@@ -179,7 +199,6 @@ useLayoutEffect(() => {
             start: 'left 80%',
             end: 'left 40%',
             scrub: 0.3,
-            markers: true,
             },
         });
         }
@@ -228,8 +247,10 @@ return (
             </div>
             <div className={styles.finalTrack}></div>
         </div>
-        {/* Seção Adicional (Section3a) continua na esteira */}
-        <Section3a ref={s3Ref} svgRuleRef={svgRuleRef} id='s2PreloadAnchor'/>
+        {/* id="s2PreloadAnchor" não é mais usado — o preload agora é
+            disparado por evento de progresso, não por posição no DOM.
+            Pode remover esse id se quiser deixar mais limpo. */}
+        <Section3a ref={s3Ref} svgRuleRef={svgRuleRef} />
         </div>
     </div>
     </section>

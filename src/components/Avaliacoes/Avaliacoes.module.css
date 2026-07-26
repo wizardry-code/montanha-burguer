@@ -14,12 +14,11 @@
 
   --font-card-title: 'Cinzel', serif;
   --font-body: 'Merriweather', Georgia, serif;
-  --font-body-alt: 'ABeeZee', sans-serif;
   color: var(--color-slate);
   isolation: isolate;
 }
 
-/* Título em Cinzel */
+
 .titulo {
 font-family: var(--font-display);
 font-size: clamp(1.6rem, 3.5vw, 2.5rem);
