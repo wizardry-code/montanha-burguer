@@ -1,22 +1,15 @@
 import { useState } from 'react';
 import { TagItem } from '../TagItem/TagItem';
+import frameLunar from '../../assets/cardframes/frameCardLunar.svg';
 import styles from './TcgMenuCard.module.css';
-
-// Mapa de cores por raridade — já que RARIDADES no data.js traz classes Tailwind
-// (que não funcionam num projeto CSS puro), a cor real é resolvida aqui via raridade.id
-const RARITY_COLORS = {
-comum: { glow: 'rgba(148, 163, 184, 0.35)', border: 'rgba(148, 163, 184, 0.5)' },
-raro: { glow: 'rgba(34, 211, 238, 0.4)', border: 'rgba(34, 211, 238, 0.55)' },
-epico: { glow: 'rgba(168, 85, 247, 0.45)', border: 'rgba(168, 85, 247, 0.6)' },
-lendario: { glow: 'rgba(251, 191, 36, 0.55)', border: 'rgba(251, 191, 36, 0.65)' },
-};
+import { getRaridadeById } from '../../data/cardapioData';
 
 export function TcgMenuCard({
 nomeFicticio,
 nomeReal,
 preco,
 imagemUrl,
-raridade,
+raridade,        // string: "comum" | "raro" | "epico" | "lendario"
 categoria,
 subcategoria,
 restricoesAlimentares = [],
@@ -35,13 +28,12 @@ function handleToggleFocus() {
     setFocusMode((prev) => !prev);
 }
 
-const rarityColor = RARITY_COLORS[raridade?.id] || RARITY_COLORS.comum;
+const raridadeInfo = getRaridadeById(raridade);
 const cardStyle = {
-    '--rarity-glow': rarityColor.glow,
-    '--rarity-border': rarityColor.border,
+    '--rarity-glow': raridadeInfo.cor.glow,
+    '--rarity-border': raridadeInfo.cor.border,
 };
 
-// Selos secundários do footer: categoria + tags promocionais, em formato ícone-only
 const footerTags = [
     ...(categoria ? [categoria] : []),
     ...tags,
@@ -49,17 +41,22 @@ const footerTags = [
 
 return (
     <article className={styles.card} style={cardStyle}>
-    {/* Base / Moldura + Imagem Full-Art */}
     <button
         type="button"
         className={styles.imageButton}
         onClick={handleToggleFocus}
-        aria-label={focusMode ? 'Mostrar informações do prato' : 'Ver foto em tela cheia'}
-    >
+        aria-label={focusMode ? 'Mostrar informações do prato' : 'Ver foto em tela cheia'}>
         <img src={imagemUrl} alt={nomeReal} className={styles.image} />
     </button>
 
-    {/* Header Superior Flutuante */}
+    {/* Moldura decorativa (frame SVG) — fica acima da imagem, abaixo do conteúdo */}
+    <img
+        src={frameLunar}
+        alt=""
+        aria-hidden="true"
+        className={styles.frame}
+    />
+
     <div className={`${styles.header} ${focusMode ? styles.hidden : ''}`}>
         <div className={styles.headerLeft}>
         <span className={styles.nameBadge}>{nomeFicticio}</span>
@@ -87,12 +84,9 @@ return (
         </div>
     </div>
 
-    {/* Bloco Glassmorphism Inferior */}
     <div className={`${styles.footer} ${focusMode ? styles.hidden : ''}`}>
         <p className={styles.realName}>{nomeReal}</p>
 
-        {/* Lista semântica de ingredientes — cada item nunca quebra no meio,
-            mas a lista inteira quebra de linha quando o próximo item não couber */}
         <ul className={styles.ingredientsList}>
         {ingredientes.map((ingrediente, i) => (
             <li key={i} className={styles.ingredientTag}>

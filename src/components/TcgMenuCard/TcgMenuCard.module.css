@@ -1,203 +1,204 @@
 .card {
-position: relative;
-aspect-ratio: 3 / 4;
-width: min(100%, 420px);
-border-radius: 28px;
-overflow: hidden;
-border: 1px solid var(--rarity-border, rgba(255, 255, 255, 0.2));
-box-sizing: border-box;
-isolation: isolate;
-transition: transform 0.35s ease, box-shadow 0.35s ease;
+  position: relative;
+  /* Proporção exata do SVG (318px de largura por 509px de altura) */
+  aspect-ratio: 318 / 509; 
+  /* Reduzimos a largura máxima para o card ficar mais estreito e elegante */
+  width: min(100%, 350px); 
+  border-radius: 30px;
+  overflow: hidden;
+  border: 1px solid var(--rarity-border, rgba(255, 255, 255, 0.2));
+  box-sizing: border-box;
+  isolation: isolate;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
 
 .card:hover {
-transform: scale(1.05);
-box-shadow: 0 0 0 1px var(--rarity-border), 0 0 40px -10px var(--rarity-glow);
-}
-
-.card::after {
-content: '';
-position: absolute;
-inset: 14px;
-border-radius: 20px;
-border: 1px solid rgba(255, 255, 255, 0.14);
-pointer-events: none;
-z-index: 30;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 1px var(--rarity-border), 0 0 40px -10px var(--rarity-glow);
 }
 
 /* ============================================
-IMAGEM FULL-ART (Z-Index: 10)
-============================================ */
+   MOLDURA DECORATIVA (Frame SVG) — Z-Index: 20
+   ============================================ */
+.frame {
+  position: absolute;
+  inset: 4px; /* Recuo uniforme em todos os 4 lados */
+  z-index: 20;
+  pointer-events: none;
+  /* Removido width/height calc() e object-fit: fill para preservar os vetores */
+}
+
+/* ============================================
+   IMAGEM FULL-ART (Z-Index: 10)
+   ============================================ */
 .imageButton {
-position: absolute;
-inset: 0;
-z-index: 10;
-border: none;
-padding: 0;
-margin: 0;
-background: none;
-cursor: pointer;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: none;
+  cursor: pointer;
 }
 
 .image {
-width: 100%;
-height: 100%;
-object-fit: cover;
-display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* ============================================
-HEADER SUPERIOR FLUTUANTE (Z-Index: 20)
-============================================ */
+   HEADER SUPERIOR FLUTUANTE (Z-Index: 30)
+   ============================================ */
 .header {
-position: absolute;
-top: 20px;
-left: 20px;
-right: 20px;
-z-index: 20;
-display: flex;
-align-items: flex-start;
-justify-content: space-between;
-gap: 12px;
-transition: opacity 0.35s ease;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  transition: opacity 0.35s ease;
 }
 
 .headerLeft {
-display: flex;
-flex-direction: column;
-gap: 0.5rem;
-min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .nameBadge {
-align-self: flex-start;
-padding: 0.5em 0.9em;
-border-radius: 999px;
-background: rgba(20, 20, 20, 0.45);
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-border: 1px solid rgba(255, 255, 255, 0.18);
-color: #fff;
-font-size: 0.85rem;
-font-weight: 600;
-max-width: 100%;
+  align-self: flex-start;
+  padding: 0.5em 0.9em;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  max-width: 100%;
 }
 
 .mainTagsRow {
-display: flex;
-flex-wrap: wrap;
-gap: 0.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .priceTag {
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 4px;
-padding: 0.6em 0.7em;
-border-radius: 12px;
-background: rgba(6, 95, 70, 0.85);
-backdrop-filter: blur(6px);
--webkit-backdrop-filter: blur(6px);
-border: 1px solid rgba(255, 255, 255, 0.15);
-color: #fff;
-flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0.6em 0.7em;
+  border-radius: 12px;
+  background: rgba(6, 95, 70, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  flex: 0 0 auto;
 }
 
 .priceValue {
-font-size: 0.8rem;
-font-weight: 700;
-white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .priceIcon {
-font-size: 0.85rem;
-line-height: 1;
-opacity: 0.9;
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0.9;
 }
 
 /* ============================================
-BLOCO GLASSMORPHISM INFERIOR (Z-Index: 20)
-============================================ */
+   BLOCO GLASSMORPHISM INFERIOR (Z-Index: 30)
+   ============================================ */
 .footer {
-position: absolute;
-left: 12px;
-right: 12px;
-bottom: 12px;
-z-index: 20;
-padding: 0.9rem 1rem;
-border-radius: 16px;
-background: rgba(0, 0, 0, 0.5);
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-border: 1px solid rgba(255, 255, 255, 0.1);
-color: #fff;
-display: flex;
-flex-direction: column;
-gap: 0.55rem;
-transition: opacity 0.35s ease;
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 30;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  transition: opacity 0.35s ease;
 }
 
 .realName {
-margin: 0;
-font-size: 0.95rem;
-font-weight: 700;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
-/* Lista de ingredientes — semântica real (<ul>/<li>) */
 .ingredientsList {
-margin: 0;
-padding: 0;
-list-style: none;
-display: flex;
-flex-wrap: wrap; /* permite a lista quebrar linha */
-gap: 0.35rem 0.6rem;
-font-size: 0.78rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  font-size: 0.78rem;
 }
 
 .ingredientTag {
-white-space: nowrap; /* impede quebra de linha DENTRO do item */
-opacity: 0.9;
-position: relative;
+  white-space: nowrap;
+  opacity: 0.9;
+  position: relative;
 }
 
-/* Separador visual sutil entre ingredientes (bolinha), opcional */
 .ingredientTag:not(:last-child)::after {
-content: '•';
-margin-left: 0.6rem;
-opacity: 0.4;
+  content: '•';
+  margin-left: 0.6rem;
+  opacity: 0.4;
 }
 
 /* ============================================
-RODAPÉ DO BLOCO: Selos secundários + Status
-============================================ */
+   RODAPÉ DO BLOCO: Selos secundários + Status
+   ============================================ */
 .statusRow {
-display: flex;
-align-items: center;
-justify-content: space-between;
-flex-wrap: wrap;
-gap: 0.5rem;
-padding-top: 0.45rem;
-border-top: 1px solid rgba(255, 255, 255, 0.12);
-font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.72rem;
 }
 
 .secondaryTagsGroup {
-display: flex;
-align-items: center;
-flex-wrap: wrap;
-gap: 0.4rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .statusStats {
-opacity: 0.85;
-white-space: nowrap;
+  opacity: 0.85;
+  white-space: nowrap;
 }
 
 /* ============================================
-MODO FOCUS
-============================================ */
+   MODO FOCUS
+   ============================================ */
 .hidden {
-opacity: 0;
-pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
 }

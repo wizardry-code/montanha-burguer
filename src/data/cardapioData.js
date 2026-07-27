@@ -6,27 +6,36 @@ COMUM: {
     id: "comum",
     label: "Comum",
     corGlow: "border-slate-400 shadow-slate-500/20",
-    corTag: "bg-slate-800/80 text-slate-300 border-slate-600/40"
+    corTag: "bg-slate-800/80 text-slate-300 border-slate-600/40",
+    cor: { glow: "rgba(148, 163, 184, 0.2)", border: "#94a3b8" }
 },
 RARO: {
     id: "raro",
     label: "Raro",
     corGlow: "border-cyan-400 shadow-cyan-500/30",
-    corTag: "bg-cyan-950/80 text-cyan-300 border-cyan-500/40"
+    corTag: "bg-cyan-950/80 text-cyan-300 border-cyan-500/40",
+    cor: { glow: "rgba(34, 211, 238, 0.3)", border: "#22d3ee" }
 },
 EPICO: {
     id: "epico",
     label: "Épico",
     corGlow: "border-purple-500 shadow-purple-500/40",
-    corTag: "bg-purple-950/80 text-purple-300 border-purple-500/40"
+    corTag: "bg-purple-950/80 text-purple-300 border-purple-500/40",
+    cor: { glow: "rgba(168, 85, 247, 0.4)", border: "#a855f7" }
 },
 LENDARIO: {
     id: "lendario",
     label: "Lendário",
     corGlow: "border-amber-400 shadow-amber-500/50",
-    corTag: "bg-amber-500/20 text-amber-300 border-amber-500/40"
+    corTag: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    cor: { glow: "rgba(251, 191, 36, 0.5)", border: "#fbbf24" }
 }
 };
+
+// Helper pra buscar a raridade pelo id (ex: "epico") em vez de precisar saber a chave (EPICO)
+export function getRaridadeById(id) {
+return Object.values(RARIDADES).find((r) => r.id === id) || RARIDADES.COMUM;
+}
 // 1. CATEGORIAS MACRO (Apenas os 4 pilares de navegação)
 export const CATEGORIAS = {
 HAMBURGUER: { id: "hamburguer", label: "Hambúrgueres do Reino", icone: "🍔" },

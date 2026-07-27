@@ -38,10 +38,6 @@ return (
     <div id="smooth-wrapper">
     <div id="smooth-content">
         {/* Suas seções anteriores */}
-        <Header/>
-        <Hero/>
-        {/* Sua Seção 4 com a Animação no Canvas */}
-        <SectionCardapio />
     </div>
     </div>
 );
