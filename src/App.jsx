@@ -53,11 +53,6 @@ function App() {
           <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
             <Section3 />
           </Suspense>
-
-          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
-            <SectionCardapio />
-          </Suspense>
-
           <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
             <Section4 />
           </Suspense>

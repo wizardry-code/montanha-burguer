@@ -1,10 +1,97 @@
 .root {
-  padding: 4rem 5vw;
+  position: relative;
+  width: 100%;
+  background-color: #080808;
+  color: #ffffff;
+  overflow: hidden;
 }
 
-.cardsGrid {
+.stickyWrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+/* Canvas centralizado e flutuando no background */
+.canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* FILTRO CINEMÁTICO OVERLAY */
+.overlayCinematic {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  /* Gradiente radial para escurecer as bordas (vignette) e dar tom escuro */
+  background: 
+    radial-gradient(circle at center, rgba(0, 0, 0, 0) 0%, rgba(8, 8, 8, 0.582) 80%),
+    linear-gradient(180deg, rgba(8, 8, 8, 0.123) 0%, rgba(8, 8, 8, 0.295) 100%);
+  
+  /* Linhas CRT sutis (opcional, como na imagem de referência) */
+  background-size: 100% 100%, 100% 4px;
+}
+
+/* CONTAINER DOS TEXTOS */
+.contentGrid {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 1280px;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  align-items: center;
+  pointer-events: none; /* Deixa cliques passarem */
+}
+
+.titleBox, .descriptionBox {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-family: 'MedievalSharp','Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  font-family: 'Merriweather';
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  color: #a1a1aa;
+  line-height: 1.6;
+}
+
+/* Animação dos textos via GSAP */
+.word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+  will-change: transform, opacity;
+}
+
+/* Responsividade estilo Mobile da foto */
+@media (max-width: 900px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 1rem;
+    padding-top: 4rem;
+  }
 }

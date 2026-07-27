@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './Section4.module.css';
 import { S2_HEAVY_PRELOAD_EVENT } from '../Section2/Section2';
 import { debouncedRefresh } from '../../utils/gsapRefresh';
-
+import { splitIntoWords } from '../../utils/textUtils';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,6 +30,7 @@ const sheetPath = (sheetIndex, device) =>
 export default function Section4() {
 const containerRef = useRef(null);
 const canvasRef = useRef(null);
+const textRef = useRef(null);
 const [imagesLoaded, setImagesLoaded] = useState(false);
 const sheetsRef = useRef([]);
 const readyRef = useRef(false);
@@ -65,25 +66,60 @@ useEffect(() => {
 
     let cancelled = false;
 
-    // gsap.context agrupa o pin + o fallback trigger num único objeto
-    // rastreável — o cleanup vira uma linha só (ctx.revert()), em vez de
-    // precisar lembrar de dar .kill() em cada trigger manualmente.
     const ctx = gsap.context(() => {
-    // 1) Pin/ScrollTrigger criado imediatamente (não depende dos sheets)
-    ScrollTrigger.create({
+    // 1) Criamos uma TIMELINE acoplada ao ScrollTrigger
+    const tl = gsap.timeline({
+        scrollTrigger: {
         trigger: containerRef.current,
         start: 'top top',
-        end: '+=300%',
+        end: '+=450%', // Aumentado ligeiramente para dar espaço aos textos + canvas
         pin: true,
         scrub: 1,
-        onUpdate: (self) => {
-        if (!readyRef.current) return;
-
-        const rawFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(self.progress * TOTAL_FRAMES));
-        sequence.frame = PLAYBACK_DIRECTION === 'reverse' ? TOTAL_FRAMES - 1 - rawFrame : rawFrame;
-        render();
         },
     });
+
+    // PASSO A: Animação dos Palavras (SplitText)
+    const words = containerRef.current.querySelectorAll(`.${styles.word}`);
+    if (words.length > 0) {
+        tl.to(words, {
+        opacity: 1,
+        y: 0,
+        stagger: 0.05,
+        duration: 1,
+        ease: 'power2.out',
+        });
+    }
+
+    // PASSO B: Sequência do Canvas + Fade Out do Texto
+    tl.to(
+        sequence,
+        {
+        frame: TOTAL_FRAMES - 1,
+        duration: 3,
+        ease: 'none',
+        onUpdate: () => {
+            if (!readyRef.current) return;
+            const currentFrame = Math.floor(sequence.frame);
+            sequence.frame =
+            PLAYBACK_DIRECTION === 'reverse'
+                ? TOTAL_FRAMES - 1 - currentFrame
+                : currentFrame;
+            render();
+        },
+        },
+        '+=0.2' // Pequeno delay após os textos aparecerem
+    );
+
+    // PASSO C: Efeito opcional de esvanecer textos conforme a plataforma cresce/preenche
+    tl.to(
+        textRef.current,
+        {
+        opacity: 0,
+        y: -40,
+        duration: 1,
+        },
+        '-=1.5' // Executa junto com a metade final da animação do canvas
+    );
 
     // Fallback de segurança
     ScrollTrigger.create({
@@ -93,13 +129,10 @@ useEffect(() => {
         onEnter: handleS2Ready,
     });
 
-    // Recalcula posições de scroll considerando a altura atual do
-    // documento — importante já que essa seção é montada de forma
-    // assíncrona (lazy) e pode chegar depois de outras seções.
     debouncedRefresh();
     }, containerRef);
 
-    // 2) Preload dos sheets em lotes com fetchPriority baixa
+    // 2) Preload de Imagens
     const MAX_CONCURRENT = 3;
 
     const loadOneSheet = (sheetIndex) =>
@@ -144,8 +177,6 @@ useEffect(() => {
     }
     };
 
-    // 3) Gatilho de preload: evento disparado pela Section2 no progresso
-    // correto da timeline HORIZONTAL
     let scrollReached = false;
     let pageLoaded = document.readyState === 'complete';
     let started = false;
@@ -174,14 +205,36 @@ useEffect(() => {
     cancelled = true;
     window.removeEventListener('load', handleWindowLoad);
     window.removeEventListener(S2_HEAVY_PRELOAD_EVENT, handleS2Ready);
-    ctx.revert(); // mata o pin + o fallback trigger de uma vez só
+    ctx.revert();
     };
 }, []);
 
 return (
     <section ref={containerRef} className={styles.root}>
     <div className={styles.stickyWrapper}>
+        {/* Canvas de Fundo */}
         <canvas ref={canvasRef} className={styles.canvas} />
+
+        {/* Filtro Escuro / Cinemático */}
+        <div className={styles.overlayCinematic} aria-hidden="true" />
+
+        {/* Camada de Conteúdo Textual com Split */}
+        <div ref={textRef} className={styles.contentGrid}>
+        <div className={styles.titleBox}>
+            <h2 className={styles.title}>
+            {splitIntoWords('Nosso Cardápio Mágico e Interativo', styles.word)}
+            </h2>
+        </div>
+        <div className={styles.descriptionBox}>
+            <p className={styles.description}>
+            {splitIntoWords(
+                'Explore combinações únicas, ingredientes selecionados e uma experiência feita para transformar seu pedido em um evento.',
+                styles.word
+            )}
+            </p>
+        </div>
+        </div>
+
         {!imagesLoaded && (
         <div className={styles.loadingOverlay} aria-hidden="true" />
         )}
