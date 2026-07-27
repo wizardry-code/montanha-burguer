@@ -1,8 +1,15 @@
 import { TcgMenuCard } from '../../components/TcgMenuCard/TcgMenuCard';
 import { cardTcgData } from '../../data/cardapioData';
 import styles from './Section4.module.css';
+import { useEffect } from 'react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { debouncedRefresh } from '../../utils/gsapRefresh';
+
 
 export default function Section4() {
+    useEffect(() => {
+        debouncedRefresh();
+    }, []);
 return (
     <section className={styles.root} aria-label="Cardápio Mágico">
     <div className={styles.cardsGrid}>

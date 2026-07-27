@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -7,28 +7,29 @@ import './App.css';
 import PreLoader from './sections/PreLoader/PreLoader';
 import Header from './sections/Header/Header';
 import Hero from './sections/Hero/Hero';
-import Section2 from './sections/Section2/Section2';
-import Section3 from './sections/Section3/Section3b';
-import Section4 from './sections/Section4/Section4';
 import EmberCursor from './components/EmbedCursor/EmbedCursor';
-import SectionCardapio from './sections/SectionCardapio/SectionCardapio';
+
+
+const Section2 = lazy(() => import('./sections/Section2/Section2'));
+const Section3 = lazy(() => import('./sections/Section3/Section3b'));
+const SectionCardapio = lazy(() => import('./sections/SectionCardapio/SectionCardapio'));
+const Section4 = lazy(() => import('./sections/Section4/Section4'));
 
 // Registra os plugins do GSAP
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
-ScrollTrigger.config({ ignoreMobileResize: true })
-
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 function App() {
   useEffect(() => {
     const smoother = ScrollSmoother.create({
-      normalizeScroll:true,
+      normalizeScroll: true,
       wrapper: '#smooth-wrapper',
       content: '#smooth-content',
-      smooth: 1.5, // Suavização (1.2 a 1.8 é o ideal para o efeito amanteigado)
-      effects: true, 
+      smooth: 1.5,
+      effects: true,
     });
-    ScrollTrigger.refresh()
+    ScrollTrigger.refresh();
 
     return () => {
       smoother.kill();
@@ -44,10 +45,22 @@ function App() {
       <div id="smooth-wrapper">
         <div id="smooth-content">
           <Hero />
-          <Section2 />
-          <Section3 />
-          <SectionCardapio/>
-          <Section4 />
+
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <Section2 />
+          </Suspense>
+
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <Section3 />
+          </Suspense>
+
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <SectionCardapio />
+          </Suspense>
+
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <Section4 />
+          </Suspense>
         </div>
       </div>
     </div>

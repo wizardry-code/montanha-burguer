@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
+import { debouncedRefresh } from '../../utils/gsapRefresh';
 
 // Imports de estilos
 import cardStyles from '../../components/MedievalCard/MedievalCard.module.css';
@@ -219,8 +220,7 @@ useLayoutEffect(() => {
         });
         }
     }
-
-    ScrollTrigger.refresh();
+    debouncedRefresh();
     }, rootRef);
 
     return () => ctx.revert();

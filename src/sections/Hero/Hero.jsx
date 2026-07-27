@@ -4,6 +4,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import * as THREE from 'three';
+import { debouncedRefresh } from '../../utils/gsapRefresh';
 
 //importação de componentes
 import { Castelo } from '../../components/Castelo/Castelo.jsx';
@@ -368,6 +369,7 @@ export default function Hero() {
             }, exitLabel);
           }
         });
+        debouncedRefresh();
       }, sectionHeroRef);
     }
 

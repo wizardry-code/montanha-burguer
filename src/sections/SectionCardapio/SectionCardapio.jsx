@@ -2,14 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './SectionCardapio.module.css';
-import { S2_HEAVY_PRELOAD_EVENT } from '../Section2/Section2'; // ajuste o path se necessário
+import { S2_HEAVY_PRELOAD_EVENT } from '../Section2/Section2';
+import { debouncedRefresh } from '../../utils/gsapRefresh';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ------------------------------------------------------------
-// CONFIGURAÇÃO DOS SPRITE SHEETS
-// ------------------------------------------------------------
-const TOTAL_FRAMES = 103; // atualize depois de recalcular o fps com ffprobe
+const TOTAL_FRAMES = 103;
 const GRID_COLS = 6;
 const GRID_ROWS = 5;
 const FRAMES_PER_SHEET = GRID_COLS * GRID_ROWS;
@@ -21,7 +20,7 @@ mobile: { width: 720, height: 1280 },
 };
 
 const MOBILE_BREAKPOINT = '(max-width: 900px)';
-const PLAYBACK_DIRECTION = 'reverse'; // 'normal' | 'reverse'
+const PLAYBACK_DIRECTION = 'reverse';
 
 const sheetPath = (sheetIndex, device) =>
 `${import.meta.env.BASE_URL}frames/${device}/sprites/sheet_${(sheetIndex + 1)
@@ -64,21 +63,41 @@ useEffect(() => {
     context.drawImage(sheet, sx, sy, frameWidth, frameHeight, 0, 0, canvas.width, canvas.height);
     };
 
+    let cancelled = false;
+
+    // gsap.context agrupa o pin + o fallback trigger num único objeto
+    // rastreável — o cleanup vira uma linha só (ctx.revert()), em vez de
+    // precisar lembrar de dar .kill() em cada trigger manualmente.
+    const ctx = gsap.context(() => {
     // 1) Pin/ScrollTrigger criado imediatamente (não depende dos sheets)
-    const trigger = ScrollTrigger.create({
-    trigger: containerRef.current,
-    start: 'top top',
-    end: '+=300%',
-    pin: true,
-    scrub: 1,
-    onUpdate: (self) => {
+    ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: 'top top',
+        end: '+=300%',
+        pin: true,
+        scrub: 1,
+        onUpdate: (self) => {
         if (!readyRef.current) return;
 
         const rawFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(self.progress * TOTAL_FRAMES));
         sequence.frame = PLAYBACK_DIRECTION === 'reverse' ? TOTAL_FRAMES - 1 - rawFrame : rawFrame;
         render();
-    },
+        },
     });
+
+    // Fallback de segurança
+    ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: 'top bottom+=600',
+        once: true,
+        onEnter: handleS2Ready,
+    });
+
+    // Recalcula posições de scroll considerando a altura atual do
+    // documento — importante já que essa seção é montada de forma
+    // assíncrona (lazy) e pode chegar depois de outras seções.
+    debouncedRefresh();
+    }, containerRef);
 
     // 2) Preload dos sheets em lotes com fetchPriority baixa
     const MAX_CONCURRENT = 3;
@@ -91,8 +110,6 @@ useEffect(() => {
         img.onload = () => resolve(img);
         img.onerror = () => resolve(img);
     });
-
-    let cancelled = false;
 
     const preloadSheets = async () => {
     const loadedSheets = new Array(TOTAL_SHEETS);
@@ -128,8 +145,7 @@ useEffect(() => {
     };
 
     // 3) Gatilho de preload: evento disparado pela Section2 no progresso
-    // correto da timeline HORIZONTAL — NÃO um ScrollTrigger vertical num
-    // id do DOM (dentro de um pin, isso não mede posição corretamente).
+    // correto da timeline HORIZONTAL
     let scrollReached = false;
     let pageLoaded = document.readyState === 'complete';
     let started = false;
@@ -148,26 +164,17 @@ useEffect(() => {
     window.addEventListener('load', handleWindowLoad, { once: true });
     }
 
-    const handleS2Ready = () => {
+    function handleS2Ready() {
     scrollReached = true;
     tryStartPreload();
-    };
+    }
     window.addEventListener(S2_HEAVY_PRELOAD_EVENT, handleS2Ready, { once: true });
-
-    // Fallback de segurança
-    const fallbackTrigger = ScrollTrigger.create({
-    trigger: containerRef.current,
-    start: 'top bottom+=600',
-    once: true,
-    onEnter: handleS2Ready,
-    });
 
     return () => {
     cancelled = true;
     window.removeEventListener('load', handleWindowLoad);
     window.removeEventListener(S2_HEAVY_PRELOAD_EVENT, handleS2Ready);
-    fallbackTrigger.kill();
-    trigger.kill();
+    ctx.revert(); // mata o pin + o fallback trigger de uma vez só
     };
 }, []);
 
