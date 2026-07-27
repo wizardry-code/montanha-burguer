@@ -29,7 +29,7 @@ overflow: hidden;
 content: "";
 position: absolute;
 inset: 0;
-background-image: url('../../assets/pattern/patternCompress.webp');
+background-image: var(--bg-pattern,none);
 background-repeat: repeat;
 background-size: 400px 400px;
 mix-blend-mode: soft-light;

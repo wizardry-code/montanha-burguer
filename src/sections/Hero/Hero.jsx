@@ -14,7 +14,7 @@ import { SvgTrans } from '../../components/ui/svgs/SvgTrans/SvgTrans.jsx';
 import TrilhaHero from '../../components/TrilhaHero/TrilhaHero.jsx';
 import ScrollIndicator from '../../components/ScrollIndicator/ScrollIndicator.jsx';
 
-//importação de dados (extraídos para facilitar leitura e manutenção)
+//importação de dados
 import { SCENE_TARGETS } from '../../data/hero/sceneTargets.js';
 import { WAYPOINTS } from '../../data/hero/waypoints.js';
 import { TEXT_SCENES } from '../../data/hero/textScenes.js';
@@ -24,13 +24,16 @@ import { ICON_SCENE_CONFIG } from '../../data/hero/iconSceneConfig.js';
 import styles from './Hero.module.css';
 import svgStyles from '../../components/ui/svgs/SvgTrans/SvgTrans.module.css';
 
-// Só o ScrollTrigger é registrado de forma estática — é leve e precisa
-// estar pronto assim que o componente monta (pin da section).
-// DrawSVGPlugin e SplitText (GSAP Club, pesados) são carregados via
-// dynamic import lá dentro do useEffect, fora do caminho crítico.
-gsap.registerPlugin(ScrollTrigger);
 
-// --- PRELOADS DE IMAGENS E PATTERNS ---
+// --- IMPORTS DE ASSETS PARA INJEÇÃO DINÂMICA ---
+import imgTranS2Url from '../../assets/imgs/section2/imgTranS2.avif';
+import patternUrl from '../../assets/pattern/patternCompress.webp';
+import imgS3Url from '../../assets/imgs/section2/imgS3.avif';
+// ATENÇÃO: Confira se os caminhos e nomes exatos das fontes no seu projeto coincidem com estes abaixo:
+import fontCinzelUrl from '../../assets/fonts/Cinzel/cinzel-v26-latin-regular.woff2'; 
+import fontMerriweatherUrl from '../../assets/fonts/Merriweather/static/merriweather-v33-latin-regular.woff2';
+gsap.registerPlugin(ScrollTrigger);
+// --- MAPS DE IMAGENS DAS SEÇÕES ---
 const section2ImagesMap = import.meta.glob('/src/assets/imgs/section2/*.{png,jpg,webp,avif}', {
   eager: true,
   import: 'default'
@@ -43,15 +46,32 @@ const section3ImagesMap = import.meta.glob('/src/assets/imgs/section3/*.{png,jpg
 });
 const section3Urls = Object.values(section3ImagesMap);
 
-// Debug removido do build de produção — antes tinha "|| true" e rodava
-// sempre, custando serialização de arrays grandes em cada carregamento.
 if (import.meta.env.DEV) {
   console.log('DEBUG section2Urls:', section2Urls.length, section2Urls);
   console.log('DEBUG section3Urls:', section3Urls.length, section3Urls);
 }
 
-import patternUrl from '../../assets/pattern/patternCompress.webp';
+// Helper para Injeção Dinâmica de Fontes via JS
+const loadFontsDynamically = async () => {
+  try {
+    const fontCinzel = new FontFace('Cinzel', `url(${fontCinzelUrl})`);
+    const fontMerriweather = new FontFace('Merriweather', `url(${fontMerriweatherUrl})`);
 
+    const [loadedCinzel, loadedMerriweather] = await Promise.all([
+      fontCinzel.load(),
+      fontMerriweather.load()
+    ]);
+
+    document.fonts.add(loadedCinzel);
+    document.fonts.add(loadedMerriweather);
+
+    if (import.meta.env.DEV) console.log('⚡ Fontes (Cinzel/Merriweather) carregadas dinamicamente!');
+  } catch (err) {
+    if (import.meta.env.DEV) console.error('Erro ao carregar fontes dinamicamente:', err);
+  }
+};
+
+// Helper de Preload de Imagens
 const preloadImages = (urls) => {
   urls.forEach((url) => {
     const img = new Image();
@@ -60,10 +80,6 @@ const preloadImages = (urls) => {
   });
 };
 
-// Nome do evento customizado que avisa a Avaliacoes.jsx que já pode
-// injetar o script pesado do Elfsight (536KB). Componentes IRMÃOS
-// (Hero e Avaliacoes, que vive dentro da Section2) se comunicam via
-// window custom event, sem precisar de prop drilling/contexto.
 export const HERO_END_WIDGET_EVENT = 'heroEndWidgetReady';
 
 function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
@@ -135,7 +151,6 @@ export default function Hero() {
     casteloRef: casteloScaleRef,
   };
 
-  // --- Effect 1: detecção de viewport (leve, síncrono) ---
   useEffect(() => {
     const checkViewport = () => setIsMobile(window.innerWidth <= 500);
     checkViewport();
@@ -156,9 +171,6 @@ export default function Hero() {
     };
   }, [isMobile]);
 
-  // --- Effect 2: monta o pin/scroll da Hero de forma imediata ---
-  // Isso precisa acontecer cedo pra section já "travar" no scroll
-  // certo assim que o usuário rolar, sem pulo de layout.
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.set(scrollIndicatorRef.current, { opacity: 1, scale: 1 });
@@ -175,11 +187,6 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  // --- Effect 3: timeline pesada de texto/ícones (SplitText + DrawSVG) ---
-  // Adiada com requestIdleCallback: os plugins pesados do GSAP só são
-  // baixados e a timeline só é montada depois que o browser já deu
-  // conta do primeiro paint. Isso tira SplitText (forced reflow) e os
-  // plugins do caminho crítico de renderização.
   useEffect(() => {
     let ctx;
     let cancelled = false;
@@ -236,20 +243,32 @@ export default function Hero() {
             scrub: 1.8,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
-              // Meio do voo da Hero (~50% do scroll do pin): Baixa Section 2 + Pattern
+              // Meio do voo da Hero (~50% do scroll do pin): Libera S2 + Imagem Trans + Pattern
               if (self.progress >= 0.5 && !s2Preloaded) {
                 s2Preloaded = true;
-                if (import.meta.env.DEV) console.log('⚡ Preloading S2 + Pattern no meio da Hero');
-                preloadImages([...section2Urls, patternUrl]);
+                if (import.meta.env.DEV) console.log('⚡ Preloading S2 + Pattern + Imagem S2Trans no meio da Hero');
+
+                // 1. Injeta os estilos CSS para ativar o background no navegador
+                document.documentElement.style.setProperty('--bg-img-s2Trans', `url(${imgTranS2Url})`);
+                document.documentElement.style.setProperty('--bg-pattern', `url(${patternUrl})`);
+
+                // 2. Precarrega a lista de imagens da Section 2
+                preloadImages([...section2Urls, patternUrl, imgTranS2Url]);
               }
 
-              // Quase no fim da Hero (~90% do scroll do pin): Baixa Section 3
-              // e avisa a Avaliacoes.jsx que já pode injetar o script pesado
-              // do Elfsight (536KB) — em vez de carregar no mount do componente.
+              // Quase no fim da Hero (~90% do scroll do pin): Libera S3 + Fontes + Elfsight Widget
               if (self.progress >= 0.9 && !s3Preloaded) {
                 s3Preloaded = true;
-                if (import.meta.env.DEV) console.log('⚡ Preloading S3 no fim da Hero');
-                preloadImages(section3Urls);
+                if (import.meta.env.DEV) console.log('⚡ Preloading S3 + Fontes no fim da Hero');
+
+                // 1. Injeta a imagem de fundo da Section 3
+                document.documentElement.style.setProperty('--section3-image', `url(${imgS3Url})`);
+
+                // 2. Registra e carrega as fontes pesadas (Cinzel e Merriweather)
+                loadFontsDynamically();
+
+                // 3. Precarrega imagens da Section 3
+                preloadImages([...section3Urls, imgS3Url]);
               }
 
               if (self.progress >= 0.9 && !widgetTriggered) {

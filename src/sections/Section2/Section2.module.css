@@ -35,7 +35,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url(../../assets/imgs/section2/imgTranS2.avif);
+  background-image: var(--bg-img-s2Trans,none);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
@@ -81,7 +81,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url('../../assets/pattern/patternCompress.webp');
+  background-image: var(--bg-pattern,none);
   background-repeat: repeat;
   background-size: 400px 400px;
   mix-blend-mode: multiply;

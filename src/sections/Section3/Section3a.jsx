@@ -4,21 +4,16 @@ import { DrawnRule } from '../../components/ui/DrawnRule';
 import { splitIntoWords } from '../../utils/textUtils';
 import styles from './Section3a.module.css';
 
-
 export const Section3a = forwardRef(function Section3a({ svgRuleRef }, ref) {
-const bgImage = section3AData?.image ? `url(${section3AData.image})` : 'none';
-
 return (
     <section
     ref={ref}
     className={styles.section}
-    style={{ '--section3-image': bgImage }}
+    /* A imagem vem 100% via CSS / GSAP var(--section3-image) */
     aria-labelledby="reservas-title"
     >
     <div className={styles.overlay} />
     <div className={styles.content}>
-        {/* lineClassName usa a cor creme (styles.ruleLine) porque aqui o fundo e escuro,
-            diferente da regua slate usada dentro dos MedievalCard */}
         <DrawnRule ref={svgRuleRef} className={styles.ruleSvg} lineClassName={styles.ruleLine} />
 
         <h2 id="reservas-title" className={`${styles.title} ${styles.cinzel}`}>
