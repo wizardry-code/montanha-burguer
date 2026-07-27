@@ -5,7 +5,7 @@
 /* --- CINZEL DECORATIVE --- */
 @font-face {
   font-family: 'Cinzel'; /* Mantido como 'Cinzel' para funcionar com suas variáveis */
-  src: url('./assets/fonts/Cinzel_Decorative/CinzelDecorative-Regular.ttf') format('truetype');
+  src: url('./assets/fonts/Cinzel_Decorative/cinzel-decorative-v19-latin-regular.woff2') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -14,7 +14,7 @@
 /* --- MEDIEVAL SHARP --- */
 @font-face {
   font-family: 'MedievalSharp';
-  src: url('./assets/fonts/MedievalSharp/MedievalSharp-Regular.ttf') format('truetype');
+  src: url('./assets/fonts/MedievalSharp/medievalsharp-v28-latin-regular.woff2') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -23,7 +23,7 @@
 /* --- MERRIWEATHER (REGULAR) --- */
 @font-face {
   font-family: 'Merriweather';
-  src: url('./assets/fonts/Merriweather/static/Merriweather_24pt-Regular.ttf') format('truetype');
+  src: url('./assets/fonts/Merriweather/static/merriweather-v33-latin-regular.woff2') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
