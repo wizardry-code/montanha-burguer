@@ -2,9 +2,11 @@ import { useGLTF } from "@react-three/drei";
 import React from "react";
 
 const MODEL_PATH = `${import.meta.env.BASE_URL}modelos/wrath_of_the_dragon-compressedTeste.glb`;
+// Caminho pro decoder Draco local (public/draco/), no lugar do CDN do Google
+const DRACO_PATH = `${import.meta.env.BASE_URL}draco/`;
 
 export const Castelo = () => {
-const modelo = useGLTF(MODEL_PATH);
+const modelo = useGLTF(MODEL_PATH, DRACO_PATH);
 
 // Percorre o modelo e força todas as malhas a projetarem e receberem sombra
 React.useMemo(() => {
@@ -12,11 +14,9 @@ React.useMemo(() => {
     if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
-        
-        // Se o modelo original usar materiais muito brilhantes, 
-        // você pode calibrar a rugosidade aqui para tirar o aspeto de plástico:
+
         if (child.material) {
-        child.material.roughness = 0.8; 
+        child.material.roughness = 0.8;
         }
     }
     });
@@ -27,5 +27,5 @@ return <primitive object={modelo.scene} />;
 
 export default Castelo;
 
-// Preload do próprio Drei usando a mesma URL resolvida
-useGLTF.preload(MODEL_PATH);
+// Preload usando o mesmo decoder local
+useGLTF.preload(MODEL_PATH, DRACO_PATH);
