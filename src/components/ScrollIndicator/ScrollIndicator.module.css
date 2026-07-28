@@ -1,7 +1,7 @@
 .container {
-position: absolute;
-bottom: 40px;
-left: 50%;
+position: fixed;
+bottom: 11%;
+left: 87%;
 transform: translateX(-50%);
 z-index: 10;
 pointer-events: none;

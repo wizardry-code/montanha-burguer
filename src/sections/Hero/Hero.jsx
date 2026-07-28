@@ -3,8 +3,9 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import * as THREE from 'three';
-import { debouncedRefresh } from '../../utils/gsapRefresh';
 
 //importação de componentes
 import { Castelo } from '../../components/Castelo/Castelo.jsx';
@@ -12,7 +13,6 @@ import { Stars } from '@react-three/drei';
 import { HERO_SCENES } from '../../utils/heroConfig.js';
 import { SvgTrans } from '../../components/ui/svgs/SvgTrans/SvgTrans.jsx';
 import TrilhaHero from '../../components/TrilhaHero/TrilhaHero.jsx';
-import ScrollIndicator from '../../components/ScrollIndicator/ScrollIndicator.jsx';
 
 //importação de dados
 import { SCENE_TARGETS } from '../../data/hero/sceneTargets.js';
@@ -24,15 +24,17 @@ import { ICON_SCENE_CONFIG } from '../../data/hero/iconSceneConfig.js';
 import styles from './Hero.module.css';
 import svgStyles from '../../components/ui/svgs/SvgTrans/SvgTrans.module.css';
 
-
 // --- IMPORTS DE ASSETS PARA INJEÇÃO DINÂMICA ---
 import imgTranS2Url from '../../assets/imgs/section2/imgTranS2.avif';
 import patternUrl from '../../assets/pattern/patternCompress.webp';
 import imgS3Url from '../../assets/imgs/section2/imgS3.avif';
+
 // ATENÇÃO: Confira se os caminhos e nomes exatos das fontes no seu projeto coincidem com estes abaixo:
-import fontCinzelUrl from '../../assets/fonts/Cinzel/cinzel-v26-latin-regular.woff2'; 
+import fontCinzelUrl from '../../assets/fonts/Cinzel/cinzel-v26-latin-regular.woff2';
 import fontMerriweatherUrl from '../../assets/fonts/Merriweather/static/merriweather-v33-latin-regular.woff2';
-gsap.registerPlugin(ScrollTrigger);
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, ScrollSmoother);
+
 // --- MAPS DE IMAGENS DAS SEÇÕES ---
 const section2ImagesMap = import.meta.glob('/src/assets/imgs/section2/*.{png,jpg,webp,avif}', {
   eager: true,
@@ -56,15 +58,12 @@ const loadFontsDynamically = async () => {
   try {
     const fontCinzel = new FontFace('Cinzel', `url(${fontCinzelUrl})`);
     const fontMerriweather = new FontFace('Merriweather', `url(${fontMerriweatherUrl})`);
-
     const [loadedCinzel, loadedMerriweather] = await Promise.all([
       fontCinzel.load(),
       fontMerriweather.load()
     ]);
-
     document.fonts.add(loadedCinzel);
     document.fonts.add(loadedMerriweather);
-
     if (import.meta.env.DEV) console.log('⚡ Fontes (Cinzel/Merriweather) carregadas dinamicamente!');
   } catch (err) {
     if (import.meta.env.DEV) console.error('Erro ao carregar fontes dinamicamente:', err);
@@ -81,6 +80,44 @@ const preloadImages = (urls) => {
 };
 
 export const HERO_END_WIDGET_EVENT = 'heroEndWidgetReady';
+
+// ============================================================
+// 1) PARADAS DE LEITURA — AJUSTE AQUI
+// ------------------------------------------------------------
+// Cada texto tem uma animação de entrada (SplitText) que começa
+// no label "text_<chave>Enter". Nesse instante exato o texto
+// AINDA NÃO está visível (está começando a subir/aparecer).
+// Por isso a "parada" real de leitura fica em um label separado
+// ("stop_<chave>"), posicionado esse tanto de segundos DEPOIS
+// do enter — dando tempo da revelação terminar antes de pausar.
+//
+// Aumente o valor se a parada ainda pegar o texto em animação.
+// Diminua se o usuário ficar esperando parado com o texto já
+// visível há muito tempo antes do clique liberar a leitura.
+//
+// ⚠️ "guilda" tem uma segunda animação que FAZ O TEXTO VOAR PARA
+// LONGE em "text_guildaEnter+=0.8". O offset de "guilda" abaixo
+// PRECISA ser menor que 0.8, senão a parada acontece durante o
+// texto já saindo de cena.
+// ============================================================
+const STOP_OFFSETS = {
+  ponte: 1.0,
+  dragao: 1.2,
+  guilda: 1.25,
+  portao: 1.2,
+};
+
+// Duração (em segundos) de cada "salto" entre paradas — tanto da
+// câmera/texto quanto do scroll real da página (ver seção 2).
+const STOP_TRAVEL_DURATION = 3.6;
+
+// 3) Ease pedido: velocidade constante, sem acelerar/desacelerar.
+const STOP_TRAVEL_EASE = 'none';
+
+// Limiar mínimo de deltaY/swipe para considerar como intenção real
+// de navegar (evita disparos com scroll residual de trackpad).
+const WHEEL_THRESHOLD = 5;
+const TOUCH_THRESHOLD = 40;
 
 function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
   const lookAtVector = useRef(
@@ -106,7 +143,6 @@ function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
     state.camera.getWorldDirection(cameraDirection);
 
     timerAcc.current += delta;
-
     if (onUpdateLiveCoords && timerAcc.current > 0.1) {
       timerAcc.current = 0;
       onUpdateLiveCoords({
@@ -125,7 +161,6 @@ function CameraRig({ cameraTarget, onUpdateLiveCoords }) {
 
 export default function Hero() {
   const [isMobile, setIsMobile] = useState(false);
-
   const sectionHeroRef = useRef(null);
   const heroBeltRef = useRef(null);
   const canvasContainerRef = useRef(null);
@@ -136,7 +171,6 @@ export default function Hero() {
   const portaoRightRef = useRef(null);
   const [liveCoords, setLiveCoords] = useState({ x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0 });
 
-  const scrollIndicatorRef = useRef(null);
   const trilhaContainerRef = useRef(null);
   const trilhaPathActiveRef = useRef(null);
   const magoHatScaleRef = useRef(null);
@@ -150,6 +184,152 @@ export default function Hero() {
     espadaRef: espadaScaleRef,
     casteloRef: casteloScaleRef,
   };
+
+  // --- NAVEGAÇÃO / PIN ---
+  // Paradas = label inicial + uma "stop_<chave>" por texto + label final.
+  const STOP_LABELS = useRef(
+    ['start', ...Object.keys(TEXT_SCENES).map((key) => `stop_${key}`), 'end']
+  ).current;
+
+  const tlDroneRef = useRef(null);
+  const pinTriggerRef = useRef(null);
+
+  // Refs = fonte da verdade para os handlers de wheel/touch (evita closures
+  // desatualizadas). State = só para re-renderizar a UI (botões/contador).
+  const stopIndexRef = useRef(0);
+  const isAnimatingRef = useRef(false);
+  const isInternalScrollRef = useRef(false); // true enquanto SOMOS nós movendo o scroll
+
+  const [stopIndex, setStopIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const goToStop = useCallback((direction) => {
+    const tl = tlDroneRef.current;
+    const pinST = pinTriggerRef.current;
+    if (!tl || !pinST || isAnimatingRef.current) return;
+
+    const nextIndex = stopIndexRef.current + direction;
+    if (nextIndex < 0 || nextIndex >= STOP_LABELS.length) return;
+
+    isAnimatingRef.current = true;
+    setIsAnimating(true);
+
+    // Anima a câmera/texto até a próxima parada
+    tl.tweenTo(STOP_LABELS[nextIndex], {
+      duration: STOP_TRAVEL_DURATION,
+      ease: STOP_TRAVEL_EASE,
+    });
+
+    // ------------------------------------------------------------
+    // 2) SINCRONIA COM O SCROLL REAL (ScrollSmoother)
+    // ------------------------------------------------------------
+    // Movemos a posição real de scroll junto com a animação, para
+    // que o restante do site (outras seções com trigger baseado em
+    // "50% da Hero", scrollbar, etc.) veja a Hero "avançando" de
+    // verdade — mesmo o usuário controlando via botão/scroll-lock.
+    const smoother = ScrollSmoother.get();
+    const targetScroll = pinST.start + (nextIndex / (STOP_LABELS.length - 1)) * (pinST.end - pinST.start);
+
+    isInternalScrollRef.current = true;
+    if (smoother) {
+      // ScrollSmoother expõe scrollTop() como getter/setter "tweenable"
+      gsap.to(smoother, {
+        scrollTop: targetScroll,
+        duration: STOP_TRAVEL_DURATION,
+        ease: STOP_TRAVEL_EASE,
+      });
+    } else {
+      // Fallback caso o ScrollSmoother não esteja ativo nessa página
+      gsap.to(window, {
+        scrollTo: { y: targetScroll },
+        duration: STOP_TRAVEL_DURATION,
+        ease: STOP_TRAVEL_EASE,
+      });
+    }
+
+    gsap.delayedCall(STOP_TRAVEL_DURATION, () => {
+      isAnimatingRef.current = false;
+      isInternalScrollRef.current = false;
+      stopIndexRef.current = nextIndex;
+      setIsAnimating(false);
+      setStopIndex(nextIndex);
+    });
+  }, [STOP_LABELS]);
+
+  const goNext = useCallback(() => goToStop(1), [goToStop]);
+  const goPrev = useCallback(() => goToStop(-1), [goToStop]);
+
+  // Atalho de teclado (setas)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        goPrev();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [goNext, goPrev]);
+
+  // ------------------------------------------------------------
+  // 2) INTERCEPTA SCROLL "NORMAL" (wheel/touch) E TRANSFORMA EM
+  // "avançar/retroceder 1 parada", em vez de deixar o usuário
+  // rolar livremente (o que pulava a Hero inteira antes).
+  // Nas bordas (primeira/última parada), libera o comportamento
+  // nativo para o usuário conseguir sair da seção normalmente.
+  // ------------------------------------------------------------
+  useEffect(() => {
+    const section = sectionHeroRef.current;
+    if (!section) return;
+
+    const handleWheel = (e) => {
+      if (!pinTriggerRef.current?.isActive) return;
+      if (Math.abs(e.deltaY) < WHEEL_THRESHOLD) return;
+
+      const goingDown = e.deltaY > 0;
+      if (goingDown && stopIndexRef.current >= STOP_LABELS.length - 1) return; // deixa sair pra próxima seção
+      if (!goingDown && stopIndexRef.current <= 0) return; // deixa sair pra seção anterior
+
+      e.preventDefault();
+      if (isAnimatingRef.current) return;
+      goToStop(goingDown ? 1 : -1);
+    };
+
+    let touchStartY = null;
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0]?.clientY ?? null;
+    };
+
+    const handleTouchMove = (e) => {
+      if (!pinTriggerRef.current?.isActive || touchStartY === null) return;
+      const currentY = e.touches[0]?.clientY ?? touchStartY;
+      const deltaY = touchStartY - currentY; // positivo = dedo subindo = quer ir pra frente
+
+      if (Math.abs(deltaY) < TOUCH_THRESHOLD) return;
+
+      const goingDown = deltaY > 0;
+      if (goingDown && stopIndexRef.current >= STOP_LABELS.length - 1) return;
+      if (!goingDown && stopIndexRef.current <= 0) return;
+
+      e.preventDefault();
+      touchStartY = currentY;
+      if (isAnimatingRef.current) return;
+      goToStop(goingDown ? 1 : -1);
+    };
+
+    section.addEventListener('wheel', handleWheel, { passive: false });
+    section.addEventListener('touchstart', handleTouchStart, { passive: true });
+    section.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      section.removeEventListener('wheel', handleWheel);
+      section.removeEventListener('touchstart', handleTouchStart);
+      section.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [goToStop, STOP_LABELS]);
 
   useEffect(() => {
     const checkViewport = () => setIsMobile(window.innerWidth <= 500);
@@ -173,7 +353,6 @@ export default function Hero() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.set(scrollIndicatorRef.current, { opacity: 1, scale: 1 });
       gsap.set(trilhaContainerRef.current, { opacity: 0 });
       gsap.set(
         [magoHatScaleRef.current, dragaoScaleRef.current, espadaScaleRef.current, casteloScaleRef.current],
@@ -190,6 +369,12 @@ export default function Hero() {
   useEffect(() => {
     let ctx;
     let cancelled = false;
+
+    // Reseta a navegação sempre que a timeline é reconstruída (ex: troca mobile/desktop)
+    stopIndexRef.current = 0;
+    isAnimatingRef.current = false;
+    setStopIndex(0);
+    setIsAnimating(false);
 
     const ICON_SCENES = {
       mago:    { ...ICON_SCENE_CONFIG.mago,    ref: magoHatScaleRef },
@@ -234,62 +419,42 @@ export default function Hero() {
           });
         }
 
+        // Timeline PAUSADA — controlada via tweenTo() pelos botões/scroll-lock,
+        // não mais via scrub de ScrollTrigger.
         const tlDrone = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionHeroRef.current,
-            pin: heroBeltRef.current,
-            start: 'top top',
-            end: '+=500%',
-            scrub: 1.8,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              // Meio do voo da Hero (~50% do scroll do pin): Libera S2 + Imagem Trans + Pattern
-              if (self.progress >= 0.5 && !s2Preloaded) {
-                s2Preloaded = true;
-                if (import.meta.env.DEV) console.log('⚡ Preloading S2 + Pattern + Imagem S2Trans no meio da Hero');
+          paused: true,
+          onUpdate: () => {
+            const progress = tlDrone.progress();
 
-                // 1. Injeta os estilos CSS para ativar o background no navegador
-                document.documentElement.style.setProperty('--bg-img-s2Trans', `url(${imgTranS2Url})`);
-                document.documentElement.style.setProperty('--bg-pattern', `url(${patternUrl})`);
+            if (progress >= 0.5 && !s2Preloaded) {
+              s2Preloaded = true;
+              if (import.meta.env.DEV) console.log('⚡ Preloading S2 + Pattern + Imagem S2Trans no meio da Hero');
+              document.documentElement.style.setProperty('--bg-img-s2Trans', `url(${imgTranS2Url})`);
+              document.documentElement.style.setProperty('--bg-pattern', `url(${patternUrl})`);
+              preloadImages([...section2Urls, patternUrl, imgTranS2Url]);
+            }
 
-                // 2. Precarrega a lista de imagens da Section 2
-                preloadImages([...section2Urls, patternUrl, imgTranS2Url]);
-              }
+            if (progress >= 0.9 && !s3Preloaded) {
+              s3Preloaded = true;
+              if (import.meta.env.DEV) console.log('⚡ Preloading S3 + Fontes no fim da Hero');
+              document.documentElement.style.setProperty('--section3-image', `url(${imgS3Url})`);
+              loadFontsDynamically();
+              preloadImages([...section3Urls, imgS3Url]);
+            }
 
-              // Quase no fim da Hero (~90% do scroll do pin): Libera S3 + Fontes + Elfsight Widget
-              if (self.progress >= 0.9 && !s3Preloaded) {
-                s3Preloaded = true;
-                if (import.meta.env.DEV) console.log('⚡ Preloading S3 + Fontes no fim da Hero');
-
-                // 1. Injeta a imagem de fundo da Section 3
-                document.documentElement.style.setProperty('--section3-image', `url(${imgS3Url})`);
-
-                // 2. Registra e carrega as fontes pesadas (Cinzel e Merriweather)
-                loadFontsDynamically();
-
-                // 3. Precarrega imagens da Section 3
-                preloadImages([...section3Urls, imgS3Url]);
-              }
-
-              if (self.progress >= 0.9 && !widgetTriggered) {
-                widgetTriggered = true;
-                if (import.meta.env.DEV) console.log('⚡ Liberando script do widget Elfsight no fim da Hero');
-                window.dispatchEvent(new Event(HERO_END_WIDGET_EVENT));
-              }
-            },
+            if (progress >= 0.9 && !widgetTriggered) {
+              widgetTriggered = true;
+              if (import.meta.env.DEV) console.log('⚡ Liberando script do widget Elfsight no fim da Hero');
+              window.dispatchEvent(new Event(HERO_END_WIDGET_EVENT));
+            }
           },
         });
+
+        tlDrone.addLabel('start', 0);
 
         const totalWaypointDuration = WAYPOINTS.length - 1;
         const introDuration = totalWaypointDuration * 0.05;
         const trilhaRevealDuration = introDuration;
-
-        tlDrone.to(scrollIndicatorRef.current, {
-          opacity: 0,
-          scale: 0.7,
-          duration: introDuration,
-          ease: 'power2.out',
-        }, 0);
 
         tlDrone.to(trilhaContainerRef.current, {
           opacity: 1,
@@ -302,9 +467,9 @@ export default function Hero() {
         for (let i = 1; i < WAYPOINTS.length; i++) {
           const point = WAYPOINTS[i];
           const currentPointNumber = i + 1;
-          const finalTargetX = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.x : point.targetX;
-          const finalTargetY = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.y : point.targetY;
-          const finalTargetZ = (currentPointNumber === 6) ? SCENE_TARGETS.dragon.z : point.targetZ;
+          const finalTargetX = (currentPointNumber === 7) ? SCENE_TARGETS.dragon.x : point.targetX;
+          const finalTargetY = (currentPointNumber === 7) ? SCENE_TARGETS.dragon.y : point.targetY;
+          const finalTargetZ = (currentPointNumber === 7) ? SCENE_TARGETS.dragon.z : point.targetZ;
 
           tlDrone.to(cameraTarget.current, {
             x: point.x, y: point.y, z: point.z,
@@ -388,7 +553,56 @@ export default function Hero() {
             }, exitLabel);
           }
         });
-        debouncedRefresh();
+
+        // ------------------------------------------------------------
+        // 1) LABELS DE PARADA — ver STOP_OFFSETS no topo do arquivo.
+        // Criadas depois de todos os tweens de texto acima, porque
+        // dependem dos labels "text_<chave>Enter" já existirem.
+        // ------------------------------------------------------------
+        Object.entries(STOP_OFFSETS).forEach(([key, offset]) => {
+          const enterLabel = `text_${key}Enter`;
+          if (tlDrone.labels[enterLabel] !== undefined) {
+            tlDrone.addLabel(`stop_${key}`, `${enterLabel}+=${offset}`);
+          }
+        });
+
+        // Marca o fim real da timeline (após todos os tweens acima)
+        tlDrone.addLabel('end', tlDrone.duration());
+
+        tlDroneRef.current = tlDrone;
+
+        // ------------------------------------------------------------
+        // 2) PIN — trava a seção por uma distância de scroll real,
+        // proporcional ao número de paradas (100vh por transição).
+        // Não faz scrub: quem move a timeline são os botões/wheel/touch
+        // (ver goToStop) ou saltos externos (âncora do header, drag na
+        // scrollbar), tratados no onUpdate abaixo.
+        // ------------------------------------------------------------
+        const pinTrigger = ScrollTrigger.create({
+          trigger: sectionHeroRef.current,
+          start: 'top top',
+          end: `+=${(STOP_LABELS.length - 1) * 100}%`,
+          pin: heroBeltRef.current,
+          pinSpacing: true,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            // Se fomos nós que movemos o scroll (goToStop), ignora —
+            // já estamos cuidando da timeline via tweenTo.
+            if (isInternalScrollRef.current) return;
+
+            // Salto externo: âncora do header, drag na scrollbar, etc.
+            // Ajusta a cena INSTANTANEAMENTE (sem tween longo) para a
+            // parada mais próxima da nova posição de scroll.
+            const targetIndex = Math.round(self.progress * (STOP_LABELS.length - 1));
+            if (targetIndex !== stopIndexRef.current) {
+              tlDrone.seek(STOP_LABELS[targetIndex]);
+              stopIndexRef.current = targetIndex;
+              setStopIndex(targetIndex);
+            }
+          },
+        });
+
+        pinTriggerRef.current = pinTrigger;
       }, sectionHeroRef);
     }
 
@@ -399,6 +613,8 @@ export default function Hero() {
     return () => {
       cancelled = true;
       ctx?.revert();
+      tlDroneRef.current = null;
+      pinTriggerRef.current = null;
       if ('requestIdleCallback' in window && 'cancelIdleCallback' in window) {
         cancelIdleCallback(idleId);
       } else {
@@ -430,7 +646,36 @@ export default function Hero() {
               activePathRef={trilhaPathActiveRef}
             />
           </div>
-          <ScrollIndicator ref={scrollIndicatorRef} />
+
+          {/* Controles de navegação por cena */}
+          <div className={styles.navControls} aria-label="Controle de navegação da cena">
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={goPrev}
+              disabled={isAnimating || stopIndex === 0}
+              aria-label="Cena anterior"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+                <path d="M6 15l6-6 6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={goNext}
+              disabled={isAnimating || stopIndex === STOP_LABELS.length - 1}
+              aria-label="Próxima cena"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            <span className={styles.srOnly} aria-live="polite">
+              {`Cena ${stopIndex + 1} de ${STOP_LABELS.length}`}
+            </span>
+          </div>
 
           <section className={styles.textOverlayContainer} role="region" aria-label="Introdução Montanha Burguer">
             {HERO_SCENES.map((scene) => {
@@ -445,7 +690,6 @@ export default function Hero() {
                     <span className="sr-only">
                       O portal está aberto. Deixe o mundo virtual e venha viver a experiência real na nossa verdadeira fortaleza do sabor!
                     </span>
-
                     <span aria-hidden="true" style={{ display: 'contents' }}>
                       <span className={styles.portaoLeft} ref={portaoLeftRef}>
                         {scene.tokensLeft.map((token, i) => (
@@ -474,7 +718,6 @@ export default function Hero() {
                   ref={(el) => (textRefs.current[scene.refKey] = el)}
                 >
                   <span className="sr-only">{fullText}</span>
-
                   <span aria-hidden="true" style={{ display: 'contents' }}>
                     {scene.tokens.map((token, i) => {
                       if (token.highlight) return <strong key={i}>{token.text}</strong>;

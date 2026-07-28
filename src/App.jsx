@@ -8,7 +8,7 @@ import PreLoader from './sections/PreLoader/PreLoader';
 import Header from './sections/Header/Header';
 import Hero from './sections/Hero/Hero';
 import EmberCursor from './components/EmbedCursor/EmbedCursor';
-
+import ScrollIndicator from './components/ScrollIndicator/ScrollIndicator';
 
 const Section2 = lazy(() => import('./sections/Section2/Section2'));
 const Section3 = lazy(() => import('./sections/Section3/Section3b'));
@@ -41,6 +41,7 @@ function App() {
       <EmberCursor />
       <PreLoader />
       <Header />
+      <ScrollIndicator/>
 
       <div id="smooth-wrapper">
         <div id="smooth-content">

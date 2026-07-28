@@ -23,7 +23,7 @@ useEffect(() => {
 
     // Seta pulando com vai e vem sutil
     gsap.to(arrowRef.current, {
-        y: 6,
+        y: -5,
         duration: 0.5,
         repeat: -1,
         yoyo: true,
@@ -51,7 +51,7 @@ return (
         </div>
 
         {/* Seta isolada no centro */}
-        <span ref={arrowRef} className={styles.arrow}>↓</span>
+        <span ref={arrowRef} className={styles.arrow}>↑</span>
     </div>
     </div>
 );
