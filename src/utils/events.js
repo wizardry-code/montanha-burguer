@@ -1,0 +1,1 @@
+export const S2_HEAVY_PRELOAD_EVENT = 'section2HeavyPreloadReady';

@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { debouncedRefresh } from '../../utils/gsapRefresh';
-
+import { S2_HEAVY_PRELOAD_EVENT } from '../../utils/events';
 // Imports de estilos
 import cardStyles from '../../components/MedievalCard/MedievalCard.module.css';
 import s3Styles from '../Section3/Section3a.module.css';
@@ -28,7 +28,6 @@ const INTRO_SCROLL_VH = 1.3;
 // tempo antes do usuário chegar na S4 (importante em conexões ruins).
 const S4_PRELOAD_THRESHOLD = 0.8;
 
-export const S2_HEAVY_PRELOAD_EVENT = 'S2_HEAVY_PRELOAD_EVENT';
 
 export default function Section2() {
 const rootRef = useRef(null);

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './Section4.module.css';
-import { S2_HEAVY_PRELOAD_EVENT } from '../Section2/Section2';
+import { S2_HEAVY_PRELOAD_EVENT } from '../../utils/events';
 import { debouncedRefresh } from '../../utils/gsapRefresh';
 import { splitIntoWords } from '../../utils/textUtils';
 
