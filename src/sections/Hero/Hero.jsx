@@ -9,7 +9,7 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 // Canvas 3D isolado em chunk próprio — só baixa/executa quando este
 // componente realmente monta, tirando Three.js + react-three-fiber
 // do bundle principal.
-const HeroCanvas = lazy(() => import('./HeroCanvas'));
+const HeroCanvas = lazy(() => import('./HeroCanvas.jsx'));
 
 //importação de componentes
 import { HERO_SCENES } from '../../utils/heroConfig.js';
