@@ -42,12 +42,11 @@ return null;
 export default function HeroCanvas({ cameraTarget, isMobile }) {
 return (
     <Canvas
-    shadows={!isMobile}
+    shadows={!isMobile ? { type: THREE.PCFShadowMap } : false}
     dpr={isMobile ? [1, 1.25] : [1, 2]}
     gl={{ 
         antialias: !isMobile, 
         powerPreference: 'high-performance',
-        shadowMapType: THREE.PCFShadowMap 
     }}
     camera={{ position: [WAYPOINTS[0].x, WAYPOINTS[0].y, WAYPOINTS[0].z], fov: 90 }}
     >
