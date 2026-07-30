@@ -8,6 +8,12 @@ gap: clamp(24px, 3vw, 56px);
 width: min(74vw, 980px);
 will-change: transform;
 }
+.cardImage{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+}
 
 .cardFigure {
 position: relative;
@@ -19,13 +25,7 @@ overflow: hidden;
 border-radius: 3px;
 }
 
-.cardImage {
-display: block;
-width: 100%;
-height: 100%;
-object-fit: cover;
-will-change: transform;
-}
+
 
 /* ============================================================
 OVERLAY COM BOX-SHADOW INSET (Efeito de profundidade/recesso)
@@ -347,7 +347,7 @@ background-color: #03A9D9;
 
 .card.cardVertical .cardFigure {
     width: 100%;
-    height: auto;
+    height: 100%;
     aspect-ratio: 9 / 16;
 }
 

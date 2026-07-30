@@ -354,7 +354,7 @@ export default function Hero() {
 
             if (progress >= 0.5 && !s2Preloaded) {
               s2Preloaded = true;
-              if (import.meta.env.DEV) console.log('⚡ Preloading S2 + Pattern + Imagem S2Trans no meio da Hero');
+              if (import.meta.env.DEV) console.log('⚡ Preloading S2 + Pattern + Imagem S2Trans no meio da Hero') ;
               document.documentElement.style.setProperty('--bg-img-s2Trans', `url(${imgTranS2Url})`);
               document.documentElement.style.setProperty('--bg-pattern', `url(${patternUrl})`);
               preloadImages([...section2Urls, patternUrl, imgTranS2Url]);

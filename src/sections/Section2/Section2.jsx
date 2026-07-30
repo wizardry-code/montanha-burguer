@@ -21,13 +21,27 @@ gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
 const SVG_MAX_STROKE = 600;
 const INTRO_SCROLL_VH = 1.3;
+const MOBILE_BREAKPOINT = 768; 
 
-// Progresso (0 a 1) da timeline HORIZONTAL da Section2 a partir do qual
-// avisamos a SectionCardapio pra começar a baixar os sheets do Cardápio.
-// 0.8 = 80% do trajeto horizontal já percorrido, dando bom buffer de
-// tempo antes do usuário chegar na S4 (importante em conexões ruins).
 const S4_PRELOAD_THRESHOLD = 0.8;
 
+
+const TRIGGER_CONFIG = {
+  desktop: {
+    cardImage: { start: 'left 80%', end: 'left 30%', scrub: 0.5 },
+    cardHeader: { start: 'left 60%', end: 'left 20%', scrub: 0.3 },
+    cardWords: { start: 'left 80%', end: 'left 30%', scrub: 0.5 },
+    s3Line: { start: 'left 80%', end: 'left 40%', scrub: 0.3 },
+    s3Words: { start: 'left 80%', end: 'left 35%', scrub: 0.5 },
+  },
+  mobile: {
+    cardImage: { start: 1, end: 0.6 },
+    cardHeader: { start: 1, end: 0.6 },
+    cardWords: { start: 1, end: 0.6 },
+    s3Line: { start: 1, end: 0.6 },
+    s3Words: { start: 1, end: 0.6 },
+  },
+};
 
 export default function Section2() {
 const rootRef = useRef(null);
@@ -43,11 +57,16 @@ useLayoutEffect(() => {
     const cards = gsap.utils.toArray(`.${cardStyles.card}`, track);
     if (!cards.length) return;
 
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+    const cfg = isMobile ? TRIGGER_CONFIG.mobile : TRIGGER_CONFIG.desktop;
+
     const getTrackTravel = () => track.scrollWidth - window.innerWidth;
 
     const introDistance = window.innerHeight * INTRO_SCROLL_VH;
     const enterOffset = window.innerWidth;
     const trackTravelNow = getTrackTravel();
+    const viewportWidth = window.innerWidth;
+    const masterTotalDuration = introDistance + enterOffset + trackTravelNow;
 
     if (svgIntroRef.current) {
         gsap.set(svgIntroRef.current, {
@@ -58,8 +77,38 @@ useLayoutEffect(() => {
 
     gsap.set(track, { x: enterOffset });
 
-    // Flag local (não precisa ser ref do React — o efeito só roda uma
-    // vez) pra garantir que o evento dispara UMA única vez.
+    // ============================================================
+    // Helper (só usado no MOBILE): calcula a posição/largura real de
+    // um elemento DENTRO do track, em pixels, ignorando o transform
+    // atual do track (a subtração dos dois getBoundingClientRect
+    // cancela a translação, então funciona não importa o x atual).
+    // ============================================================
+    function getElementGeometry(el) {
+        const trackRect = track.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        return {
+        left: elRect.left - trackRect.left,
+        width: elRect.width,
+        };
+    }
+
+    // Converte um par de frações (0 a 1, estilo "X% da viewport") em
+    // um início/duração absolutos dentro da timeline master. Como a
+    // master já é escrubada 1 unidade de tempo = 1 pixel de scroll
+    // (ver o master.to(track, {...}) mais abaixo), isso dá um timing
+    // preciso e 100% determinístico, sem depender de ScrollTrigger
+    // aninhado nem de markers.
+    function getScrollWindow(el, startFraction, endFraction, { useCenter = true } = {}) {
+        const { left, width } = getElementGeometry(el);
+        const refPoint = useCenter ? left + width / 2 : left;
+        let pStart = introDistance + refPoint + viewportWidth * (1 - startFraction);
+        let pEnd = introDistance + refPoint + viewportWidth * (1 - endFraction);
+        // Clamp de segurança pra nunca passar do fim real da timeline
+        pStart = Math.max(0, Math.min(pStart, masterTotalDuration));
+        pEnd = Math.max(pStart + 1, Math.min(pEnd, masterTotalDuration));
+        return { pStart, pEnd, duration: pEnd - pStart };
+    }
+
     let heavyPreloadFired = false;
 
     const master = gsap.timeline({
@@ -71,10 +120,6 @@ useLayoutEffect(() => {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        // ESSENCIAL: é este onUpdate que dispara o evento de preload.
-        // self.progress mede corretamente o progresso da timeline
-        // horizontal (0 a 1), diferente de um ScrollTrigger vertical
-        // solto num elemento — que não funciona dentro de um pin.
         onUpdate: (self) => {
             if (!heavyPreloadFired && self.progress >= S4_PRELOAD_THRESHOLD) {
             heavyPreloadFired = true;
@@ -84,7 +129,6 @@ useLayoutEffect(() => {
         },
     });
 
-    // 2. Animação no Master Timeline
     if (svgIntroRef.current) {
         master.to(
         svgIntroRef.current,
@@ -127,55 +171,83 @@ useLayoutEffect(() => {
         const headerCard = card.querySelector(`.${cardStyles.cardHeader}`);
         const words = card.querySelectorAll(`.${cardStyles.word}`);
         const image = card.querySelector(`.${cardStyles.cardImage}`);
+        const figure = card.querySelector(`.${cardStyles.cardFigure}`);
         const content = card.querySelector(`.${cardStyles.cardContent}`);
 
         gsap.set(lines, { drawSVG: '0%' });
-        gsap.set(words, { y: 16, autoAlpha: 0 });
-        gsap.set(image, { scale: 2 });
+        gsap.set(image, { scale: 1.5 });
 
+        if (isMobile) {
+        // ============================================================
+        // MOBILE: tweens posicionados manualmente na master timeline,
+        // calculados a partir da posição real (em pixels) de cada
+        // elemento dentro do track. Nada de ScrollTrigger aninhado
+        // aqui — evita a imprecisão de markers com containerAnimation.
+        // ============================================================
+
+        if (image && figure) {
+            const win = getScrollWindow(figure, cfg.cardImage.start, cfg.cardImage.end);
+            master.to(image, { scale: 1, ease: 'none', duration: win.duration }, win.pStart);
+        }
+
+        if (headerCard && lines.length) {
+            const win = getScrollWindow(headerCard, cfg.cardHeader.start, cfg.cardHeader.end);
+            master.to(lines, { drawSVG: '100%', ease: 'none', duration: win.duration }, win.pStart);
+        }
+
+        if (content) {
+            gsap.set(content, { autoAlpha: 0 });
+            const win = getScrollWindow(content, cfg.cardWords.start, cfg.cardWords.end);
+            master.to(content, { autoAlpha: 1, ease: 'power1.out', duration: win.duration }, win.pStart);
+        }
+        } else {
+        // ============================================================
+        // DESKTOP: comportamento original, inalterado.
+        // ============================================================
         if (image) {
-        gsap.to(image, {
+            gsap.to(image, {
             scale: 1,
             ease: 'none',
             scrollTrigger: {
-            trigger: card,
-            containerAnimation: master,
-            start: 'left 80%',
-            end: 'left 30%',
-            scrub: 0.5,
+                trigger: image,
+                containerAnimation: master,
+                start: cfg.cardImage.start,
+                end: cfg.cardImage.end,
+                scrub: cfg.cardImage.scrub,
             },
-        });
+            });
         }
 
-        // Configurado para iniciar quando a esquerda do header bater em 80% da tela
         if (headerCard && lines.length) {
-        gsap.to(lines, {
+            gsap.to(lines, {
             drawSVG: '100%',
             ease: 'none',
             scrollTrigger: {
-            trigger: headerCard,
-            containerAnimation: master,
-            start: 'left 60%',
-            end: 'left 20%',
-            scrub: 0.3,
+                trigger: headerCard,
+                containerAnimation: master,
+                start: cfg.cardHeader.start,
+                end: cfg.cardHeader.end,
+                scrub: cfg.cardHeader.scrub,
             },
-        });
+            });
         }
 
         if (content && words.length) {
-        gsap.to(words, {
+            gsap.set(words, { y: 16, autoAlpha: 0 });
+            gsap.to(words, {
             y: 0,
             autoAlpha: 1,
             stagger: 0.02,
             ease: 'power1.out',
             scrollTrigger: {
-            trigger: content,
-            containerAnimation: master,
-            start: 'left 80%',
-            end: 'left 30%',
-            scrub: 0.5,
+                trigger: content,
+                containerAnimation: master,
+                start: cfg.cardWords.start,
+                end: cfg.cardWords.end,
+                scrub: cfg.cardWords.scrub,
             },
-        });
+            });
+        }
         }
     });
 
@@ -185,38 +257,55 @@ useLayoutEffect(() => {
         const line = svgRuleRef.current ? svgRuleRef.current.querySelector('line') : null;
         const words = gsap.utils.toArray(`.${s3Styles.word}`, s3El);
         const s3Header = s3El.querySelector('header') || s3El;
+        // TODO: troque `s3Styles.cardContent` pela classe real que envolve
+        // SÓ o texto (título + parágrafo) da Section3a, sem o fundo/imagem.
+        // Se não existir essa classe, ajuste aqui manualmente.
+        const s3TextWrapper = s3El.querySelector(`.${s3Styles.content}`) || s3Header;
 
         if (line) gsap.set(line, { drawSVG: '0%' });
-        if (words.length) gsap.set(words, { y: 16, autoAlpha: 0 });
 
+        if (isMobile) {
         if (line) {
-        gsap.to(line, {
+            const win = getScrollWindow(s3Header, cfg.s3Line.start, cfg.s3Line.end);
+            master.to(line, { drawSVG: '100%', ease: 'none', duration: win.duration }, win.pStart);
+        }
+
+        // Só o texto anima de opacidade 0 -> 1; o fundo da seção
+        // (s3El) fica visível desde o começo, sem gsap.set/to nele.
+        gsap.set(s3TextWrapper, { autoAlpha: 0 });
+        const win = getScrollWindow(s3TextWrapper, cfg.s3Words.start, cfg.s3Words.end);
+        master.to(s3TextWrapper, { autoAlpha: 1, ease: 'power1.out', duration: win.duration }, win.pStart);
+        } else {
+        if (line) {
+            gsap.to(line, {
             drawSVG: '100%',
             ease: 'none',
             scrollTrigger: {
-            trigger: s3Header,
-            containerAnimation: master,
-            start: 'left 80%',
-            end: 'left 40%',
-            scrub: 0.3,
+                trigger: s3Header,
+                containerAnimation: master,
+                start: cfg.s3Line.start,
+                end: cfg.s3Line.end,
+                scrub: cfg.s3Line.scrub,
             },
-        });
+            });
         }
 
         if (words.length) {
-        gsap.to(words, {
+            gsap.set(words, { y: 16, autoAlpha: 0 });
+            gsap.to(words, {
             y: 0,
             autoAlpha: 1,
             stagger: 0.02,
             ease: 'power1.out',
             scrollTrigger: {
-            trigger: s3El,
-            containerAnimation: master,
-            start: 'left 80%',
-            end: 'left 35%',
-            scrub: 0.5,
+                trigger: s3El,
+                containerAnimation: master,
+                start: cfg.s3Words.start,
+                end: cfg.s3Words.end,
+                scrub: cfg.s3Words.scrub,
             },
-        });
+            });
+        }
         }
     }
     debouncedRefresh();
@@ -228,15 +317,12 @@ useLayoutEffect(() => {
 return (
     <section className={styles.root} aria-label="Conheça a taverna Montanha">
     <div ref={rootRef} className={styles.pinSection}>
-        {/* Fundo Fixo com Imagem/Placeholder e SvgTrans */}
         <div ref={bgWrapperRef} className={styles.bgWrapper}>
         <div className={styles.imgPlaceholder} aria-hidden="true" />
         <SvgTrans ref={svgIntroRef} />
         </div>
 
-        {/* Esteira de Scroll Horizontal */}
         <div ref={trackRef} className={styles.track}>
-        {/* Envelope dos Cards Medievais */}
         <div className={styles.cardsWrapper}>
             {Section2articlesData.map((section, index) => (
             <MedievalCard section={section} index={index} tag='Capítulo' key={section.id} />
@@ -246,9 +332,6 @@ return (
             </div>
             <div className={styles.finalTrack}></div>
         </div>
-        {/* id="s2PreloadAnchor" não é mais usado — o preload agora é
-            disparado por evento de progresso, não por posição no DOM.
-            Pode remover esse id se quiser deixar mais limpo. */}
         <Section3a ref={s3Ref} svgRuleRef={svgRuleRef} />
         </div>
     </div>

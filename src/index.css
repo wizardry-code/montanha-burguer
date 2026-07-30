@@ -42,7 +42,7 @@ html, body {
 }
 /* 1. CURSOR PADRÃO PARA O SITE INTEIRO */
 body {
-  cursor: url('../public/cursor/cursor.svg') 0 0, auto !important;
+  cursor: url('../cursor/cursor.svg') 0 0, auto !important;
 }
 
 /* 2. BOTÕES, LINKS E ELEMENTOS CLICÁVEIS GERAIS DO SITE */
@@ -54,5 +54,5 @@ input[type="button"],
 .swiper-button-next,
 .swiper-button-prev,
 .swiper-pagination-bullet {
-  cursor: url('../public/cursor/cursorHover.svg') 0 0, pointer !important;
+  cursor: url('../cursor/cursorHover.svg') 0 0, pointer !important;
 }
