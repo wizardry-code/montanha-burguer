@@ -12,8 +12,8 @@ import ScrollIndicator from './components/ScrollIndicator/ScrollIndicator';
 
 const Section2 = lazy(() => import('./sections/Section2/Section2'));
 const Section3 = lazy(() => import('./sections/Section3/Section3b'));
-const SectionCardapio = lazy(() => import('./sections/SectionCardapio/SectionCardapio'));
 const Section4 = lazy(() => import('./sections/Section4/Section4'));
+const SectionCardapio = lazy(() => import('./sections/SectionCardapio/SectionCardapio'));
 
 // Registra os plugins do GSAP
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
@@ -56,6 +56,9 @@ function App() {
           </Suspense>
           <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
             <Section4 />
+          </Suspense>
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <SectionCardapio />
           </Suspense>
         </div>
       </div>

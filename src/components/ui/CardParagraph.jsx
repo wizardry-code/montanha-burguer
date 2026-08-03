@@ -6,7 +6,8 @@ return (
     <p className={className}>
     {fragments.map((frag, i) => (
         <span className={styles[frag.variant]} key={i}>
-        {splitIntoWords(frag.text)}
+        {/* Passamos o styles.word como segundo parâmetro */}
+        {splitIntoWords(frag.text, styles.word)}
         </span>
     ))}
     </p>

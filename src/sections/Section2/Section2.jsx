@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { debouncedRefresh } from '../../utils/gsapRefresh';
 import { S2_HEAVY_PRELOAD_EVENT } from '../../utils/events';
+
 // Imports de estilos
 import cardStyles from '../../components/MedievalCard/MedievalCard.module.css';
 import s3Styles from '../Section3/Section3a.module.css';
@@ -16,31 +17,28 @@ import { SvgTrans } from '../../components/ui/svgs/SvgTrans/SvgTrans';
 import { Section2articlesData } from '../../data/sectionsData';
 import Avaliacoes from '../../components/Avaliacoes/Avaliacoes';
 
-
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
 const SVG_MAX_STROKE = 600;
 const INTRO_SCROLL_VH = 1.3;
 const MOBILE_BREAKPOINT = 768; 
-
 const S4_PRELOAD_THRESHOLD = 0.8;
 
-
 const TRIGGER_CONFIG = {
-  desktop: {
-    cardImage: { start: 'left 80%', end: 'left 30%', scrub: 0.5 },
-    cardHeader: { start: 'left 60%', end: 'left 20%', scrub: 0.3 },
-    cardWords: { start: 'left 80%', end: 'left 30%', scrub: 0.5 },
-    s3Line: { start: 'left 80%', end: 'left 40%', scrub: 0.3 },
-    s3Words: { start: 'left 80%', end: 'left 35%', scrub: 0.5 },
-  },
-  mobile: {
+desktop: {
     cardImage: { start: 1, end: 0.6 },
     cardHeader: { start: 1, end: 0.6 },
     cardWords: { start: 1, end: 0.6 },
     s3Line: { start: 1, end: 0.6 },
     s3Words: { start: 1, end: 0.6 },
-  },
+},
+mobile: {
+    cardImage: { start: 1, end: 0.6 },
+    cardHeader: { start: 1, end: 0.6 },
+    cardContent: { start: 1, end: 0.6 },
+    s3Line: { start: 1, end: 0.6 },
+    s3Content: { start: 1, end: 0.6 },
+},
 };
 
 export default function Section2() {
@@ -61,7 +59,6 @@ useLayoutEffect(() => {
     const cfg = isMobile ? TRIGGER_CONFIG.mobile : TRIGGER_CONFIG.desktop;
 
     const getTrackTravel = () => track.scrollWidth - window.innerWidth;
-
     const introDistance = window.innerHeight * INTRO_SCROLL_VH;
     const enterOffset = window.innerWidth;
     const trackTravelNow = getTrackTravel();
@@ -77,12 +74,6 @@ useLayoutEffect(() => {
 
     gsap.set(track, { x: enterOffset });
 
-    // ============================================================
-    // Helper (só usado no MOBILE): calcula a posição/largura real de
-    // um elemento DENTRO do track, em pixels, ignorando o transform
-    // atual do track (a subtração dos dois getBoundingClientRect
-    // cancela a translação, então funciona não importa o x atual).
-    // ============================================================
     function getElementGeometry(el) {
         const trackRect = track.getBoundingClientRect();
         const elRect = el.getBoundingClientRect();
@@ -92,20 +83,16 @@ useLayoutEffect(() => {
         };
     }
 
-    // Converte um par de frações (0 a 1, estilo "X% da viewport") em
-    // um início/duração absolutos dentro da timeline master. Como a
-    // master já é escrubada 1 unidade de tempo = 1 pixel de scroll
-    // (ver o master.to(track, {...}) mais abaixo), isso dá um timing
-    // preciso e 100% determinístico, sem depender de ScrollTrigger
-    // aninhado nem de markers.
     function getScrollWindow(el, startFraction, endFraction, { useCenter = true } = {}) {
         const { left, width } = getElementGeometry(el);
         const refPoint = useCenter ? left + width / 2 : left;
+        
         let pStart = introDistance + refPoint + viewportWidth * (1 - startFraction);
         let pEnd = introDistance + refPoint + viewportWidth * (1 - endFraction);
-        // Clamp de segurança pra nunca passar do fim real da timeline
+        
         pStart = Math.max(0, Math.min(pStart, masterTotalDuration));
         pEnd = Math.max(pStart + 1, Math.min(pEnd, masterTotalDuration));
+        
         return { pStart, pEnd, duration: pEnd - pStart };
     }
 
@@ -129,6 +116,7 @@ useLayoutEffect(() => {
         },
     });
 
+    // 1. Intro SVG
     if (svgIntroRef.current) {
         master.to(
         svgIntroRef.current,
@@ -142,6 +130,7 @@ useLayoutEffect(() => {
         );
     }
 
+    // 2. Track Horizontal
     master.to(
         track,
         {
@@ -152,6 +141,7 @@ useLayoutEffect(() => {
         introDistance
     );
 
+    // 3. Parallax dos Cards
     cards.forEach((card, i) => {
         const direction = i % 2 === 0 ? -1 : 1;
         master.to(
@@ -165,7 +155,7 @@ useLayoutEffect(() => {
         );
     });
 
-    // Animações individuais de cada Card
+    // 4. Animações Internas dos Cards
     cards.forEach((card) => {
         const lines = card.querySelectorAll(`.${cardStyles.ruleLine}`);
         const headerCard = card.querySelector(`.${cardStyles.cardHeader}`);
@@ -175,139 +165,111 @@ useLayoutEffect(() => {
         const content = card.querySelector(`.${cardStyles.cardContent}`);
 
         gsap.set(lines, { drawSVG: '0%' });
-        gsap.set(image, { scale: 1.5 });
+        if (image) gsap.set(image, { scale: 1.5 });
 
-        if (isMobile) {
-        // ============================================================
-        // MOBILE: tweens posicionados manualmente na master timeline,
-        // calculados a partir da posição real (em pixels) de cada
-        // elemento dentro do track. Nada de ScrollTrigger aninhado
-        // aqui — evita a imprecisão de markers com containerAnimation.
-        // ============================================================
-
+        // Zoom da Imagem
         if (image && figure) {
-            const win = getScrollWindow(figure, cfg.cardImage.start, cfg.cardImage.end);
-            master.to(image, { scale: 1, ease: 'none', duration: win.duration }, win.pStart);
+        const win = getScrollWindow(figure, cfg.cardImage.start, cfg.cardImage.end);
+        master.to(image, { scale: 1, ease: 'none', duration: win.duration }, win.pStart);
         }
 
+        // Desenho da Linha
         if (headerCard && lines.length) {
-            const win = getScrollWindow(headerCard, cfg.cardHeader.start, cfg.cardHeader.end);
-            master.to(lines, { drawSVG: '100%', ease: 'none', duration: win.duration }, win.pStart);
+        const win = getScrollWindow(headerCard, cfg.cardHeader.start, cfg.cardHeader.end);
+        master.to(lines, { drawSVG: '100%', ease: 'none', duration: win.duration }, win.pStart);
         }
 
+        // --- ANIMAÇÃO DE TEXTO (DESKTOP vs MOBILE) ---
         if (content) {
-            gsap.set(content, { autoAlpha: 0 });
-            const win = getScrollWindow(content, cfg.cardWords.start, cfg.cardWords.end);
-            master.to(content, { autoAlpha: 1, ease: 'power1.out', duration: win.duration }, win.pStart);
-        }
-        } else {
-        // ============================================================
-        // DESKTOP: comportamento original, inalterado.
-        // ============================================================
-        if (image) {
-            gsap.to(image, {
-            scale: 1,
-            ease: 'none',
-            scrollTrigger: {
-                trigger: image,
-                containerAnimation: master,
-                start: cfg.cardImage.start,
-                end: cfg.cardImage.end,
-                scrub: cfg.cardImage.scrub,
-            },
-            });
-        }
+        if (isMobile) {
+            // MOBILE: Animação performática do bloco inteiro (sem split text)
+            gsap.set(content, { autoAlpha: 0, y: 12 });
+            const win = getScrollWindow(content, cfg.cardContent.start, cfg.cardContent.end);
 
-        if (headerCard && lines.length) {
-            gsap.to(lines, {
-            drawSVG: '100%',
-            ease: 'none',
-            scrollTrigger: {
-                trigger: headerCard,
-                containerAnimation: master,
-                start: cfg.cardHeader.start,
-                end: cfg.cardHeader.end,
-                scrub: cfg.cardHeader.scrub,
+            master.to(
+            content,
+            {
+                autoAlpha: 1,
+                y: 0,
+                ease: 'power1.out',
+                duration: win.duration,
             },
-            });
-        }
-
-        if (content && words.length) {
+            win.pStart
+            );
+        } else if (words.length) {
+            // DESKTOP: Mantém o Split Text + Stagger
             gsap.set(words, { y: 16, autoAlpha: 0 });
-            gsap.to(words, {
-            y: 0,
-            autoAlpha: 1,
-            stagger: 0.02,
-            ease: 'power1.out',
-            scrollTrigger: {
-                trigger: content,
-                containerAnimation: master,
-                start: cfg.cardWords.start,
-                end: cfg.cardWords.end,
-                scrub: cfg.cardWords.scrub,
+            const win = getScrollWindow(content, cfg.cardWords.start, cfg.cardWords.end);
+
+            master.to(
+            words,
+            {
+                y: 0,
+                autoAlpha: 1,
+                stagger: {
+                amount: win.duration * 0.7,
+                from: 'start',
+                },
+                ease: 'power1.out',
+                duration: win.duration,
             },
-            });
+            win.pStart
+            );
         }
         }
     });
 
-    // Animações da Section 3a
+    // 5. Section 3a
     if (s3Ref.current) {
         const s3El = s3Ref.current;
         const line = svgRuleRef.current ? svgRuleRef.current.querySelector('line') : null;
         const words = gsap.utils.toArray(`.${s3Styles.word}`, s3El);
         const s3Header = s3El.querySelector('header') || s3El;
-        // TODO: troque `s3Styles.cardContent` pela classe real que envolve
-        // SÓ o texto (título + parágrafo) da Section3a, sem o fundo/imagem.
-        // Se não existir essa classe, ajuste aqui manualmente.
-        const s3TextWrapper = s3El.querySelector(`.${s3Styles.content}`) || s3Header;
+        const s3Content = s3El.querySelector(`.${s3Styles.content}`) || s3El;
 
-        if (line) gsap.set(line, { drawSVG: '0%' });
+        if (line) {
+        gsap.set(line, { drawSVG: '0%' });
+        const win = getScrollWindow(s3Header, cfg.s3Line.start, cfg.s3Line.end);
+        master.to(line, { drawSVG: '100%', ease: 'none', duration: win.duration }, win.pStart);
+        }
 
         if (isMobile) {
-        if (line) {
-            const win = getScrollWindow(s3Header, cfg.s3Line.start, cfg.s3Line.end);
-            master.to(line, { drawSVG: '100%', ease: 'none', duration: win.duration }, win.pStart);
-        }
+        // MOBILE: Bloco único sumindo e aparecendo (fade + leve y)
+        gsap.set(s3Content, { autoAlpha: 0, y: 12 });
+        const win = getScrollWindow(s3Content, cfg.s3Content.start, cfg.s3Content.end);
 
-        // Só o texto anima de opacidade 0 -> 1; o fundo da seção
-        // (s3El) fica visível desde o começo, sem gsap.set/to nele.
-        gsap.set(s3TextWrapper, { autoAlpha: 0 });
-        const win = getScrollWindow(s3TextWrapper, cfg.s3Words.start, cfg.s3Words.end);
-        master.to(s3TextWrapper, { autoAlpha: 1, ease: 'power1.out', duration: win.duration }, win.pStart);
-        } else {
-        if (line) {
-            gsap.to(line, {
-            drawSVG: '100%',
-            ease: 'none',
-            scrollTrigger: {
-                trigger: s3Header,
-                containerAnimation: master,
-                start: cfg.s3Line.start,
-                end: cfg.s3Line.end,
-                scrub: cfg.s3Line.scrub,
+        master.to(
+            s3Content,
+            {
+            autoAlpha: 1,
+            y: 0,
+            ease: 'power1.out',
+            duration: win.duration,
             },
-            });
-        }
+            win.pStart
+        );
+        } else if (words.length) {
+        // DESKTOP: Stagger normal das palavras
+        gsap.set(words, { y: 16, autoAlpha: 0 });
+        const win = getScrollWindow(s3El, cfg.s3Words.start, cfg.s3Words.end);
 
-        if (words.length) {
-            gsap.set(words, { y: 16, autoAlpha: 0 });
-            gsap.to(words, {
+        master.to(
+            words,
+            {
             y: 0,
             autoAlpha: 1,
-            stagger: 0.02,
-            ease: 'power1.out',
-            scrollTrigger: {
-                trigger: s3El,
-                containerAnimation: master,
-                start: cfg.s3Words.start,
-                end: cfg.s3Words.end,
-                scrub: cfg.s3Words.scrub,
+            stagger: {
+                amount: win.duration * 0.7,
+                from: 'start',
             },
-            });
-        }
+            ease: 'power1.out',
+            duration: win.duration,
+            },
+            win.pStart
+        );
         }
     }
+
     debouncedRefresh();
     }, rootRef);
 
@@ -325,10 +287,10 @@ return (
         <div ref={trackRef} className={styles.track}>
         <div className={styles.cardsWrapper}>
             {Section2articlesData.map((section, index) => (
-            <MedievalCard section={section} index={index} tag='Capítulo' key={section.id} />
+            <MedievalCard section={section} index={index} tag="Capítulo" key={section.id} />
             ))}
             <div className={styles.avaliacoesCard}>
-            <Avaliacoes/>
+            <Avaliacoes />
             </div>
             <div className={styles.finalTrack}></div>
         </div>

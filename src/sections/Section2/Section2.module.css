@@ -24,7 +24,10 @@
   height: 100dvh;
   overflow: hidden;
 }
-
+.word {
+  display: inline-block;
+  will-change: transform, opacity;
+}
 .bgWrapper {
   position: absolute;
   inset: 0;

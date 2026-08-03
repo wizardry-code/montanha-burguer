@@ -1,3 +1,4 @@
+// MedievalCard.jsx
 import { useState, useRef } from 'react';
 import { splitIntoWords } from '../../utils/textUtils';
 import { DrawnRule } from '../ui/DrawnRule';
@@ -9,12 +10,12 @@ export function MedievalCard({ section, index, tag = 'Capítulo', mobileLayout =
 const [copied, setCopied] = useState(false);
 const timeoutRef = useRef(null);
 
-const cardClassName = mobileLayout === 'column' ? styles.card + ' ' + styles.cardVertical : styles.card;
-const mapsButtonClassName = styles.ctaButton + ' ' + styles.ctaButtonMaps;
-const wazeButtonClassName = styles.ctaButton + ' ' + styles.ctaButtonWaze;
-const toastClassName = copied ? styles.copyToast + ' ' + styles.copyToastVisible : styles.copyToast;
-const titleClassName = styles.title + ' ' + styles.cinzel;
-const paragraphClassName = styles.paragraph + ' ' + styles.merriweather;
+const cardClassName = mobileLayout === 'column' ? `${styles.card} ${styles.cardVertical}` : styles.card;
+const mapsButtonClassName = `${styles.ctaButton} ${styles.ctaButtonMaps}`;
+const wazeButtonClassName = `${styles.ctaButton} ${styles.ctaButtonWaze}`;
+const toastClassName = copied ? `${styles.copyToast} ${styles.copyToastVisible}` : styles.copyToast;
+const titleClassName = `${styles.title} ${styles.cinzel}`;
+const paragraphClassName = `${styles.paragraph} ${styles.merriweather}`;
 
 async function handleCopyAddress() {
     if (!section.footer?.address) return;
@@ -30,7 +31,7 @@ async function handleCopyAddress() {
 }
 
 return (
-    <article className={cardClassName} data-index={index} aria-labelledby={section.id + '-title'}>
+    <article className={cardClassName} data-index={index} aria-labelledby={`${section.id}-title`}>
     <figure className={styles.cardFigure}>
         <img className={styles.cardImage} src={section.image} alt={section.imageAlt} loading="lazy" />
         <div className={styles.imageOverlay} />
@@ -42,13 +43,19 @@ return (
     <div className={styles.cardContent}>
         <header className={styles.cardHeader}>
         <DrawnRule />
-        <h2 id={section.id + '-title'} className={titleClassName}>
-            {splitIntoWords(section.title)}
+        <h2 id={`${section.id}-title`} className={titleClassName}>
+            {/* CORREÇÃO 1: Passar styles.word explicitamente para o título */}
+            {splitIntoWords(section.title, styles.word)}
         </h2>
         <DrawnRule />
         </header>
 
-        <CardParagraph fragments={section.paragraph} className={paragraphClassName} />
+        {/* CORREÇÃO 2: Garantir que o CardParagraph passe styles.word para o splitIntoWords */}
+        <CardParagraph 
+        fragments={section.paragraph} 
+        className={paragraphClassName} 
+        wordClassName={styles.word} 
+        />
 
         {section.footer?.type === 'address' && (
         <div className={styles.footerBlock}>
